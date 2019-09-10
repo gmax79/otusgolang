@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 	"unicode"
@@ -8,26 +9,43 @@ import (
 
 func unpackString(str string) (string, error) {
 
-	result := []string{} //make([]rune, 0, len(str))
+	result := []string{}
 	digits := []rune{}
-	for _, sym := range str {
+	slashMask := false
+	for i, sym := range str {
+		if slashMask {
+			slashMask = false
+			result = append(result, string(sym))
+			continue
+		}
+		lastdigit := false
 		if unicode.IsDigit(sym) {
 			digits = append(digits, sym)
-		} else {
-			s := string(sym)
-			if len(digits) == 0 {
-				result = append(result, s)
+			if i == len(str)-1 {
+				lastdigit = true
 			} else {
-				count, err := strconv.Atoi(string(digits))
-				if err != nil {
-					return "", err
-				}
-				result = append(result, strings.Repeat(s, count))
+				continue
+			}
+		}
+		if len(digits) > 0 {
+			count, err := strconv.Atoi(string(digits))
+			if err != nil {
+				return "", errors.New("very big number, overflow") // atoi with only numbers (IsDigit)
+			}
+			if len(result) == 0 {
+				return "", errors.New("invalid input string")
+			}
+			if count > 1 {
+				lastSymbolIndex := len(result) - 1
+				result = append(result, strings.Repeat(result[lastSymbolIndex], count-1))
 			}
 			digits = digits[:0]
 		}
-
+		if sym == '\\' {
+			slashMask = true
+		} else if !lastdigit {
+			result = append(result, string(sym))
+		}
 	}
-
 	return strings.Join(result, ""), nil
 }
