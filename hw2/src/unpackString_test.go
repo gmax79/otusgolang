@@ -23,6 +23,8 @@ func TestUnpackString(t *testing.T) {
 		{"a4bc2d5e", "aaaabccddddde"},
 		{"abcd", "abcd"},
 		{"qwe\\4\\5", "qwe45"},
+		{"qwe\\45", "qwe44444"},
+		{"qwe\\\\5", "qwe\\\\\\\\\\"},
 		{"a\\42\\53", "a44555"},
 		{"a\\4b2\\511", "a4bb55555555555"},
 	}
