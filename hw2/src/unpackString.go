@@ -28,12 +28,12 @@ func unpackString(str string) (string, error) {
 			}
 		}
 		if len(digits) > 0 {
-			count, err := strconv.Atoi(string(digits))
-			if err != nil {
-				return "", errors.New("very big number, overflow") // atoi with only numbers (IsDigit)
-			}
 			if len(result) == 0 {
 				return "", errors.New("invalid input string")
+			}
+			count, err := strconv.Atoi(string(digits))
+			if err != nil {
+				return "", errors.New(err.Error() + " big number?") // atoi with only numbers (IsDigit)
 			}
 			if count > 1 {
 				lastSymbolIndex := len(result) - 1
