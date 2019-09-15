@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"sort"
 	"strings"
@@ -24,8 +25,7 @@ func main() {
 	// Read text from file
 	file, err := os.Open("test.txt")
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	// Create map with counters per word
@@ -37,23 +37,17 @@ func main() {
 			if word = getWord(word); word == "" {
 				continue
 			}
-			counter, ok := wordsMap[word]
-			if !ok {
-				wordsMap[word] = 1
-			} else {
-				wordsMap[word] = counter + 1
-			}
+			counter, _ := wordsMap[word]
+			wordsMap[word] = counter + 1
 		}
 	}
 	file.Close()
 
 	// Find first 10 words
 	// Translate map into slice first
-	wordsList := make(PairList, len(wordsMap))
-	i := 0
+	wordsList := make(PairList, 0, len(wordsMap))
 	for k, v := range wordsMap {
-		wordsList[i] = Pair{k, v}
-		i++
+		wordsList = append(wordsList, Pair{k, v})
 	}
 	// Sort slice by value from max to min
 	sort.Sort(sort.Reverse(wordsList))
