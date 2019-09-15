@@ -37,8 +37,7 @@ func main() {
 			if word = getWord(word); word == "" {
 				continue
 			}
-			counter, _ := wordsMap[word]
-			wordsMap[word] = counter + 1
+			wordsMap[word] = wordsMap[word] + 1
 		}
 	}
 	file.Close()
