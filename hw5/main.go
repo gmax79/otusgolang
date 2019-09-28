@@ -18,7 +18,8 @@ func createWorker(id int) worker {
 		fmt.Printf("Started worker #%d\n", id)
 		time.Sleep(duration)
 		if errchance < 20 {
-			return fmt.Errorf("Stopped worker #%d with error", id)
+			fmt.Printf("Stopped worker #%d with error\n", id)
+			return fmt.Errorf("Something wrong")
 		}
 		fmt.Printf("Stopped worker #%d\n", id)
 		return nil
@@ -39,29 +40,30 @@ func workerPool(workers []worker, maxWorkers int, maxErrors int) {
 			case counter <- struct{}{}:
 				break
 			}
-			defer func() {
-				<-counter
-			}()
 			results <- w()
 		}(workerfunc)
 	}
 
 	errorsCounter := 0
 	finished := 0
+	diesent := false
 	for {
 		select {
 		case err := <-results:
 			finished++
 			if err != nil {
-				fmt.Println(err.Error())
 				errorsCounter++
-				if errorsCounter == maxErrors {
-					close(die)
-				}
 			}
-			if finished == len(workers) {
-				return
+			if errorsCounter == maxErrors && !diesent {
+				diesent = true
+				close(die)
 			}
+			if !diesent {
+				<-counter
+			}
+		}
+		if finished == len(workers) {
+			return
 		}
 	}
 }
@@ -72,5 +74,5 @@ func main() {
 	for i := 0; i < workersCount; i++ {
 		workers[i] = createWorker(i + 1)
 	}
-	workerPool(workers, 5, 10)
+	workerPool(workers, 5, 3)
 }
