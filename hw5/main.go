@@ -8,6 +8,7 @@ import (
 
 type worker func() error
 
+// test worker, with random working time and chance to error
 func createWorker(id int) worker {
 	seed := rand.NewSource(time.Now().UnixNano())
 	random := rand.New(seed)
@@ -27,43 +28,52 @@ func createWorker(id int) worker {
 }
 
 func workerPool(workers []worker, maxWorkers int, maxErrors int) {
-	counter := make(chan struct{}, maxWorkers)
-	results := make(chan error, 1)
-	die := make(chan struct{})
 
-	for _, workerfunc := range workers {
-		go func(w worker) {
-			select {
-			case <-die:
-				results <- nil
-				return
-			case counter <- struct{}{}:
-				break
+	results := make(chan error)
+	pool := make(chan worker)
+
+	// create n workers
+	for i := 0; i < maxWorkers; i++ {
+		go func() {
+			for {
+				select {
+				case w, ok := <-pool:
+					if !ok { // closed
+						return
+					}
+					results <- w()
+				}
 			}
-			results <- w()
-		}(workerfunc)
+		}()
 	}
 
+	// counting workers and errors
+	working := 0
 	errorsCounter := 0
-	finished := 0
-	diesent := false
-	for {
+
+stopsent:
+	for _, w := range workers {
 		select {
+		case pool <- w:
+			working++
 		case err := <-results:
-			finished++
+			working--
 			if err != nil {
 				errorsCounter++
 			}
-			if errorsCounter == maxErrors && !diesent {
-				diesent = true
-				close(die)
-			}
-			if !diesent {
-				<-counter
+			if errorsCounter == maxErrors {
+				close(pool)
+				break stopsent
 			}
 		}
-		if finished == len(workers) {
-			return
+	}
+	// wait working
+	for working > 0 {
+		select {
+		case err := <-results:
+			working--
+			if err != nil {
+			}
 		}
 	}
 }
