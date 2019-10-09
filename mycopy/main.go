@@ -33,10 +33,10 @@ func main() {
 	}
 	if from == "" || to == "" || offset < 0 || limit < 0 {
 		fmt.Println("Program copies part of file to another file.")
-		flag.Usage()
+		fmt.Println("Use --help option to see options list.")
 		return
 	}
-	err := copy(from, to, limit, offset)
+	err := copy(from, to, offset, limit)
 	if err != nil {
 		fmt.Println("Error:", err.Error())
 	}
@@ -53,8 +53,9 @@ func copy(from, to string, offset, limit int64) error {
 	if err != nil {
 		return err
 	}
+	srcsize := stat.Size()
 	if offset > 0 {
-		if offset >= stat.Size() {
+		if offset >= srcsize {
 			return fmt.Errorf("Offset exceeds size of source file")
 		}
 		_, err = src.Seek(offset, io.SeekStart)
@@ -71,28 +72,44 @@ func copy(from, to string, offset, limit int64) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Copied %d bytes, \n", copied)
+
+	var percents float64
+	if srcsize > 0 {
+		percents = float64(copied) / float64(srcsize)
+		percents *= 100
+	}
+	fmt.Printf("Copied %d bytes (%f percents)\n", copied, percents)
 	return nil
 }
 
 // copyio - function to run tests
-func copyio(src io.Reader, dst io.Writer, limit int64) (int64, error) {
-	var copied int64
-	buffer := make([]byte, 0, 16384)
+func copyio(src io.Reader, dst io.Writer, limit int64) (copied int64, err error) {
+	buffer := make([]byte, 16384)
 	for {
-		readed, err := src.Read(buffer)
+		var readed int
+		readed, err = src.Read(buffer)
 		if readed > 0 {
-			written, err := dst.Write(buffer)
-			if err != nil {
-				return copied, err
+			readed64 := int64(readed)
+			if limit > 0 && readed64 > limit {
+				readed64 = limit
 			}
-			copied += int64(written)
+			_, err = dst.Write(buffer[:readed64])
+			if err != nil {
+				return
+			}
+			copied += readed64
+			if limit > 0 {
+				limit -= readed64
+				if limit == 0 {
+					return copied, nil
+				}
+			}
 		}
 		if err == io.EOF {
 			return copied, nil
 		}
 		if err != nil {
-			return copied, err
+			return
 		}
 	}
 }
