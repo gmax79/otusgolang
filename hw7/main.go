@@ -49,9 +49,15 @@ func main() {
 			fmt.Println("File", f.Name, "can't read,", openerr.Error())
 			continue
 		}
-		file.Close()
+		var stat os.FileInfo
+		if stat, openerr = file.Stat(); openerr != nil {
+			fmt.Println("File", f.Name, "can't read,", openerr.Error())
+		}
 
+		file.Close()
 	}
+
+	//dd
 
 	fmt.Println(envdir, apppath)
 }
