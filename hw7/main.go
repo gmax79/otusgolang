@@ -43,15 +43,27 @@ func main() {
 	}
 
 	for _, f := range files {
-		var file *os.File
+		// enviroment variable name is the name of file
+		varname := f.Name()
 		var openerr error
+		var file *os.File
 		if file, openerr = os.Open(f.Name()); openerr != nil {
-			fmt.Println("File", f.Name, "can't read,", openerr.Error())
+			fmt.Println("File", varname, "can't read,", openerr.Error())
 			continue
 		}
 		var stat os.FileInfo
 		if stat, openerr = file.Stat(); openerr != nil {
-			fmt.Println("File", f.Name, "can't read,", openerr.Error())
+			fmt.Println("File", varname, "can't read,", openerr.Error())
+			continue
+		}
+		if stat.IsDir() {
+			continue
+		}
+		// 32760 - maximum length of enviroment variable
+		const maxlen = 32760
+		if stat.Size() >= maxlen {
+			fmt.Println("Enviroment variable", varname, "can't set. Value is bigger then maximum len", maxlen)
+			continue
 		}
 
 		file.Close()
