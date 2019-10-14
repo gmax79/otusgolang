@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestEnvLoader(t *testing.T) {
 	m, err := loadEnvVariables("envdir")
@@ -23,5 +26,39 @@ func TestEnvLoader(t *testing.T) {
 	const testvalue = "test-value"
 	if v != testvalue {
 		t.Errorf("TEST with wrong value %s, expected props-value", testvalue)
+	}
+}
+
+func TestErrEnvLoader(t *testing.T) {
+	_, err := loadEnvVariables("errenv")
+	if err == nil {
+		t.Errorf("errenv parsed without error, expected error")
+		return
+	}
+}
+
+type testWriter struct {
+	data []byte
+}
+
+func (w *testWriter) Write(p []byte) (n int, err error) {
+	w.data = append(w.data, p...)
+	return len(p), nil
+}
+
+func TestAppRuner(t *testing.T) {
+	stdout := &testWriter{}
+	stderr := &testWriter{}
+	vars, _ := loadEnvVariables("envdir")
+	err := runApp("env", []string{}, vars, stdout, stderr)
+	if err != nil {
+		t.Error(err)
+	}
+	out := string(stdout.data)
+	if !strings.Contains(out, "PROPS=props-value") {
+		t.Error("envdir/PROPS!=props-value")
+	}
+	if !strings.Contains(out, "TEST=test-value") {
+		t.Error("envdir/PROPS!=props-value")
 	}
 }
