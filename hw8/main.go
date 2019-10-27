@@ -1,76 +1,92 @@
-package main
+|package main
 
-// EventTrigger - key, when event happends
-type EventTrigger struct {
-	date string
+type EventTrigger interface {
+	SetEventCallback(f func())
 }
 
-// Event - interface for invoke event, and serialize it for restore later
+// Event - interface for invoke event
 type Event interface {
-	Invoke() string
-	Serialize() string
+	Invoke()
+}
+
+type CalendarTrigger interface {
+	AddEvent(e Event) bool
+	GetEventsCount() int
+	DeleteEvent(index int) bool
+	GetEvent(index int) Event
+	ReplaceEvent(index int, e Event) bool
 }
 
 // Calendar - main object
 type Calendar interface {
-	AddEvent(t EventTrigger, e Event) bool
-	GetEventsCount(t EventTrigger) int
-	DeleteAllEvents(t EventTrigger) bool
-	DeleteEvent(t EventTrigger, index int) bool
-	GetEvent(t EventTrigger, index int) Event
+	AddTrigger(t EventTrigger)
+	FindTrigger(t EventTrigger) CalendarTrigger
+	DeleteTrigger(t EventTrigger)
 }
 
 // Calendar implementaion
-type calendImpl struct {
-	events map[EventTrigger][]Event
+type calendarImpl struct {
+	triggers map[EventTrigger]triggerImpl
 }
 
-func (c *calendImpl) Create() {
-	c.events = make(map[EventTrigger][]Event)
+type triggerImpl struct {
+	events []Event
 }
 
-func (c *calendImpl) AddEvent(t EventTrigger, e Event) bool {
+// CreateCalendar - create calendar instance
+func CreateCalendar() Calendar {
+	return &calendarImpl{ triggers: make(map[EventTrigger]triggerImpl)}
+}
+
+func (c *calendarImpl) AddTrigger(t EventTrigger) {
+	callback := func() {
+	}
+
+	c.trigger[t] = triggerImpl{}
+}
+
+func (c *calendarImpl) FindTrigger(t EventTrigger) CalendarTrigger {
+	return nil
+}
+
+func (c *calendarImpl) DeleteTrigger(t EventTrigger) {
+	delete(c.triggers, t)
+}
+
+func (t *triggerImpl) AddEvent(e Event) bool {
 	if e == nil {
 		return false
 	}
-	events, ok := c.events[t]
-	if !ok {
-		c.events[t] = []Event{e}
-	} else {
-		c.events[t] = append(events, e)
-	}
+	t.events = append(t.events, e)
 	return true
 }
 
-func (c *calendImpl) GetEventsCount(t EventTrigger) int {
-	events, ok := c.events[t]
-	if !ok {
-		return 0
-	}
-	return len(events)
+func (t *triggerImpl) GetEventsCount() int {
+	return len(t.events)
 }
 
-func (c *calendImpl) DeleteEvent(t EventTrigger, index int) bool {
-	events, ok := c.events[t]
-	if !ok || index < 0 || index >= len(events) {
+func (t *triggerImpl) DeleteEvent(index int) bool {
+	if index >= 0 && index < len(t.events) {
+		t.events = append(t.events[:index], t.events[index+1:]...)
+		return true
+	}
+	return false
+}
+
+func (t *triggerImpl) GetEvent(index int) Event {
+	if index >= 0 && index < len(t.events) {
+		return t.events[index]
+	}
+	return nil
+}
+
+func (t *triggerImpl) ReplaceEvent(index int, e Event) bool {
+	if e == nil {
 		return false
 	}
-	c.events[t] = append(events[:index], events[index+1:]...)
-	return true
-}
-
-func (c *calendImpl) DeleteAllEvents(t EventTrigger) bool {
-	if _, ok := c.events[t]; !ok {
-		return false
+	if t.DeleteEvent(index) {
+		t.AddEvent(e)
+		return true
 	}
-	delete(c.events, t)
-	return true
-}
-
-func (c *calendImpl) GetEvent(t EventTrigger, index int) Event {
-	events, ok := c.events[t]
-	if !ok || index < 0 || index >= len(events) {
-		return nil
-	}
-	return events[index]
+	return false
 }
