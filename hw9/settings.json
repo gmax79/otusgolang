@@ -1,4 +1,6 @@
 {
     "logfile" : "/var/log/hw9",
-    "level": "warnings"
+    "level": "debug",
+    "encoding": "console",
+    "debug": "true"
 }
