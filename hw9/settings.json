@@ -1,0 +1,4 @@
+{
+    "logfile" : "/var/log/hw9",
+    "level": "warnings"
+}
