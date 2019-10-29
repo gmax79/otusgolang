@@ -15,7 +15,7 @@ type Settings struct {
 	LogFile      string `json:"logfile"`
 	Encoding     string `json:"encoding"`
 	VerboseLevel string `json:"level"`
-	Debugmode    bool   `json:"debug"`
+	Debugmode    int    `json:"debug"`
 }
 
 func readSettings() (*Settings, error) {
@@ -31,21 +31,26 @@ func readSettings() (*Settings, error) {
 
 func createLogger(s *Settings) (*zap.Logger, error) {
 	zapconfig := zap.NewProductionConfig()
-	zapconfig.Development = s.Debugmode
-	if s.Encoding != "console" || s.Encoding == "json" {
+	if s.Debugmode != 0 {
+		zapconfig.Development = true
+	}
+	if s.Encoding == "console" || s.Encoding == "json" {
 		zapconfig.Encoding = s.Encoding
 	} else if s.Encoding != "" {
-		fmt.Printf("Encoding type %s not supported./n", s.Encoding)
+		return nil, fmt.Errorf("Encoding type '%s' not supported", s.Encoding)
 	}
+
 	switch s.VerboseLevel {
 	case "debug":
 		zapconfig.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
-	case "error":
-		zapconfig.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
-	case "warning":
-		zapconfig.Level = zap.NewAtomicLevelAt(zap.WarnLevel)
 	case "info":
 		zapconfig.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+	case "warning":
+		zapconfig.Level = zap.NewAtomicLevelAt(zap.WarnLevel)
+	case "error":
+		zapconfig.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
+	default:
+		return nil, fmt.Errorf("Verbose level '%s' not supported", s.VerboseLevel)
 	}
 	return zapconfig.Build()
 }
@@ -54,7 +59,7 @@ func main() {
 	var err error
 	defer func() {
 		if err != nil {
-			log.Fatalf("Application can't start, error: %v", err)
+			log.Fatalf("Error: %v", err)
 		}
 	}()
 

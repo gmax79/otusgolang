@@ -1,6 +1,6 @@
 {
     "logfile" : "/var/log/hw9",
-    "level": "debug",
+    "level": "info",
     "encoding": "console",
-    "debug": "true"
+    "debug": 1
 }
