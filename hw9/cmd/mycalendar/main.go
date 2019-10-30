@@ -11,8 +11,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// Settings - parameters to start program
-type Settings struct {
+// ServiceConfig - parameters to start service
+type ServiceConfig struct {
 	LogFile      string `json:"log_file"`
 	VerboseLevel string `json:"log_level"`
 	Encoding     string `json:"encoding"`
@@ -20,18 +20,18 @@ type Settings struct {
 	ListenHTTP   string `json:"http_listen"`
 }
 
-func readSettings() (*Settings, error) {
-	settings := &Settings{}
-	settingsFile := flag.String("settings", "settings.json", "path to settings file")
+func readServiceConfig() (*ServiceConfig, error) {
+	config := &ServiceConfig{}
+	configFile := flag.String("config", "config.json", "path to config file")
 	flag.Parse()
-	data, err := ioutil.ReadFile(*settingsFile)
+	data, err := ioutil.ReadFile(*configFile)
 	if err == nil {
-		err = json.Unmarshal(data, &settings)
+		err = json.Unmarshal(data, &config)
 	}
-	return settings, err
+	return config, err
 }
 
-func createLogger(s *Settings) (*zap.Logger, error) {
+func createLogger(s *ServiceConfig) (*zap.Logger, error) {
 	zapconfig := zap.NewProductionConfig()
 	zapconfig.DisableStacktrace = true
 	if s.Debugmode != 0 {
@@ -70,17 +70,17 @@ func main() {
 	var err error
 	defer func() {
 		if err != nil {
-			log.Fatalf("Error: %v", err)
+			log.Fatalf("Error: %v\nUse --help option to read usage information", err)
 		}
 	}()
 
-	var settings *Settings
-	if settings, err = readSettings(); err != nil {
+	var config *ServiceConfig
+	if config, err = readServiceConfig(); err != nil {
 
 		return
 	}
 	var logger *zap.Logger
-	if logger, err = createLogger(settings); err != nil {
+	if logger, err = createLogger(config); err != nil {
 		return
 	}
 
@@ -88,8 +88,8 @@ func main() {
 	http.HandleFunc("/", s.httpRoot)
 	http.HandleFunc("/hello", s.httpHello)
 	logger.Info("Calendar service started")
-	logger.Info("Go in browser at host ", zap.String("url", settings.ListenHTTP))
-	httperr := http.ListenAndServe(settings.ListenHTTP, nil)
+	logger.Info("Go in browser at host ", zap.String("url", config.ListenHTTP))
+	httperr := http.ListenAndServe(config.ListenHTTP, nil)
 	if httperr != nil {
 		logger.Error("error", zap.Error(httperr))
 	}
