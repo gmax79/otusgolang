@@ -1,4 +1,4 @@
-module github.com/gmax79/otusgolang/hw9/cmd/calendar
+module github.com/gmax79/otusgolang/hw9/cmd/mycalendar
 
 go 1.13
 

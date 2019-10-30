@@ -1,5 +1,5 @@
 {
-    "log_file" : "/tmp/hw9",
+    "log_file" : "/tmp/mycalendar",
     "log_level": "info",
     "encoding": "json",
     "debug": 0,
