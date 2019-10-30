@@ -1,4 +1,4 @@
-module template/service
+module github.com/gmax79/otusgolang/hw9/cmd/service
 
 go 1.13
 
