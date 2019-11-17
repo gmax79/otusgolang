@@ -1,0 +1,4 @@
+/pkg/
+/.vscode/
+/gotelnet/gotelnet
+/echoserver/echoserver
