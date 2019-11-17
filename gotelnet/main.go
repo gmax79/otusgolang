@@ -4,15 +4,15 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io"
 	"net"
 	"os"
 	"os/signal"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
-	"github.com/gmax79/otusgolang/contextscanner"
+	"github.com/gmax79/otusgolang/contexttools"
 )
 
 func stdErrAndExit(v ...interface{}) {
@@ -61,45 +61,35 @@ func main() {
 		fmt.Fprintln(os.Stdout, "Connection closed")
 	}()
 
-	writectx, writecancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 	term := make(chan os.Signal, 1)
 	signal.Notify(term, syscall.SIGINT, syscall.SIGTERM)
-	readctx, readcancel := context.WithCancel(context.Background())
+
+	var syncflag int32
 	go func() {
 		<-term
-		writecancel()
-		readcancel()
+		atomic.SwapInt32(&syncflag, 1)
+		cancel()
 	}()
+
+	writer := contexttools.CreateCopier(ctx)
+	reader := contexttools.CreateCopier(ctx)
 
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 	go func() {
-		err := copyWithContext(writectx, os.Stdin, conn, 0)
-		fmt.Fprintln(os.Stdout, "Connection write closed")
+		err := writer.Copy(os.Stdin, conn)
 		stdErr(err)
-		timer := time.NewTimer(time.Second * 3)
-		<-timer.C
-		readcancel()
+		if atomic.SwapInt32(&syncflag, 1) == 0 {
+			fmt.Fprintln(os.Stdout, "<<EOF>>, receive last data")
+			reader.AddTimeout(time.Second * 3)
+		}
 		wg.Done()
 	}()
 	go func() {
-		err := copyWithContext(readctx, conn, os.Stdout, 0)
-		fmt.Fprintln(os.Stdout, "Connection read closed")
+		err := reader.Copy(conn, os.Stdout)
 		stdErr(err)
 		wg.Done()
 	}()
 	wg.Wait()
-}
-
-func copyWithContext(ctx context.Context, in io.ReadCloser, out io.Writer, readtimeout time.Duration) error {
-	scanner := contextscanner.Create(ctx, in, readtimeout)
-	for {
-		data, ok := <-scanner.Read()
-		if !ok {
-			return scanner.GetLastError()
-		}
-		if _, err := out.Write(data); err != nil {
-			return err
-		}
-	}
 }

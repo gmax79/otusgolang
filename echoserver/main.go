@@ -9,7 +9,7 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/gmax79/otusgolang/contextscanner"
+	"github.com/gmax79/otusgolang/contexttools"
 )
 
 func main() {
@@ -47,7 +47,7 @@ func main() {
 }
 
 func handleConnection(ctx context.Context, conn net.Conn, wg *sync.WaitGroup) {
-	scanner := contextscanner.Create(ctx, conn, 0)
+	reader := contexttools.CreateReader(ctx, conn)
 	remoteAddr := conn.RemoteAddr()
 	defer func() {
 		log.Printf("Closing connection with %s\n", remoteAddr)
@@ -57,9 +57,9 @@ func handleConnection(ctx context.Context, conn net.Conn, wg *sync.WaitGroup) {
 	log.Printf("Connected from %s\n", remoteAddr)
 	for {
 		select {
-		case data, ok := <-scanner.Read():
+		case data, ok := <-reader.Read():
 			if !ok {
-				err := scanner.GetLastError()
+				err := reader.GetLastError()
 				if err != nil {
 					log.Println(err.Error())
 				}
