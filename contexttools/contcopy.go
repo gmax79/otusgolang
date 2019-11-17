@@ -2,7 +2,6 @@ package contexttools
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"sync/atomic"
 	"time"
@@ -12,6 +11,7 @@ type Copier struct {
 	ctx     context.Context
 	timeout chan struct{}
 	flag    int32
+	tout    bool
 }
 
 // CreateCopier - create it
@@ -36,6 +36,7 @@ func (c *Copier) Copy(in io.Reader, out io.Writer) error {
 			}
 			atomic.SwapInt32(&c.flag, 1)
 		case <-c.timeout:
+			c.tout = true
 			return nil
 		}
 	}
@@ -51,7 +52,6 @@ func (c *Copier) AddTimeout(timeout time.Duration) {
 			case <-ticker.C:
 				if atomic.SwapInt32(&c.flag, 0) == 0 {
 					c.timeout <- struct{}{}
-					fmt.Println("timeout")
 					break loop
 				}
 			case <-c.ctx.Done():
@@ -60,4 +60,9 @@ func (c *Copier) AddTimeout(timeout time.Duration) {
 		}
 		ticker.Stop()
 	}()
+}
+
+// IsTimeout - check if copier stopped via timeout
+func (c *Copier) IsTimeout() bool {
+	return c.tout
 }

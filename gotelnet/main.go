@@ -92,4 +92,7 @@ func main() {
 		wg.Done()
 	}()
 	wg.Wait()
+	if reader.IsTimeout() {
+		fmt.Fprintln(os.Stdout, "timeout")
+	}
 }
