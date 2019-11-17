@@ -15,7 +15,7 @@ type ContextReader struct {
 	closed int32
 }
 
-// Create - create helper around read from io.Reader
+// CreateReader - create helper around read from io.Reader
 func CreateReader(ctx context.Context, reader io.Reader) *ContextReader {
 	buffer := make([]byte, 65536)
 

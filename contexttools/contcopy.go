@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Copier - object to copy from reader to writer with context control
 type Copier struct {
 	ctx     context.Context
 	timeout chan struct{}
