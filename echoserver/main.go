@@ -65,11 +65,10 @@ func handleConnection(ctx context.Context, conn net.Conn, wg *sync.WaitGroup) {
 				}
 				return
 			}
-			log.Printf("Received %d bytes from %s: %s\n", len(data), remoteAddr, string(data))
+			log.Printf("Received %d bytes from %s: %s", len(data), remoteAddr, string(data))
 			// send echo answer
 			conn.Write([]byte("echo:"))
 			conn.Write(data)
-			conn.Write([]byte("\n"))
 		}
 	}
 }

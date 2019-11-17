@@ -1,8 +1,8 @@
 package contextscanner
 
 import (
-	"bufio"
 	"context"
+	"fmt"
 	"io"
 	"net"
 	"sync/atomic"
@@ -11,76 +11,110 @@ import (
 
 // ContextScanner - main object, processing read from context
 type ContextScanner struct {
-	data chan []byte
-	err  error
-	flag int32
+	data   chan []byte
+	err    error
+	flag   int32
+	closed int32
+	//buffer []byte
 }
 
 // ScanChunks is a split function for a bufio.Scanner that returns byte chunks as is
-func scanChunks(data []byte, atEOF bool) (advance int, token []byte, err error) {
+/*func scanChunks(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	if atEOF && len(data) == 0 {
 		return 0, nil, nil
 	}
 	return len(data), data, nil
 }
 
-// Create - create helper around bufio.Scanner
-func Create(ctx context.Context, reader io.ReadCloser, timeout time.Duration) *ContextScanner {
+type readerWithClose struct {
+	internal io.Reader
+	closed   bool
+}
+
+func (r *readerWithClose) Read(p []byte) (n int, err error) {
+	if r.closed {
+		return 0, io.EOF
+	}
+	return r.internal.Read(p)
+}
+
+func (r *readerWithClose) Close() {
+	r.closed = true
+}*/
+
+// Create - create helper around read from io.Reader
+func Create(ctx context.Context, reader io.Reader, timeout time.Duration) *ContextScanner {
+	timeoutchan := make(chan struct{}, 1)
+	buffer := make([]byte, 65536)
+
 	s := &ContextScanner{}
-	s.data = make(chan []byte)
+	s.data = make(chan []byte, 1)
+	go func() {
+		<-ctx.Done()
+		s.close()
+	}()
 
 	if timeout > 0 {
 		ticker := time.NewTicker(timeout)
 		go func() {
+		loop:
 			for {
 				select {
 				case <-ticker.C:
 					if atomic.SwapInt32(&s.flag, 0) == 0 {
-						ticker.Stop()
-						reader.Close()
-						return
+						timeoutchan <- struct{}{}
+						fmt.Println("timeout")
+						break loop
 					}
 				case <-ctx.Done():
-					ticker.Stop()
-					return
+					break loop
 				}
 			}
+			ticker.Stop()
+			s.close()
 		}()
 	}
 
 	go func() {
-		<-ctx.Done()
-		reader.Close()
-	}()
-
-	go func() {
-		scanner := bufio.NewScanner(reader)
-		scanner.Split(scanChunks)
 	loop:
 		for {
-			if !scanner.Scan() {
-				s.err = scanner.Err()
+			fmt.Println("read")
+			readed, err := reader.Read(buffer)
+			if err != nil {
+				s.err = err
 				break loop
 			}
-			data := scanner.Bytes()
-			if len(data) == 0 {
+			if readed == 0 {
 				select {
+				case <-timeoutchan:
+					break loop
 				case <-ctx.Done():
 					break loop
 				default:
 				}
 				continue
 			}
+			data := make([]byte, readed)
+			copy(data, buffer[0:])
 			select {
 			case s.data <- data:
 				atomic.SwapInt32(&s.flag, 1)
+			case <-timeoutchan:
+				break loop
 			case <-ctx.Done():
 				break loop
 			}
 		}
-		close(s.data)
+		s.close()
 	}()
 	return s
+}
+
+func (s *ContextScanner) close() {
+	if !atomic.CompareAndSwapInt32(&s.closed, 0, 1) {
+		return
+	}
+	close(s.data)
 }
 
 // Read - return channel for read from scanner
@@ -90,6 +124,9 @@ func (s *ContextScanner) Read() <-chan []byte {
 
 // GetLastError - return error if it happend
 func (s *ContextScanner) GetLastError() error {
+	if s.err == io.EOF {
+		return nil
+	}
 	if _, ok := s.err.(*net.OpError); ok {
 		return nil
 	}

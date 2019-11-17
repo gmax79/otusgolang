@@ -56,30 +56,39 @@ func main() {
 	if err != nil {
 		stdErrAndExit("Cannot connect:", err.Error())
 	}
-	defer conn.Close()
+	defer func() {
+		conn.Close()
+		fmt.Fprintln(os.Stdout, "Connection closed")
+	}()
 
-	ctx, cancel := context.WithCancel(context.Background())
+	writectx, writecancel := context.WithCancel(context.Background())
 	term := make(chan os.Signal, 1)
 	signal.Notify(term, syscall.SIGINT, syscall.SIGTERM)
+	readctx, readcancel := context.WithCancel(context.Background())
 	go func() {
 		<-term
-		cancel()
+		writecancel()
+		readcancel()
 	}()
 
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 	go func() {
-		err := copyWithContext(ctx, os.Stdin, conn, 0)
+		err := copyWithContext(writectx, os.Stdin, conn, 0)
+		fmt.Fprintln(os.Stdout, "Connection write closed")
 		stdErr(err)
+		timer := time.NewTimer(time.Second * 3)
+		<-timer.C
+		readcancel()
 		wg.Done()
 	}()
 	go func() {
-		err := copyWithContext(ctx, conn, os.Stdout, timeoutDuration)
+		err := copyWithContext(readctx, conn, os.Stdout, 0)
+		fmt.Fprintln(os.Stdout, "Connection read closed")
 		stdErr(err)
 		wg.Done()
 	}()
 	wg.Wait()
-	fmt.Fprintln(os.Stdout, "Connection closed")
 }
 
 func copyWithContext(ctx context.Context, in io.ReadCloser, out io.Writer, readtimeout time.Duration) error {
@@ -89,8 +98,7 @@ func copyWithContext(ctx context.Context, in io.ReadCloser, out io.Writer, readt
 		if !ok {
 			return scanner.GetLastError()
 		}
-		_, err := out.Write(data)
-		if err != nil {
+		if _, err := out.Write(data); err != nil {
 			return err
 		}
 	}
