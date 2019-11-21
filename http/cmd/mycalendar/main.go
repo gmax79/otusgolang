@@ -16,10 +16,17 @@ type CalendarServiceConfig struct {
 	ListenHTTP string `json:"host"`
 }
 
+func (cc *CalendarServiceConfig) Check() error {
+	if cc.ListenHTTP == "" {
+		return fmt.Errorf("Host address not declared")
+	}
+	return nil
+}
+
 // CalendarService - main struct of service
 type CalendarService struct {
 	logger *zap.Logger
-	config *CalendarServiceConfig
+	config CalendarServiceConfig
 }
 
 func main() {
@@ -31,13 +38,16 @@ func main() {
 	}()
 	configFile := flag.String("config", "config.json", "path to config file")
 	flag.Parse()
-	configJSON, err := ioutil.ReadFile(*configFile)
-	if err != nil {
+	var configJSON []byte
+	if configJSON, err = ioutil.ReadFile(*configFile); err != nil {
 		return
 	}
 
-	s := &CalendarService{config: &CalendarServiceConfig{}}
+	s := &CalendarService{}
 	if err = json.Unmarshal(configJSON, &s.config); err != nil {
+		return
+	}
+	if err = s.config.Check(); err != nil {
 		return
 	}
 	if s.logger, err = internal.CreateLogger(configJSON); err != nil {
