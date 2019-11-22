@@ -1,7 +1,7 @@
 {
     "log_file" : "/tmp/mycalendar",
     "log_level": "info",
-    "encoding": "console",
+    "log_encoding": "console",
     "debug": 0,
     "host": "localhost:8080"
 }

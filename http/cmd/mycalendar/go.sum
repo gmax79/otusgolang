@@ -1,6 +1,11 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/gmax79/otusgolang v0.0.0-20191121220640-bf38e9ee78b9 h1:HN9gMvfa/11y5yFxbk0HGg6ZfNBkCT3Yc5EKIkGEhFU=
+github.com/gmax79/otusgolang/http/internal v0.0.0-20191121220640-bf38e9ee78b9 h1:MsGIlqHnC3X5eRNdIW7QHyzj9zb4Tl9fJLVhuQLh5zA=
+github.com/gmax79/otusgolang/http/internal v0.0.0-20191121220640-bf38e9ee78b9/go.mod h1:ukrtN9jcGZ/PRs8XNjK9Eobv53jXyskAyB8k1+KgksM=
+github.com/gmax79/otusgolang/hw8/internal/calendar v0.0.0-20191121220640-bf38e9ee78b9 h1:XlQKFAkIKZF/+9hTCA646Vau8oqD5hLiKmwhy7C3HJA=
+github.com/gmax79/otusgolang/hw8/internal/calendar v0.0.0-20191121220640-bf38e9ee78b9/go.mod h1:F6KgDPLdlABfshK/NEJ9MRA8XkzpFCvzBXSq0EOLlOI=
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=

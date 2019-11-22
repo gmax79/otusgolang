@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/gmax79/otusgolang/http/internal"
+	nlog "github.com/gmax79/otusgolang/http/internal/log"
 	"go.uber.org/zap"
 )
 
@@ -21,12 +23,6 @@ func (cc *CalendarServiceConfig) Check() error {
 		return fmt.Errorf("Host address not declared")
 	}
 	return nil
-}
-
-// CalendarService - main struct of service
-type CalendarService struct {
-	logger *zap.Logger
-	config CalendarServiceConfig
 }
 
 func main() {
@@ -42,39 +38,30 @@ func main() {
 	if configJSON, err = ioutil.ReadFile(*configFile); err != nil {
 		return
 	}
-
-	s := &CalendarService{}
-	if err = json.Unmarshal(configJSON, &s.config); err != nil {
+	config := CalendarServiceConfig{}
+	if err = json.Unmarshal(configJSON, &config); err != nil {
 		return
 	}
-	if err = s.config.Check(); err != nil {
-		return
-	}
-	if s.logger, err = internal.CreateLogger(configJSON); err != nil {
+	if err = config.Check(); err != nil {
 		return
 	}
 
-	http.HandleFunc("/", s.httpRoot)
-	http.HandleFunc("/hello", s.httpHello)
-
-	s.logger.Info("Calendar service started")
-	s.logger.Info("Go in browser at host ", zap.String("url", s.config.ListenHTTP))
-	httperr := http.ListenAndServe(s.config.ListenHTTP, nil)
-	if httperr != nil {
-		s.logger.Error("error", zap.Error(httperr))
+	var logger *zap.Logger
+	if logger, err = nlog.CreateLogger(configJSON); err != nil {
+		return
 	}
-}
+	server := createServer(config.ListenHTTP, logger)
+	logger.Info("Calendar service started")
+	logger.Info("Go in browser at host ", zap.String("url", config.ListenHTTP))
 
-func (s *CalendarService) logRequest(r *http.Request) {
-	s.logger.Info("request", zap.String("url", r.URL.Path))
-}
+	server.ListenAndServe()
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+	<-stop
 
-func (s *CalendarService) httpRoot(w http.ResponseWriter, r *http.Request) {
-	s.logRequest(r)
-	fmt.Fprint(w, "Calendar app")
-}
-
-func (s *CalendarService) httpHello(w http.ResponseWriter, r *http.Request) {
-	s.logRequest(r)
-	fmt.Fprint(w, "Hello !")
+	server.Shutdown()
+	if httperr := server.GetLastError(); httperr != nil {
+		logger.Error("error", zap.Error(httperr))
+	}
+	logger.Info("Calendar service stopped")
 }
