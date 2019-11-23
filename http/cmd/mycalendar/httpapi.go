@@ -2,60 +2,19 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gmax79/otusgolang/http/internal/calendar"
+	"github.com/gmax79/otusgolang/http/internal/support"
 	"go.uber.org/zap"
 )
-
-// Response - send http answer to client
-func Response(w http.ResponseWriter, v interface{}) {
-	switch v.(type) {
-	case nil:
-		w.WriteHeader(http.StatusNotFound)
-	case int:
-		w.WriteHeader(v.(int))
-	case error:
-		err := v.(error)
-		text := "{ \"error\" : " + err.Error() + "  }"
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(text))
-	default:
-		answer, err := json.Marshal(v)
-		if err != nil {
-			Response(w, err)
-		} else {
-			w.WriteHeader(http.StatusOK)
-			w.Write(answer)
-		}
-	}
-}
 
 type httpCalandarAPI struct {
 	server    *http.Server
 	logger    *zap.Logger
 	lasterror error
-	clr       calendar.Calendar
-}
-
-type createEventRequest struct {
-	ID string
-}
-
-func (p *createEventRequest) ReadParameters(r *http.Request, w http.ResponseWriter) (ok bool) {
-	if r.Method != http.MethodPost {
-		Response(w, http.StatusInternalServerError)
-		return
-	}
-	if err := r.ParseForm(); err != nil {
-		Response(w, err)
-		return
-	}
-	p.ID = r.Form.Get("id")
-	return true
+	cr        calendar.Calendar
 }
 
 func createServer(host string, zaplog *zap.Logger) *httpCalandarAPI {
@@ -64,7 +23,7 @@ func createServer(host string, zaplog *zap.Logger) *httpCalandarAPI {
 	mux.HandleFunc("/", s.httpRoot)
 	mux.HandleFunc("/create_event", s.httpCreateEvent)
 	s.server = &http.Server{Addr: host, Handler: mux}
-	s.clr = calendar.CreateCalendar()
+	s.cr = calendar.CreateCalendar()
 	return s
 }
 
@@ -90,15 +49,21 @@ func (s *httpCalandarAPI) GetLastError() error {
 
 func (s *httpCalandarAPI) httpRoot(w http.ResponseWriter, r *http.Request) {
 	s.logRequest(r)
-	Response(w, nil)
+	support.HTTPResponse(w, http.StatusNotFound)
 }
 
 func (s *httpCalandarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request) {
 	s.logRequest(r)
-	var p createEventRequest
-	if !p.ReadParameters(r, w) {
-		return
+	if pr := support.ReadPostRequest(r, w); r != nil {
+		id := pr.Get("id")
+		_ = id
+
+		t := calendar.CreateCalendarTrigger()
+		t.AddTrigger
 	}
-	fmt.Fprint(w, "id = ", p.ID)
-	Response(w, http.StatusOK)
+}
+
+func (s *httpCalandarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request) {
+	s.logRequest(r)
+
 }
