@@ -10,16 +10,25 @@ type triggerParser struct {
 	parsed time.Time
 }
 
-func (t *triggerParser) Parse(trigger, layout string) error {
+func (t *triggerParser) Parse(trigger string) error {
 	if trigger == "" {
-		return fmt.Errorf("Error: trigger is empty")
-	}
-	if layout == "" {
-		return fmt.Errorf("Error: trigger's layout is empty")
+		return fmt.Errorf("Time doesn't declared")
 	}
 	trigger = strings.TrimSpace(trigger)
-	trigger = trigger[:len(layout)]
+	if len(trigger) < len(DateLayout) {
+		return fmt.Errorf("Time is in invalid format")
+	}
+
+	trigger = trigger[:len(DateLayout)]
 	var err error
-	t.parsed, err = time.Parse(layout, trigger)
+	t.parsed, err = time.Parse(DateLayout, trigger)
 	return err
+}
+
+func (t *triggerParser) Normalize(custom time.Time) {
+	t.Parse(custom.String())
+}
+
+func (t *triggerParser) NormalizeNow() {
+	t.Normalize(time.Now())
 }

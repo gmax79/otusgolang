@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -10,60 +11,127 @@ import (
 	"go.uber.org/zap"
 )
 
-type httpCalandarAPI struct {
+type httpCalendarAPI struct {
 	server    *http.Server
 	logger    *zap.Logger
 	lasterror error
-	cr        calendar.Calendar
+	calen     calendar.Calendar
 }
 
-func createServer(host string, zaplog *zap.Logger) *httpCalandarAPI {
-	s := &httpCalandarAPI{logger: zaplog}
+func createServer(host string, zaplog *zap.Logger) *httpCalendarAPI {
+	s := &httpCalendarAPI{logger: zaplog}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", s.httpRoot)
 	mux.HandleFunc("/create_event", s.httpCreateEvent)
+	mux.HandleFunc("/delete_event", s.httpDeleteEvent)
+	mux.HandleFunc("/update_event", s.httpUpdateEvent)
+	mux.HandleFunc("/events_for_day", s.httpUpdateEvent)
+	mux.HandleFunc("/events_for_week", s.httpEventsForWeek)
+	mux.HandleFunc("/events_for_month", s.httpEventsForMonth)
 	s.server = &http.Server{Addr: host, Handler: mux}
-	s.cr = calendar.CreateCalendar()
+	s.calen = calendar.Create()
 	return s
 }
 
-func (s *httpCalandarAPI) logRequest(r *http.Request) {
-	s.logger.Info("request", zap.String("url", r.URL.Path))
+func (s *httpCalendarAPI) logRequest(r *http.Request) {
+	s.logger.Info("request", zap.String("method", r.Method), zap.String("url", r.URL.Path))
 }
 
-func (s *httpCalandarAPI) Shutdown() {
+func (s *httpCalendarAPI) Shutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	s.server.Shutdown(ctx)
 }
 
-func (s *httpCalandarAPI) ListenAndServe() {
+func (s *httpCalendarAPI) ListenAndServe() {
 	go func() {
 		s.lasterror = s.server.ListenAndServe()
 	}()
 }
 
-func (s *httpCalandarAPI) GetLastError() error {
+func (s *httpCalendarAPI) GetLastError() error {
 	return s.lasterror
 }
 
-func (s *httpCalandarAPI) httpRoot(w http.ResponseWriter, r *http.Request) {
+func (s *httpCalendarAPI) httpRoot(w http.ResponseWriter, r *http.Request) {
 	s.logRequest(r)
 	support.HTTPResponse(w, http.StatusNotFound)
 }
 
-func (s *httpCalandarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request) {
-	s.logRequest(r)
-	if pr := support.ReadPostRequest(r, w); r != nil {
-		id := pr.Get("id")
-		_ = id
-
-		t := calendar.CreateCalendarTrigger()
-		//t.AddTrigger
-	}
+type dummyEvent struct {
+	event string
 }
 
-func (s *httpCalandarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request) {
-	s.logRequest(r)
+func (d *dummyEvent) Invoke() {
+	fmt.Println("Event !!!")
+}
 
+func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request) {
+	s.logRequest(r)
+	if pr := support.ReadPostRequest(r, w); r != nil {
+		time := pr.Get("time")
+		event := pr.Get("event")
+		if time == "" || event == "" {
+			support.HTTPResponse(w, http.StatusBadRequest)
+			return
+		}
+		events, err := s.calen.AddTrigger(time)
+		if err != nil {
+			support.HTTPResponse(w, err)
+			return
+		}
+		if !events.AddEvent(&dummyEvent{event: event}) {
+			support.HTTPResponse(w, http.StatusBadRequest)
+			return
+		}
+		support.HTTPResponse(w, http.StatusOK)
+		return
+	}
+	support.HTTPResponse(w, http.StatusBadRequest)
+}
+
+func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request) {
+	s.logRequest(r)
+	if pr := support.ReadPostRequest(r, w); r != nil {
+		time := pr.Get("time")
+		events, err := s.calen.AddTrigger(time)
+		if err != nil {
+			support.HTTPResponse(w, err)
+			return
+		}
+		if !events.AddEvent(&dummyEvent{}) {
+			support.HTTPResponse(w, http.StatusInternalServerError)
+			return
+		}
+	}
+	support.HTTPResponse(w, http.StatusBadRequest)
+}
+
+func (s *httpCalendarAPI) httpUpdateEvent(w http.ResponseWriter, r *http.Request) {
+	s.logRequest(r)
+	if pr := support.ReadPostRequest(r, w); r != nil {
+		time := pr.Get("time")
+		if !s.calen.DeleteTrigger(time) {
+			support.HTTPResponse(w, fmt.Errorf("event not found"))
+			return
+		}
+		support.HTTPResponse(w, http.StatusOK)
+		return
+	}
+	support.HTTPResponse(w, http.StatusBadRequest)
+}
+
+func (s *httpCalendarAPI) httpEventsForDay(w http.ResponseWriter, r *http.Request) {
+	s.logRequest(r)
+	support.HTTPResponse(w, http.StatusBadRequest)
+}
+
+func (s *httpCalendarAPI) httpEventsForWeek(w http.ResponseWriter, r *http.Request) {
+	s.logRequest(r)
+	support.HTTPResponse(w, http.StatusBadRequest)
+}
+
+func (s *httpCalendarAPI) httpEventsForMonth(w http.ResponseWriter, r *http.Request) {
+	s.logRequest(r)
+	support.HTTPResponse(w, http.StatusBadRequest)
 }

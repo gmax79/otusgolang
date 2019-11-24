@@ -10,18 +10,21 @@ type timerimpl struct {
 	id       string
 }
 
-const dateLayout = "2006-01-02 15:04:05.999999999 -0700 MST"
-
 func createTimer(trigger string, timerend chan<- string) (*timerimpl, error) {
 	p := &triggerParser{}
-	if err := p.Parse(trigger, dateLayout); err != nil {
+	if err := p.Parse(trigger); err != nil {
 		return nil, err
 	}
 	timer := &timerimpl{events: createEvents(), timerend: timerend, id: trigger}
+
+	triggerTimer := p.parsed
+	p.NormalizeNow()
+	duration := triggerTimer.Sub(p.parsed)
+
 	//fmt.Println(p.parsed.String())
-	//fmt.Println(time.Now())
-	duration := time.Until(p.parsed)
+	//fmt.Println(triggerTimer.String())
 	//fmt.Println(duration.String())
+
 	go func(t *timerimpl) {
 		timer := time.NewTimer(duration)
 		<-timer.C

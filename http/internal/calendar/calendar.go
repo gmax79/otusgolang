@@ -1,5 +1,10 @@
 package calendar
 
+import "time"
+
+// DateLayout - calendar format of data/time
+const DateLayout = "2006-01-02 15:04:05"
+
 // Event - interface for invoke event
 type Event interface {
 	Invoke()
@@ -26,4 +31,11 @@ type Calendar interface {
 // Create - create calendar instance
 func Create() Calendar {
 	return createCalendar()
+}
+
+// DurationToTimeString - get time parameter, now + duration
+func DurationToTimeString(d time.Duration) string {
+	t := time.Now().Add(d)
+	s := t.String()
+	return s[:len(DateLayout)]
 }

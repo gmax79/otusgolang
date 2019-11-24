@@ -14,8 +14,9 @@ func HTTPResponse(w http.ResponseWriter, v interface{}) {
 		w.WriteHeader(v.(int))
 	case error:
 		err := v.(error)
-		text := "{ \"error\" : " + err.Error() + "  }"
-		w.WriteHeader(http.StatusInternalServerError)
+		text := "{ \"error\" : \"" + err.Error() + "\"  }\n"
+		w.WriteHeader(http.StatusBadRequest)
+		w.Header().Add("Content-Type", "application/json")
 		w.Write([]byte(text))
 	default:
 		answer, err := json.Marshal(v)
@@ -49,5 +50,5 @@ func ReadPostRequest(r *http.Request, w http.ResponseWriter) *HTTPPostRequest {
 // Get - simple read post parameter
 func (r *HTTPPostRequest) Get(id string) string {
 	request := r.request
-	return request.Form.Get("id")
+	return request.Form.Get(id)
 }

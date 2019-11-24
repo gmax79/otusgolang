@@ -25,11 +25,6 @@ func (t *testTimerEventTrigger) Start(f func()) {
 	}()
 }
 
-func DurationToTimeString(d time.Duration) string {
-	t := time.Now().Add(d)
-	return t.String()
-}
-
 func TestBaseMethods(t *testing.T) {
 	c := Create()
 	_, err := c.AddTrigger("")
