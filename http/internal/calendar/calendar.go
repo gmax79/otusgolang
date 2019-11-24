@@ -5,14 +5,8 @@ type Event interface {
 	Invoke()
 }
 
-// EventTrigger - interface for objects, implements some event
-// trigger must call handler() when event happends
-type EventTrigger interface {
-	Start(handler func())
-}
-
-// CalendarTrigger - contains all events per EventTrigger
-type CalendarTrigger interface {
+// CalendarEvents - contains all events per trigger
+type CalendarEvents interface {
 	AddEvent(e Event) bool
 	GetEventsCount() int
 	DeleteEvent(index int) bool
@@ -23,18 +17,13 @@ type CalendarTrigger interface {
 
 // Calendar - main object, contains all triggers and objects
 type Calendar interface {
-	AddTrigger(t EventTrigger, ct CalendarTrigger)
-	GetTriggersCount() int
-	DeleteTrigger(index int) bool
-	GetTrigger(index int) CalendarTrigger
+	AddTrigger(trigger string) (CalendarEvents, error)
+	DeleteTrigger(trigger string) bool
+	GetEvents(trigger string) CalendarEvents
+	GetTriggers() []string
 }
 
-// CreateCalendar - create calendar instance
-func CreateCalendar() Calendar {
-	return &calendarImpl{}
-}
-
-// CreateCalendarTrigger - holder of events collection
-func CreateCalendarTrigger() CalendarTrigger {
-	return &triggerImpl{}
+// Create - create calendar instance
+func Create() Calendar {
+	return createCalendar()
 }

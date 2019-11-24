@@ -1,17 +1,16 @@
 package calendar
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
 
 type testEvent struct {
-	value int
-	summ  *int
 }
 
 func (e *testEvent) Invoke() {
-	*e.summ = *e.summ + e.value
+	fmt.Println("Event!!!")
 }
 
 type testTimerEventTrigger struct {
@@ -26,32 +25,39 @@ func (t *testTimerEventTrigger) Start(f func()) {
 	}()
 }
 
+func DurationToTimeString(d time.Duration) string {
+	t := time.Now().Add(d)
+	return t.String()
+}
+
+func TestBaseMethods(t *testing.T) {
+	c := Create()
+	_, err := c.AddTrigger("")
+	if err == nil {
+		t.Error("error not can be nil")
+	}
+	ce := c.GetEvents("")
+	if ce != nil {
+		t.Error("events must be nil")
+	}
+	tr := DurationToTimeString(time.Second * 15)
+	c.AddTrigger(tr)
+	tr2 := DurationToTimeString(time.Second * 25)
+	c.AddTrigger(tr2)
+
+	trs := c.GetTriggers()
+	if len(trs) != 2 {
+		t.Fatalf("Triggers must be 2")
+	}
+}
+
 func TestTimerEvents(t *testing.T) {
-	c := CreateCalendar()
-	trigger := &testTimerEventTrigger{duration: time.Second * 2}
-	ctrigger := CreateCalendarTrigger()
-	result := 0
-	ctrigger.AddEvent(&testEvent{value: 1, summ: &result})
-	ctrigger.AddEvent(&testEvent{value: 2, summ: &result})
-	c.AddTrigger(trigger, ctrigger)
-	time.Sleep(time.Second * 3)
-	if result != 3 {
-		t.Error("Failed TestTimerEvents")
+	c := Create()
+	tr := DurationToTimeString(time.Second * 3)
+	events, err := c.AddTrigger(tr)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if c.GetTriggersCount() != 1 {
-		t.Error("Failed GetTriggersCount")
-	}
-	ct := c.GetTrigger(0)
-	if ct.GetEventsCount() != 2 {
-		t.Error("Failed GetEventsCount")
-	}
-	if ct.DeleteEvent(2) {
-		t.Error("Failed DeleteEvent")
-	}
-	if !ct.DeleteEvent(0) {
-		t.Error("Failed DeleteEvent with correct index")
-	}
-	if ct.GetEventsCount() != 1 {
-		t.Error("Failed GetEventsCount after delete event")
-	}
+	events.AddEvent(&testEvent{})
+	time.Sleep(time.Second * 4)
 }

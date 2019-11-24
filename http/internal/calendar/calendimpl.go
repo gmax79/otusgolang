@@ -1,78 +1,66 @@
 package calendar
 
+import "fmt"
+
 // Calendar implementaion
 type calendarImpl struct {
-	triggers []CalendarTrigger
+	triggers map[string]*timerimpl
+	finished chan string
 }
 
-func (c *calendarImpl) AddTrigger(t EventTrigger, ct CalendarTrigger) {
-	c.triggers = append(c.triggers, ct)
-	t.Start(ct.Invoke)
+func createCalendar() Calendar {
+	newcalendar := &calendarImpl{}
+	newcalendar.triggers = make(map[string]*timerimpl)
+	newcalendar.finished = make(chan string, 1)
+	go func() {
+		for {
+			id := <-newcalendar.finished
+			t, ok := newcalendar.triggers[id]
+			if !ok {
+				fmt.Printf("Error: trigger %s not found\n", id)
+			} else {
+				fmt.Printf("Processed %s trigger\n", id)
+				t.events.Invoke()
+			}
+		}
+	}()
+	return newcalendar
 }
 
-func (c *calendarImpl) GetTriggersCount() int {
-	return len(c.triggers)
-}
-
-func (c *calendarImpl) DeleteTrigger(index int) bool {
-	if index >= 0 && index < len(c.triggers) {
-		c.triggers = append(c.triggers[:index], c.triggers[index+1:]...)
-		return true
+func (c *calendarImpl) AddTrigger(trigger string) (CalendarEvents, error) {
+	timer, ok := c.triggers[trigger]
+	if !ok {
+		newtimer, err := createTimer(trigger, c.finished)
+		if err != nil {
+			return nil, err
+		}
+		c.triggers[trigger] = newtimer
+		return newtimer.events, nil
 	}
-	return false
+	return timer.events, nil
 }
 
-func (c *calendarImpl) GetTrigger(index int) CalendarTrigger {
-	if index >= 0 && index < len(c.triggers) {
-		return c.triggers[index]
+func (c *calendarImpl) GetTriggers() []string {
+	count := len(c.triggers)
+	list := make([]string, count)
+	i := 0
+	for _, t := range c.triggers {
+		list[i] = t.id
+		i++
 	}
-	return nil
+	return list
 }
 
-type triggerImpl struct {
-	events []Event
+func (c *calendarImpl) DeleteTrigger(trigger string) bool {
+	_, ok := c.triggers[trigger]
+	delete(c.triggers, trigger)
+	return ok
 }
 
-func (t *triggerImpl) Invoke() {
-	for _, e := range t.events {
-		e.Invoke()
+func (c *calendarImpl) GetEvents(trigger string) CalendarEvents {
+	e, ok := c.triggers[trigger]
+	if !ok {
+		return nil
 	}
-}
-
-func (t *triggerImpl) AddEvent(e Event) bool {
-	if e == nil {
-		return false
-	}
-	t.events = append(t.events, e)
-	return true
-}
-
-func (t *triggerImpl) GetEventsCount() int {
-	return len(t.events)
-}
-
-func (t *triggerImpl) DeleteEvent(index int) bool {
-	if index >= 0 && index < len(t.events) {
-		t.events = append(t.events[:index], t.events[index+1:]...)
-		return true
-	}
-	return false
-}
-
-func (t *triggerImpl) GetEvent(index int) Event {
-	if index >= 0 && index < len(t.events) {
-		return t.events[index]
-	}
-	return nil
-}
-
-func (t *triggerImpl) ReplaceEvent(index int, e Event) bool {
-	if e == nil {
-		return false
-	}
-	if t.DeleteEvent(index) {
-		t.AddEvent(e)
-		return true
-	}
-	return false
+	return e.events
 }

@@ -59,7 +59,7 @@ func (s *httpCalandarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request
 		_ = id
 
 		t := calendar.CreateCalendarTrigger()
-		t.AddTrigger
+		//t.AddTrigger
 	}
 }
 
