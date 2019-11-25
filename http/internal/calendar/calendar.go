@@ -13,8 +13,8 @@ type Event interface {
 	Invoke()
 }
 
-// CalendarEvents - contains all events per trigger
-type CalendarEvents interface {
+// Events - contains all events per trigger
+type Events interface {
 	AddEvent(e Event) bool
 	GetEventsCount() int
 	DeleteEvent(index int) bool
@@ -25,9 +25,9 @@ type CalendarEvents interface {
 
 // Calendar - main object, contains all triggers and objects
 type Calendar interface {
-	AddTrigger(trigger string) (CalendarEvents, error)
+	AddTrigger(trigger string) (Events, error)
 	DeleteTrigger(trigger string) bool
-	GetEvents(trigger string) CalendarEvents
+	GetEvents(trigger string) Events
 	GetTriggers() []string
 }
 

@@ -94,6 +94,11 @@ func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request
 	s.logRequest(r)
 	if pr := support.ReadPostRequest(r, w); pr != nil {
 		time := pr.Get("time")
+		event := pr.Get("event")
+		if time == "" || event == "" {
+			support.HTTPResponse(w, http.StatusBadRequest)
+			return
+		}
 		if !s.calen.DeleteTrigger(time) {
 			support.HTTPResponse(w, fmt.Errorf("event not found"))
 			return

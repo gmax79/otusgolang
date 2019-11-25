@@ -12,10 +12,10 @@ func createCalendar() Calendar {
 	newcalendar := &calendarImpl{}
 	newcalendar.triggers = make(map[string]*timerimpl)
 	newcalendar.finished = make(chan string, 1)
-	go func() {
+	go func(c *calendarImpl) {
 		for {
-			id := <-newcalendar.finished
-			t, ok := newcalendar.triggers[id]
+			id := <-c.finished
+			t, ok := c.triggers[id]
 			if !ok {
 				fmt.Printf("Error: trigger %s not found\n", id)
 			} else {
@@ -23,11 +23,11 @@ func createCalendar() Calendar {
 				t.events.Invoke()
 			}
 		}
-	}()
+	}(newcalendar)
 	return newcalendar
 }
 
-func (c *calendarImpl) AddTrigger(trigger string) (CalendarEvents, error) {
+func (c *calendarImpl) AddTrigger(trigger string) (Events, error) {
 	timer, ok := c.triggers[trigger]
 	if !ok {
 		newtimer, err := createTimer(trigger, c.finished)
@@ -57,7 +57,7 @@ func (c *calendarImpl) DeleteTrigger(trigger string) bool {
 	return ok
 }
 
-func (c *calendarImpl) GetEvents(trigger string) CalendarEvents {
+func (c *calendarImpl) GetEvents(trigger string) Events {
 	e, ok := c.triggers[trigger]
 	if !ok {
 		return nil

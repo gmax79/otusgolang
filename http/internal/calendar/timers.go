@@ -1,11 +1,12 @@
 package calendar
 
 import (
+	"fmt"
 	"time"
 )
 
 type timerimpl struct {
-	events   CalendarEvents
+	events   Events
 	timerend chan<- string
 	id       string
 }
@@ -19,11 +20,14 @@ func createTimer(trigger string, timerend chan<- string) (*timerimpl, error) {
 
 	triggerTimer := p.parsed
 	p.SetNormalizedNow()
-	duration := triggerTimer.Sub(p.parsed)
+	if triggerTimer.Before(p.parsed) {
+		return nil, fmt.Errorf("Cant set, time from past")
+	}
 
+	duration := triggerTimer.Sub(p.parsed)
+	fmt.Println("Added trigger with duration:", duration.String())
 	//fmt.Println(p.parsed.String())
 	//fmt.Println(triggerTimer.String())
-	//fmt.Println(duration.String())
 
 	go func(t *timerimpl, d time.Duration) {
 		timer := time.NewTimer(d)
