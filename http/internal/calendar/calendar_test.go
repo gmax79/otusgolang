@@ -25,6 +25,10 @@ func (t *testTimerEventTrigger) Start(f func()) {
 	}()
 }
 
+func TestTimeParser(t *testing.T) {
+
+}
+
 func TestBaseMethods(t *testing.T) {
 	c := Create()
 	_, err := c.AddTrigger("")

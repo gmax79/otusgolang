@@ -24,8 +24,8 @@ func createServer(host string, zaplog *zap.Logger) *httpCalendarAPI {
 	mux.HandleFunc("/", s.httpRoot)
 	mux.HandleFunc("/create_event", s.httpCreateEvent)
 	mux.HandleFunc("/delete_event", s.httpDeleteEvent)
-	mux.HandleFunc("/update_event", s.httpUpdateEvent)
-	mux.HandleFunc("/events_for_day", s.httpUpdateEvent)
+	//mux.HandleFunc("/update_event", s.httpUpdateEvent)
+	mux.HandleFunc("/events_for_day", s.httpEventsForDay)
 	mux.HandleFunc("/events_for_week", s.httpEventsForWeek)
 	mux.HandleFunc("/events_for_month", s.httpEventsForMonth)
 	s.server = &http.Server{Addr: host, Handler: mux}
@@ -68,7 +68,7 @@ func (d *dummyEvent) Invoke() {
 
 func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request) {
 	s.logRequest(r)
-	if pr := support.ReadPostRequest(r, w); r != nil {
+	if pr := support.ReadPostRequest(r, w); pr != nil {
 		time := pr.Get("time")
 		event := pr.Get("event")
 		if time == "" || event == "" {
@@ -92,7 +92,21 @@ func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request
 
 func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request) {
 	s.logRequest(r)
-	if pr := support.ReadPostRequest(r, w); r != nil {
+	if pr := support.ReadPostRequest(r, w); pr != nil {
+		time := pr.Get("time")
+		if !s.calen.DeleteTrigger(time) {
+			support.HTTPResponse(w, fmt.Errorf("event not found"))
+			return
+		}
+		support.HTTPResponse(w, http.StatusOK)
+		return
+	}
+	support.HTTPResponse(w, http.StatusBadRequest)
+}
+
+/*func (s *httpCalendarAPI) httpUpdateEvent(w http.ResponseWriter, r *http.Request) {
+	s.logRequest(r)
+	if pr := support.ReadPostRequest(r, w); pr != nil {
 		time := pr.Get("time")
 		events, err := s.calen.AddTrigger(time)
 		if err != nil {
@@ -105,21 +119,7 @@ func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request
 		}
 	}
 	support.HTTPResponse(w, http.StatusBadRequest)
-}
-
-func (s *httpCalendarAPI) httpUpdateEvent(w http.ResponseWriter, r *http.Request) {
-	s.logRequest(r)
-	if pr := support.ReadPostRequest(r, w); r != nil {
-		time := pr.Get("time")
-		if !s.calen.DeleteTrigger(time) {
-			support.HTTPResponse(w, fmt.Errorf("event not found"))
-			return
-		}
-		support.HTTPResponse(w, http.StatusOK)
-		return
-	}
-	support.HTTPResponse(w, http.StatusBadRequest)
-}
+}*/
 
 func (s *httpCalendarAPI) httpEventsForDay(w http.ResponseWriter, r *http.Request) {
 	s.logRequest(r)
