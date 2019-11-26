@@ -52,8 +52,11 @@ func (c *calendarImpl) GetTriggers() []string {
 }
 
 func (c *calendarImpl) DeleteTrigger(trigger string) bool {
-	_, ok := c.triggers[trigger]
-	delete(c.triggers, trigger)
+	t, ok := c.triggers[trigger]
+	if ok {
+		t.Stop()
+		delete(c.triggers, trigger)
+	}
 	return ok
 }
 

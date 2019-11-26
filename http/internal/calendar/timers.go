@@ -8,7 +8,12 @@ import (
 type timerimpl struct {
 	events   Events
 	timerend chan<- string
+	stop     chan struct{}
 	id       string
+}
+
+func (t *timerimpl) Stop() {
+	close(t.stop)
 }
 
 func createTimer(trigger string, timerend chan<- string) (*timerimpl, error) {
@@ -16,7 +21,8 @@ func createTimer(trigger string, timerend chan<- string) (*timerimpl, error) {
 	if err := p.Parse(trigger); err != nil {
 		return nil, err
 	}
-	timer := &timerimpl{events: createEvents(), timerend: timerend, id: trigger}
+	stopch := make(chan struct{})
+	timer := &timerimpl{events: createEvents(), timerend: timerend, stop: stopch, id: trigger}
 
 	triggerTimer := p.parsed
 	p.SetNormalizedNow()
@@ -29,10 +35,13 @@ func createTimer(trigger string, timerend chan<- string) (*timerimpl, error) {
 	//fmt.Println(p.parsed.String())
 	//fmt.Println(triggerTimer.String())
 
-	go func(t *timerimpl, d time.Duration) {
+	go func(t *timerimpl, d time.Duration, stop <-chan struct{}) {
 		timer := time.NewTimer(d)
-		<-timer.C
-		t.timerend <- t.id
-	}(timer, duration)
+		select {
+		case <-timer.C:
+			t.timerend <- t.id
+		case <-stop:
+		}
+	}(timer, duration, stopch)
 	return timer, nil
 }

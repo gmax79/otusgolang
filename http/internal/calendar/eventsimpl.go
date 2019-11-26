@@ -5,7 +5,7 @@ type eventsimpl struct {
 	events []Event
 }
 
-func createEvents() CalendarEvents {
+func createEvents() Events {
 	return &eventsimpl{}
 }
 
