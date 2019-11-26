@@ -84,6 +84,8 @@ func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
+		tm, _ := s.calen.GetTriggerAlert(time)
+		s.logger.Info("new", zap.String("time", tm.String()), zap.String("event", event))
 		support.HTTPResponse(w, http.StatusOK)
 		return
 	}
@@ -103,17 +105,22 @@ func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, fmt.Errorf("event not found"))
 			return
 		}
+		s.logger.Info("delete", zap.String("time", time))
 		support.HTTPResponse(w, http.StatusOK)
 		return
 	}
 	support.HTTPResponse(w, http.StatusBadRequest)
 }
 
-/*func (s *httpCalendarAPI) httpUpdateEvent(w http.ResponseWriter, r *http.Request) {
+func (s *httpCalendarAPI) httpUpdateEvent(w http.ResponseWriter, r *http.Request) {
 	s.logRequest(r)
 	if pr := support.ReadPostRequest(r, w); pr != nil {
-		time := pr.Get("time")
-		events, err := s.calen.AddTrigger(time)
+
+		//time := pr.Get("time")
+		//event := pr.Get("event")
+		//newtime := pr.Get("newtime")
+
+		/*events, err := s.calen.AddTrigger(time)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
@@ -121,10 +128,10 @@ func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request
 		if !events.AddEvent(&dummyEvent{}) {
 			support.HTTPResponse(w, http.StatusInternalServerError)
 			return
-		}
+		}*/
 	}
 	support.HTTPResponse(w, http.StatusBadRequest)
-}*/
+}
 
 func (s *httpCalendarAPI) httpEventsForDay(w http.ResponseWriter, r *http.Request) {
 	s.logRequest(r)

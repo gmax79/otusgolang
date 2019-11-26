@@ -1,6 +1,5 @@
 package calendar
 
-// implements CalandarEvents
 type eventsimpl struct {
 	events []Event
 }

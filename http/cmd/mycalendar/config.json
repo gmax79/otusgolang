@@ -2,6 +2,6 @@
     "log_file" : "/tmp/mycalendar",
     "log_level": "info",
     "log_encoding": "console",
-    "debug": 0,
+    "log_debug": 0,
     "host": "localhost:8080"
 }

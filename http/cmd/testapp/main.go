@@ -9,7 +9,7 @@ import (
 
 const host = "http://localhost:8080"
 
-func post(path string, params map[string]string) {
+func post(path string, params map[string]string, requiredCode int) {
 	all := []string{}
 	values := url.Values{}
 	for k, v := range params {
@@ -30,7 +30,12 @@ func post(path string, params map[string]string) {
 	} else {
 		println("Return Code:", resp.Status)
 		println("Content-Length:", resp.ContentLength)
-		println("Data:", string(data))
+		if resp.ContentLength > 0 {
+			println("Content:", string(data))
+		}
+		if requiredCode != resp.StatusCode {
+			println("ERROR. Code must ", requiredCode)
+		}
 	}
 }
 
@@ -38,8 +43,14 @@ func main() {
 	println("Testing calendar app")
 
 	r1 := map[string]string{
-		"time":  "2020.10.22 18:00:00",
-		"event": "M birthday",
+		"time":  "2020-10-22 18:00:00",
+		"event": "Maks birthday",
 	}
-	post("create_event", r1)
+	post("create_event", r1, http.StatusOK)
+
+	r2 := map[string]string{
+		"time":  "2020-10-22 18:00:00",
+		"event": "Maks birthday",
+	}
+	post("delete_event", r2, http.StatusOK)
 }

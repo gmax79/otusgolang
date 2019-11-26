@@ -1,6 +1,9 @@
 package calendar
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // Calendar implementaion
 type calendarImpl struct {
@@ -40,6 +43,11 @@ func (c *calendarImpl) AddTrigger(trigger string) (Events, error) {
 	return timer.events, nil
 }
 
+func (c *calendarImpl) MoveTrigger(event Event, trigger string) error {
+
+	return nil
+}
+
 func (c *calendarImpl) GetTriggers() []string {
 	count := len(c.triggers)
 	list := make([]string, count)
@@ -66,4 +74,12 @@ func (c *calendarImpl) GetEvents(trigger string) Events {
 		return nil
 	}
 	return e.events
+}
+
+func (c *calendarImpl) GetTriggerAlert(trigger string) (t time.Time, ok bool) {
+	e, ok := c.triggers[trigger]
+	if !ok {
+		return
+	}
+	return e.alert, true
 }

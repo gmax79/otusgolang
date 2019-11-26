@@ -22,11 +22,13 @@ func CreateLogger(jsondata []byte) (*zap.Logger, error) {
 	if err != nil {
 		return nil, err
 	}
-	zapconfig := zap.NewProductionConfig()
+	zapconfig := zap.NewDevelopmentConfig()
 	zapconfig.DisableStacktrace = true
+	zapconfig.DisableCaller = true
 	if c.Debugmode != 0 {
 		zapconfig.Development = true
 		zapconfig.DisableStacktrace = false
+		zapconfig.DisableCaller = false
 	}
 	if c.LogEncoding == "console" || c.LogEncoding == "json" {
 		zapconfig.Encoding = c.LogEncoding

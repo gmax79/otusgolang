@@ -5,9 +5,6 @@ import "time"
 // DateLayout - calendar format of data with time
 const DateLayout = "2006-01-02 15:04:05"
 
-// TimeLayout - calendar format of time
-const TimeLayout = "15:04:05"
-
 // Event - interface for invoke event
 type Event interface {
 	Invoke()
@@ -27,8 +24,10 @@ type Events interface {
 type Calendar interface {
 	AddTrigger(trigger string) (Events, error)
 	DeleteTrigger(trigger string) bool
+	MoveTrigger(event Event, trigger string) error
 	GetEvents(trigger string) Events
 	GetTriggers() []string
+	GetTriggerAlert(trigger string) (time.Time, bool)
 }
 
 // Create - create calendar instance
