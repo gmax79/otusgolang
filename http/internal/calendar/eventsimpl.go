@@ -41,13 +41,11 @@ func (t *eventsimpl) GetEvent(index int) Event {
 	return nil
 }
 
-func (t *eventsimpl) ReplaceEvent(index int, e Event) bool {
-	if e == nil {
-		return false
+func (t *eventsimpl) FindEvent(name string) int {
+	for i, e := range t.events {
+		if e.GetName() == name {
+			return i
+		}
 	}
-	if t.DeleteEvent(index) {
-		t.AddEvent(e)
-		return true
-	}
-	return false
+	return -1
 }

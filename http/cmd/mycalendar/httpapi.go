@@ -24,7 +24,7 @@ func createServer(host string, zaplog *zap.Logger) *httpCalendarAPI {
 	mux.HandleFunc("/", s.httpRoot)
 	mux.HandleFunc("/create_event", s.httpCreateEvent)
 	mux.HandleFunc("/delete_event", s.httpDeleteEvent)
-	//mux.HandleFunc("/update_event", s.httpUpdateEvent)
+	mux.HandleFunc("/move_event", s.httpMoveEvent)
 	mux.HandleFunc("/events_for_day", s.httpEventsForDay)
 	mux.HandleFunc("/events_for_week", s.httpEventsForWeek)
 	mux.HandleFunc("/events_for_month", s.httpEventsForMonth)
@@ -62,8 +62,12 @@ type dummyEvent struct {
 	event string
 }
 
+func (d *dummyEvent) GetName() string {
+	return d.event
+}
+
 func (d *dummyEvent) Invoke() {
-	fmt.Println("Event !!!")
+	fmt.Println("Event", d.event, "!!!")
 }
 
 func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request) {
@@ -101,34 +105,50 @@ func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
-		if !s.calen.DeleteTrigger(time) {
-			support.HTTPResponse(w, fmt.Errorf("event not found"))
+		events := s.calen.GetEvents(time)
+		if events == nil {
+			support.HTTPResponse(w, fmt.Errorf("trigger %s not found", time))
 			return
 		}
-		s.logger.Info("delete", zap.String("time", time))
+		index := events.FindEvent(event)
+		if index == -1 {
+			support.HTTPResponse(w, fmt.Errorf("event %s in trigger %s not found", event, time))
+			return
+		}
+		events.DeleteEvent(index)
+		s.logger.Info("delete", zap.String("time", time), zap.String("event", event))
 		support.HTTPResponse(w, http.StatusOK)
 		return
 	}
 	support.HTTPResponse(w, http.StatusBadRequest)
 }
 
-func (s *httpCalendarAPI) httpUpdateEvent(w http.ResponseWriter, r *http.Request) {
+func (s *httpCalendarAPI) httpMoveEvent(w http.ResponseWriter, r *http.Request) {
 	s.logRequest(r)
 	if pr := support.ReadPostRequest(r, w); pr != nil {
-
-		//time := pr.Get("time")
-		//event := pr.Get("event")
-		//newtime := pr.Get("newtime")
-
-		/*events, err := s.calen.AddTrigger(time)
+		time := pr.Get("time")
+		event := pr.Get("event")
+		newtime := pr.Get("newtime")
+		events := s.calen.GetEvents(time)
+		if events == nil {
+			support.HTTPResponse(w, fmt.Errorf("trigger %s not found", time))
+			return
+		}
+		index := events.FindEvent(event)
+		if index == -1 {
+			support.HTTPResponse(w, fmt.Errorf("event %s in trigger %s not found", event, time))
+			return
+		}
+		newevents, err := s.calen.AddTrigger(newtime)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
 		}
-		if !events.AddEvent(&dummyEvent{}) {
-			support.HTTPResponse(w, http.StatusInternalServerError)
-			return
-		}*/
+		foundevent := events.GetEvent(index)
+		events.DeleteEvent(index)
+		newevents.AddEvent(foundevent)
+		support.HTTPResponse(w, http.StatusOK)
+		return
 	}
 	support.HTTPResponse(w, http.StatusBadRequest)
 }

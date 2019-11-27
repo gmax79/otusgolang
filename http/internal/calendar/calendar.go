@@ -8,6 +8,7 @@ const DateLayout = "2006-01-02 15:04:05"
 // Event - interface for invoke event
 type Event interface {
 	Invoke()
+	GetName() string
 }
 
 // Events - contains all events per trigger
@@ -16,7 +17,7 @@ type Events interface {
 	GetEventsCount() int
 	DeleteEvent(index int) bool
 	GetEvent(index int) Event
-	ReplaceEvent(index int, e Event) bool
+	FindEvent(name string) int
 	Invoke()
 }
 
@@ -24,7 +25,6 @@ type Events interface {
 type Calendar interface {
 	AddTrigger(trigger string) (Events, error)
 	DeleteTrigger(trigger string) bool
-	MoveTrigger(event Event, trigger string) error
 	GetEvents(trigger string) Events
 	GetTriggers() []string
 	GetTriggerAlert(trigger string) (time.Time, bool)
