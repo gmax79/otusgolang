@@ -22,7 +22,7 @@ func (t *timerimpl) String() string {
 }
 
 func createTimer(trigger string, timerend chan<- string) (*timerimpl, error) {
-	p := timeTriggerParser{}
+	p := timeParser{}
 	if err := p.Parse(trigger); err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func createTimer(trigger string, timerend chan<- string) (*timerimpl, error) {
 	}
 
 	go func(t *timerimpl) {
-		p := timeTriggerParser{}
+		p := timeParser{}
 		p.SetNormalizedNow()
 		duration := t.alert.Sub(p.parsed)
 		timer := time.NewTimer(duration)
