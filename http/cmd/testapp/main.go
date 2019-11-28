@@ -83,6 +83,8 @@ func main() {
 	}
 	post("move_event", r3move, http.StatusOK)
 
-	get("events_for_day?time='2020-01-07'", http.StatusOK)
+	get("events_for_day?day='2020-01-07'", http.StatusOK)
+	get("events_for_day?month='2020-01'", http.StatusOK)
+	get("events_for_day?week='2020'", http.StatusOK)
 
 }

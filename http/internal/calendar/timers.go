@@ -6,11 +6,11 @@ import (
 )
 
 type timerimpl struct {
-	events   Events
-	timerend chan<- string
-	stop     chan struct{}
-	id       string
-	alert    time.Time
+	events    Events
+	timerend  chan<- string
+	stop      chan struct{}
+	id        string
+	alerttime time.Time
 }
 
 func (t *timerimpl) Stop() {
@@ -18,7 +18,7 @@ func (t *timerimpl) Stop() {
 }
 
 func (t *timerimpl) String() string {
-	return t.alert.String()
+	return t.alerttime.String()
 }
 
 func createTimer(trigger string, timerend chan<- string) (*timerimpl, error) {
@@ -27,15 +27,15 @@ func createTimer(trigger string, timerend chan<- string) (*timerimpl, error) {
 		return nil, err
 	}
 	stopch := make(chan struct{})
-	timer := &timerimpl{events: createEvents(), timerend: timerend, stop: stopch, id: trigger, alert: p.Value()}
+	timer := &timerimpl{events: createEvents(), timerend: timerend, stop: stopch, id: trigger, alerttime: p.Value()}
 
-	if timer.alert.Before(p.SetNow()) {
+	if timer.alerttime.Before(p.SetNow()) {
 		return nil, fmt.Errorf("Cant set, time from past")
 	}
 
 	go func(t *timerimpl) {
 		var p Date
-		duration := t.alert.Sub(p.SetNow())
+		duration := t.alerttime.Sub(p.SetNow())
 		timer := time.NewTimer(duration)
 		select {
 		case <-timer.C:

@@ -21,6 +21,14 @@ type Events interface {
 	Invoke()
 }
 
+// SearchParameters - custom filters to search events
+type SearchParameters struct {
+	year  int
+	month int
+	week  int
+	day   int
+}
+
 // Calendar - main object, contains all triggers and objects
 type Calendar interface {
 	AddTrigger(trigger string) (Events, error)
@@ -28,7 +36,7 @@ type Calendar interface {
 	GetEvents(trigger string) Events
 	GetTriggers() []string
 	GetTriggerAlert(trigger string) (time.Time, bool)
-	CalculateEvents(date string) (int, error)
+	FindEvents(parameters SearchParameters) ([]Event, error)
 }
 
 // Create - create calendar instance

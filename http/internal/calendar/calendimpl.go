@@ -76,9 +76,24 @@ func (c *calendarImpl) GetTriggerAlert(trigger string) (t time.Time, ok bool) {
 	if !ok {
 		return
 	}
-	return e.alert, true
+	return e.alerttime, true
 }
 
-func (c *calendarImpl) CalculateEvents(date string) (int, error) {
-	return 0, nil
+func (c *calendarImpl) FindEvents(parameters SearchParameters) ([]Event, error) {
+
+	events := make([]Event, 0, 10)
+	for _, t := range c.triggers {
+		if checkSearchParameters(t.alerttime, parameters) {
+			//todo optimize
+			count := t.events.GetEventsCount()
+			for i := 0; i < count; i++ {
+				events = append(events, t.events.GetEvent(i))
+			}
+		}
+	}
+	return events, nil
+}
+
+func checkSearchParameters(t time.Time, p SearchParameters) bool {
+	return true
 }
