@@ -78,3 +78,7 @@ func (c *calendarImpl) GetTriggerAlert(trigger string) (t time.Time, ok bool) {
 	}
 	return e.alert, true
 }
+
+func (c *calendarImpl) CalculateEvents(date string) (int, error) {
+	return 0, nil
+}

@@ -28,6 +28,7 @@ type Calendar interface {
 	GetEvents(trigger string) Events
 	GetTriggers() []string
 	GetTriggerAlert(trigger string) (time.Time, bool)
+	CalculateEvents(date string) (int, error)
 }
 
 // Create - create calendar instance

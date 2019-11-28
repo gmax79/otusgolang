@@ -10,23 +10,13 @@ import (
 type timeParser struct {
 	year, month, day     int
 	hour, minute, second int
-	parsed               time.Time
 }
-
-var parseTimeTrigger *regexp.Regexp
-var parseSmallTimeTrigger *regexp.Regexp
-var parseDateTrigger *regexp.Regexp
 
 var parseTime *regexp.Regexp
 var parseDate *regexp.Regexp
-
 var days = [12]int{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 
 func init() {
-	parseTimeTrigger = regexp.MustCompile("^ *([0-9]{2}:[0-9]{2}:[0-9]{2})")
-	parseSmallTimeTrigger = regexp.MustCompile("^ *([0-9]{2}:[0-9]{2})")
-	parseDateTrigger = regexp.MustCompile("^ *([0-9]{4}-[0-9]{2}-[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2})")
-
 	parseTime = regexp.MustCompile("(?:^|\\s)([0-9]{1,2})(:[0-9]{2})?(:[0-9]{2})?(?:$|\\s)")
 	parseDate = regexp.MustCompile("(?:^|\\s)([0-9]{4})(-[0-9]{2})?(-[0-9]{2})?(?:$|\\s)")
 }

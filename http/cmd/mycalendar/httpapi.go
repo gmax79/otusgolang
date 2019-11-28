@@ -129,6 +129,10 @@ func (s *httpCalendarAPI) httpMoveEvent(w http.ResponseWriter, r *http.Request) 
 		time := pr.Get("time")
 		event := pr.Get("event")
 		newtime := pr.Get("newtime")
+		if time == "" || event == "" || newtime == "" {
+			support.HTTPResponse(w, http.StatusBadRequest)
+			return
+		}
 		events := s.calen.GetEvents(time)
 		if events == nil {
 			support.HTTPResponse(w, fmt.Errorf("trigger %s not found", time))
@@ -155,6 +159,15 @@ func (s *httpCalendarAPI) httpMoveEvent(w http.ResponseWriter, r *http.Request) 
 
 func (s *httpCalendarAPI) httpEventsForDay(w http.ResponseWriter, r *http.Request) {
 	s.logRequest(r)
+	if pr := support.ReadGetRequest(r, w); pr != nil {
+		time := pr.Get("day")
+		if time == "" {
+			support.HTTPResponse(w, http.StatusBadRequest)
+			return
+		}
+
+		//count := s.calen.CalculateEvents(0)
+	}
 	support.HTTPResponse(w, http.StatusBadRequest)
 }
 

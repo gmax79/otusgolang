@@ -34,7 +34,7 @@ type HTTPPostRequest struct {
 	request *http.Request
 }
 
-// ReadPostRequest - check what is post, and parameters parsed
+// ReadPostRequest - check what is post, and parse parameters
 func ReadPostRequest(r *http.Request, w http.ResponseWriter) *HTTPPostRequest {
 	if r.Method != http.MethodPost {
 		HTTPResponse(w, http.StatusInternalServerError)
@@ -51,4 +51,28 @@ func ReadPostRequest(r *http.Request, w http.ResponseWriter) *HTTPPostRequest {
 func (r *HTTPPostRequest) Get(id string) string {
 	request := r.request
 	return request.Form.Get(id)
+}
+
+// HTTPGetRequest - get method reader
+type HTTPGetRequest struct {
+	request *http.Request
+}
+
+// ReadGetRequest - check what is get
+func ReadGetRequest(r *http.Request, w http.ResponseWriter) *HTTPGetRequest {
+	if r.Method != http.MethodGet {
+		HTTPResponse(w, http.StatusInternalServerError)
+		return nil
+	}
+	return &HTTPGetRequest{request: r}
+}
+
+// Get - reader get query parameter
+func (r *HTTPGetRequest) Get(id string) string {
+	p := r.request.URL.Query()
+	values := p[id]
+	if len(values) == 0 {
+		return ""
+	}
+	return values[0]
 }
