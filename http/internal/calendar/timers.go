@@ -22,20 +22,20 @@ func (t *timerimpl) String() string {
 }
 
 func createTimer(trigger string, timerend chan<- string) (*timerimpl, error) {
-	p := timeParser{}
-	if err := p.Parse(trigger); err != nil {
+	var p Date
+	if err := p.ParseDate(trigger); err != nil {
 		return nil, err
 	}
 	stopch := make(chan struct{})
 	timer := &timerimpl{events: createEvents(), timerend: timerend, stop: stopch, id: trigger, alert: p.Value()}
 
-	if timer.alert.Before(p.Now()) {
+	if timer.alert.Before(p.SetNow()) {
 		return nil, fmt.Errorf("Cant set, time from past")
 	}
 
 	go func(t *timerimpl) {
-		p := timeParser{}
-		duration := t.alert.Sub(p.Now())
+		var p Date
+		duration := t.alert.Sub(p.SetNow())
 		timer := time.NewTimer(duration)
 		select {
 		case <-timer.C:

@@ -7,9 +7,10 @@ import (
 	"time"
 )
 
-type timeParser struct {
-	year, month, day     int
-	hour, minute, second int
+// Date - calendar date with time
+type Date struct {
+	Year, Month, Day     int
+	Hour, Minute, Second int
 }
 
 var parseTime *regexp.Regexp
@@ -21,8 +22,9 @@ func init() {
 	parseDate = regexp.MustCompile("(?:^|\\s)([0-9]{4})(-[0-9]{2})?(-[0-9]{2})?(?:$|\\s)")
 }
 
-func (tp *timeParser) Parse(timeTrigger string) error {
-	if timeTrigger == "" {
+// ParseDate - parse string for date and time
+func (tp *Date) ParseDate(dateString string) error {
+	if dateString == "" {
 		return fmt.Errorf("Time or date doesn't declared")
 	}
 	atoi := func(s string, skip0 bool) int {
@@ -37,51 +39,57 @@ func (tp *timeParser) Parse(timeTrigger string) error {
 		return i
 	}
 
-	p := parseTime.FindStringSubmatch(timeTrigger)
-	d := parseDate.FindStringSubmatch(timeTrigger)
+	p := parseTime.FindStringSubmatch(dateString)
+	d := parseDate.FindStringSubmatch(dateString)
 	if p == nil && d == nil {
 		return fmt.Errorf("Time and date in invalid format")
 	}
 
 	if p != nil {
-		tp.hour = atoi(p[1], false)
-		tp.minute = atoi(p[2], true)
-		tp.second = atoi(p[3], true)
-		if tp.hour < 0 || tp.hour > 23 || tp.minute < 0 || tp.minute > 59 || tp.second < 0 || tp.second > 59 {
-			return fmt.Errorf("Time with invalid value")
-		}
+		tp.Hour = atoi(p[1], false)
+		tp.Minute = atoi(p[2], true)
+		tp.Second = atoi(p[3], true)
 	}
 	if d != nil {
-		tp.year = atoi(d[1], false)
-		tp.month = atoi(d[2], true)
-		tp.day = atoi(d[3], true)
-		if tp.year < 0 || tp.month < 1 || tp.month > 12 || tp.day < 1 {
-			return fmt.Errorf("Date with invalid value")
-		}
-		d := days[tp.month]
-		if (tp.year % 4) == 0 {
-			d++
-		}
-		if tp.day > d {
-			return fmt.Errorf("Date with invalid value")
-		}
+		tp.Year = atoi(d[1], false)
+		tp.Month = atoi(d[2], true)
+		tp.Day = atoi(d[3], true)
 	}
 	return nil
 }
 
-func (tp *timeParser) Value() time.Time {
-	month := time.Month(tp.month)
-	return time.Date(tp.year, month, tp.day, tp.hour, tp.minute, tp.second, 0, time.UTC)
+// Valid - validate date
+func (tp *Date) Valid() error {
+	if tp.Hour < 0 || tp.Hour > 23 || tp.Minute < 0 || tp.Minute > 59 || tp.Second < 0 || tp.Second > 59 {
+		return fmt.Errorf("Time with invalid value")
+	}
+	if tp.Year < 0 || tp.Month < 1 || tp.Month > 12 || tp.Day < 1 {
+		return fmt.Errorf("Date with invalid value")
+	}
+	d := days[tp.Month-1]
+	if (tp.Year%4) == 0 && tp.Month == 2 {
+		d++
+	}
+	if tp.Day > d {
+		return fmt.Errorf("Date with invalid value")
+	}
+	return nil
 }
 
-func (tp *timeParser) Now() time.Time {
-	p := timeParser{}
+// Value - return time.Time
+func (tp *Date) Value() time.Time {
+	month := time.Month(tp.Month)
+	return time.Date(tp.Year, month, tp.Day, tp.Hour, tp.Minute, tp.Second, 0, time.UTC)
+}
+
+// SetNow - set and return Now time
+func (tp *Date) SetNow() time.Time {
 	t := time.Now()
-	p.hour = t.Hour()
-	p.minute = t.Minute()
-	p.second = t.Second()
-	p.year = t.Year()
-	p.month = int(t.Month())
-	p.day = t.Day()
-	return p.Value()
+	tp.Hour = t.Hour()
+	tp.Minute = t.Minute()
+	tp.Second = t.Second()
+	tp.Year = t.Year()
+	tp.Month = int(t.Month())
+	tp.Day = t.Day()
+	return tp.Value()
 }
