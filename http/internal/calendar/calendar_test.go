@@ -13,6 +13,10 @@ func (e *testEvent) Invoke() {
 	fmt.Println("Event!!!")
 }
 
+func (e *testEvent) GetName() string {
+	return ""
+}
+
 type testTimerEventTrigger struct {
 	duration time.Duration
 }
@@ -26,19 +30,17 @@ func (t *testTimerEventTrigger) Start(f func()) {
 }
 
 func TestTimeParser(t *testing.T) {
-	p := timeTriggerParser{}
+	p := timeParser{}
 	if p.Parse("10:20:30") != nil {
 		t.Fatal("Error at correct time")
 	}
-	pt := p.parsed
-	if pt.Hour() != 10 || pt.Minute() != 20 || pt.Second() != 30 {
+	if p.hour != 10 || p.minute != 20 || p.second != 30 {
 		t.Fatal("Invalid parsed time")
 	}
 	if p.Parse("20:40") != nil {
 		t.Fatal("Error at correct time 2")
 	}
-	pt = p.parsed
-	if pt.Hour() != 20 || pt.Minute() != 40 || pt.Second() != 0 {
+	if p.hour != 20 || p.minute != 40 || p.second != 0 {
 		t.Fatal("Invalid parsed time 2")
 	}
 }

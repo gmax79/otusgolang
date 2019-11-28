@@ -27,17 +27,15 @@ func createTimer(trigger string, timerend chan<- string) (*timerimpl, error) {
 		return nil, err
 	}
 	stopch := make(chan struct{})
-	timer := &timerimpl{events: createEvents(), timerend: timerend, stop: stopch, id: trigger, alert: p.parsed}
+	timer := &timerimpl{events: createEvents(), timerend: timerend, stop: stopch, id: trigger, alert: p.Value()}
 
-	p.SetNormalizedNow()
-	if timer.alert.Before(p.parsed) {
+	if timer.alert.Before(p.Now()) {
 		return nil, fmt.Errorf("Cant set, time from past")
 	}
 
 	go func(t *timerimpl) {
 		p := timeParser{}
-		p.SetNormalizedNow()
-		duration := t.alert.Sub(p.parsed)
+		duration := t.alert.Sub(p.Now())
 		timer := time.NewTimer(duration)
 		select {
 		case <-timer.C:

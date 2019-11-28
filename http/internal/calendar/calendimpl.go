@@ -43,11 +43,6 @@ func (c *calendarImpl) AddTrigger(trigger string) (Events, error) {
 	return timer.events, nil
 }
 
-func (c *calendarImpl) MoveTrigger(event Event, trigger string) error {
-
-	return nil
-}
-
 func (c *calendarImpl) GetTriggers() []string {
 	count := len(c.triggers)
 	list := make([]string, count)

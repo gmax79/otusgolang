@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -21,6 +20,8 @@ var parseDateTrigger *regexp.Regexp
 var parseTime *regexp.Regexp
 var parseDate *regexp.Regexp
 
+var days = [12]int{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+
 func init() {
 	parseTimeTrigger = regexp.MustCompile("^ *([0-9]{2}:[0-9]{2}:[0-9]{2})")
 	parseSmallTimeTrigger = regexp.MustCompile("^ *([0-9]{2}:[0-9]{2})")
@@ -35,6 +36,9 @@ func (tp *timeParser) Parse(timeTrigger string) error {
 		return fmt.Errorf("Time or date doesn't declared")
 	}
 	atoi := func(s string, skip0 bool) int {
+		if s == "" {
+			return 0
+		}
 		from := 1
 		if !skip0 {
 			from = 0
@@ -50,78 +54,44 @@ func (tp *timeParser) Parse(timeTrigger string) error {
 	}
 
 	if p != nil {
-		count := len(p) - 1 // skip index 0
 		tp.hour = atoi(p[1], false)
-		if count > 1 {
-			tp.minute = atoi(p[2], true)
-		}
-		if count == 3 {
-			tp.second = atoi(p[3], true)
+		tp.minute = atoi(p[2], true)
+		tp.second = atoi(p[3], true)
+		if tp.hour < 0 || tp.hour > 23 || tp.minute < 0 || tp.minute > 59 || tp.second < 0 || tp.second > 59 {
+			return fmt.Errorf("Time with invalid value")
 		}
 	}
-
 	if d != nil {
-		count := len(d) - 1 // skip index 0
 		tp.year = atoi(d[1], false)
-		if count > 1 {
-			tp.month = atoi(p[2], true)
+		tp.month = atoi(d[2], true)
+		tp.day = atoi(d[3], true)
+		if tp.year < 0 || tp.month < 1 || tp.month > 12 || tp.day < 1 {
+			return fmt.Errorf("Date with invalid value")
 		}
-		if count == 3 {
-			tp.day = atoi(p[3], true)
+		d := days[tp.month]
+		if (tp.year % 4) == 0 {
+			d++
 		}
-	}
-
-	// variant date with time
-	parts := parseDateTrigger.FindStringSubmatch(timeTrigger)
-	if parts != nil {
-		var err error
-		tp.parsed, err = time.Parse(DateLayout, parts[0])
-		return err
-	}
-	// variant with time only
-	parts = parseTimeTrigger.FindStringSubmatch(timeTrigger)
-	if parts != nil {
-		clock := strings.Split(parts[1], ":")
-		var err error
-		tp.parsed, err = stringTime(clock)
-		return err
-	}
-	parts = parseSmallTimeTrigger.FindStringSubmatch(timeTrigger)
-	if parts != nil {
-		clock := strings.Split(parts[1], ":")
-		var err error
-		tp.parsed, err = stringTime(clock)
-		return err
-	}
-	return fmt.Errorf("Time is in invalid format")
-}
-
-func stringTime(parts []string) (stime time.Time, err error) {
-	count := len(parts)
-	var hours, minutes, seconds int
-	if hours, err = strconv.Atoi(parts[0]); err != nil {
-		return
-	}
-	if minutes, err = strconv.Atoi(parts[1]); err != nil {
-		return
-	}
-	if count > 2 {
-		if seconds, err = strconv.Atoi(parts[2]); err != nil {
-			return
+		if tp.day > d {
+			return fmt.Errorf("Date with invalid value")
 		}
 	}
-	return makeTime(hours, minutes, seconds), nil
+	return nil
 }
 
-func makeTime(hours, minutes, seconds int) time.Time {
-	now := time.Now()
-	return time.Date(now.Year(), now.Month(), now.Day(), hours, minutes, seconds, 0, time.UTC)
+func (tp *timeParser) Value() time.Time {
+	month := time.Month(tp.month)
+	return time.Date(tp.year, month, tp.day, tp.hour, tp.minute, tp.second, 0, time.UTC)
 }
 
-func (tp *timeParser) Normalize(custom time.Time) {
-	tp.Parse(custom.String())
-}
-
-func (tp *timeParser) SetNormalizedNow() {
-	tp.Normalize(time.Now())
+func (tp *timeParser) Now() time.Time {
+	p := timeParser{}
+	t := time.Now()
+	p.hour = t.Hour()
+	p.minute = t.Minute()
+	p.second = t.Second()
+	p.year = t.Year()
+	p.month = int(t.Month())
+	p.day = t.Day()
+	return p.Value()
 }
