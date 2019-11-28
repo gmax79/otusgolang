@@ -30,17 +30,17 @@ func (t *testTimerEventTrigger) Start(f func()) {
 }
 
 func TestTimeParser(t *testing.T) {
-	p := timeParser{}
-	if p.Parse("10:20:30") != nil {
+	var p Date
+	if p.ParseDate("10:20:30") != nil {
 		t.Fatal("Error at correct time")
 	}
-	if p.hour != 10 || p.minute != 20 || p.second != 30 {
+	if p.Hour != 10 || p.Minute != 20 || p.Second != 30 {
 		t.Fatal("Invalid parsed time")
 	}
-	if p.Parse("20:40") != nil {
+	if p.ParseDate("20:40") != nil {
 		t.Fatal("Error at correct time 2")
 	}
-	if p.hour != 20 || p.minute != 40 || p.second != 0 {
+	if p.Hour != 20 || p.Minute != 40 || p.Second != 0 {
 		t.Fatal("Invalid parsed time 2")
 	}
 }
