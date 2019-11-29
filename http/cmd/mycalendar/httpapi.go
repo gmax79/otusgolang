@@ -34,7 +34,11 @@ func createServer(host string, zaplog *zap.Logger) *httpCalendarAPI {
 }
 
 func (s *httpCalendarAPI) logRequest(r *http.Request) {
-	s.logger.Info("request", zap.String("method", r.Method), zap.String("url", r.URL.Path))
+	url := r.URL.Path
+	if r.Method == http.MethodGet {
+		url = r.URL.RequestURI()
+	}
+	s.logger.Info("request", zap.String("method", r.Method), zap.String("url", url))
 }
 
 func (s *httpCalendarAPI) Shutdown() {
@@ -165,18 +169,85 @@ func (s *httpCalendarAPI) httpEventsForDay(w http.ResponseWriter, r *http.Reques
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
+		var d calendar.Date
+		err := d.ParseDate(time)
+		if err != nil {
+			support.HTTPResponse(w, err)
+			return
+		}
+		var sp calendar.SearchParameters
+		sp.Day = d.Day
+		sp.Month = d.Month
+		sp.Year = d.Year
 
-		//count := s.calen.CalculateEvents(0)
+		count, err := s.calen.FindEvents(sp)
+		if err != nil {
+			support.HTTPResponse(w, err)
+			return
+		}
+		result := fmt.Sprintf(`{ "result": %d }`, len(count))
+		support.HTTPResponse(w, result)
+		return
 	}
 	support.HTTPResponse(w, http.StatusBadRequest)
 }
 
 func (s *httpCalendarAPI) httpEventsForWeek(w http.ResponseWriter, r *http.Request) {
 	s.logRequest(r)
+	if pr := support.ReadGetRequest(r, w); pr != nil {
+		time := pr.Get("week")
+		if time == "" {
+			support.HTTPResponse(w, http.StatusBadRequest)
+			return
+		}
+		var d calendar.Date
+		err := d.ParseDate(time)
+		if err != nil {
+			support.HTTPResponse(w, err)
+			return
+		}
+		var sp calendar.SearchParameters
+		sp.Week = d.Month
+		sp.Year = d.Year
+
+		count, err := s.calen.FindEvents(sp)
+		if err != nil {
+			support.HTTPResponse(w, err)
+			return
+		}
+		result := fmt.Sprintf(`{ "result": %d }`, len(count))
+		support.HTTPResponse(w, result)
+		return
+	}
 	support.HTTPResponse(w, http.StatusBadRequest)
 }
 
 func (s *httpCalendarAPI) httpEventsForMonth(w http.ResponseWriter, r *http.Request) {
 	s.logRequest(r)
+	if pr := support.ReadGetRequest(r, w); pr != nil {
+		time := pr.Get("month")
+		if time == "" {
+			support.HTTPResponse(w, http.StatusBadRequest)
+			return
+		}
+		var d calendar.Date
+		err := d.ParseDate(time)
+		if err != nil {
+			support.HTTPResponse(w, err)
+			return
+		}
+		var sp calendar.SearchParameters
+		sp.Month = d.Month
+		sp.Year = d.Year
+
+		count, err := s.calen.FindEvents(sp)
+		if err != nil {
+			support.HTTPResponse(w, err)
+			return
+		}
+		result := fmt.Sprintf(`{ "result": %d }`, len(count))
+		support.HTTPResponse(w, result)
+		return
+	}
 	support.HTTPResponse(w, http.StatusBadRequest)
 }

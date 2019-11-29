@@ -23,10 +23,10 @@ type Events interface {
 
 // SearchParameters - custom filters to search events
 type SearchParameters struct {
-	year  int
-	month int
-	week  int
-	day   int
+	Year  int
+	Month int
+	Week  int
+	Day   int
 }
 
 // Calendar - main object, contains all triggers and objects

@@ -80,7 +80,6 @@ func (c *calendarImpl) GetTriggerAlert(trigger string) (t time.Time, ok bool) {
 }
 
 func (c *calendarImpl) FindEvents(parameters SearchParameters) ([]Event, error) {
-
 	events := make([]Event, 0, 10)
 	for _, t := range c.triggers {
 		if checkSearchParameters(t.alerttime, parameters) {
@@ -95,5 +94,30 @@ func (c *calendarImpl) FindEvents(parameters SearchParameters) ([]Event, error) 
 }
 
 func checkSearchParameters(t time.Time, p SearchParameters) bool {
-	return true
+	if p.Year <= 0 {
+		return false
+	}
+	if p.Week > 0 {
+		if p.Month == 0 && p.Day == 0 {
+			year, week := t.ISOWeek()
+			if year == p.Year && week == p.Week {
+				return true
+			}
+		}
+		return false
+	}
+	if p.Month > 0 {
+		if p.Day == 0 {
+			if p.Month == int(t.Month()) {
+				return true
+			}
+		}
+		if p.Day > 0 {
+			fmt.Println(t.Year(), int(t.Month()), t.Day(), p)
+			if p.Year == t.Year() && p.Month == int(t.Month()) && p.Day == t.Day() {
+				return true
+			}
+		}
+	}
+	return false
 }

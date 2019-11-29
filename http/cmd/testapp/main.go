@@ -83,8 +83,21 @@ func main() {
 	}
 	post("move_event", r3move, http.StatusOK)
 
-	get("events_for_day?day='2020-01-07'", http.StatusOK)
-	get("events_for_day?month='2020-01'", http.StatusOK)
-	get("events_for_day?week='2020'", http.StatusOK)
+	r5 := map[string]string{
+		"time":  "2020-01-08 16:00:00",
+		"event": "Party in club",
+	}
+	post("create_event", r5, http.StatusOK)
+
+	r6 := map[string]string{
+		"time":  "2020-01-15 12:00:00",
+		"event": "Exam",
+	}
+	post("create_event", r6, http.StatusOK)
+
+	get("events_for_day?day=2020-01-07", http.StatusOK)
+	get("events_for_day?day=2020-01-10", http.StatusOK)
+	get("events_for_week?week=2020-02", http.StatusOK)
+	get("events_for_month?month=2020-01", http.StatusOK)
 
 }
