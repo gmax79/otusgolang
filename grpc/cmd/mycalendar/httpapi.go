@@ -18,7 +18,7 @@ type httpCalendarAPI struct {
 	calen     calendar.Calendar
 }
 
-func createServer(host string, zaplog *zap.Logger) *httpCalendarAPI {
+func createServer(calen calendar.Calendar, host string, zaplog *zap.Logger) *httpCalendarAPI {
 	s := &httpCalendarAPI{logger: zaplog}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", s.httpRoot)
@@ -29,7 +29,7 @@ func createServer(host string, zaplog *zap.Logger) *httpCalendarAPI {
 	mux.HandleFunc("/events_for_week", s.httpEventsForWeek)
 	mux.HandleFunc("/events_for_month", s.httpEventsForMonth)
 	s.server = &http.Server{Addr: host, Handler: mux}
-	s.calen = calendar.Create()
+	s.calen = calen
 	return s
 }
 

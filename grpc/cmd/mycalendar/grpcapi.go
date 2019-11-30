@@ -5,28 +5,28 @@ import (
 	"net"
 
 	"github.com/gmax79/otusgolang/grpc/cmd/mycalendar/pbcalendar"
-
-	//"github.com/golang/protobuf/ptypes"
+	"github.com/gmax79/otusgolang/grpc/internal/calendar"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	//"google.golang.org/grpc/codes"
-	//"google.golang.org/grpc/reflection"
-	//"google.golang.org/grpc/status"
-	//pbcalendar "./pbcalendar"
 )
 
 type grpcCalendarAPI struct {
 	server    *grpc.Server
+	logger    *zap.Logger
 	lasterror error
+	calen     calendar.Calendar
 }
 
 // createGrpc - service grpc interface
-func createGrpc(host string) (*grpcCalendarAPI, error) {
+func createGrpc(calen calendar.Calendar, host string, zaplog *zap.Logger) (*grpcCalendarAPI, error) {
 	listen, err := net.Listen("tcp", host)
 	if err != nil {
 		return nil, err
 	}
 	g := &grpcCalendarAPI{}
 	g.server = grpc.NewServer()
+	g.logger = zaplog
+	g.calen = calen
 	pbcalendar.RegisterMyCalendarServer(g.server, g)
 	go func() {
 		g.lasterror = g.server.Serve(listen)
@@ -42,7 +42,8 @@ func (g *grpcCalendarAPI) GetLastError() error {
 	return g.lasterror
 }
 
-func (g *grpcCalendarAPI) AddEvent(context.Context, *pbcalendar.Event) (*pbcalendar.Result, error) {
+func (g *grpcCalendarAPI) AddEvent(ctx context.Context, e *pbcalendar.Event) (*pbcalendar.Result, error) {
+	g.logger.Info("grpc AddEvent", zap.String("event", e.String()))
 	var result pbcalendar.Result
 	result.Status = "OK"
 	return &result, nil

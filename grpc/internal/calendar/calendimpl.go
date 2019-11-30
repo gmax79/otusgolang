@@ -2,6 +2,7 @@ package calendar
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -9,12 +10,14 @@ import (
 type calendarImpl struct {
 	triggers map[string]*timerimpl
 	finished chan string
+	m        *sync.Mutex
 }
 
 func createCalendar() Calendar {
 	newcalendar := &calendarImpl{}
 	newcalendar.triggers = make(map[string]*timerimpl)
 	newcalendar.finished = make(chan string, 1)
+	newcalendar.m = &sync.Mutex{}
 	go func(c *calendarImpl) {
 		for {
 			id := <-c.finished
@@ -31,6 +34,8 @@ func createCalendar() Calendar {
 }
 
 func (c *calendarImpl) AddTrigger(trigger string) (Events, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	timer, ok := c.triggers[trigger]
 	if !ok {
 		newtimer, err := createTimer(trigger, c.finished)
@@ -44,6 +49,8 @@ func (c *calendarImpl) AddTrigger(trigger string) (Events, error) {
 }
 
 func (c *calendarImpl) GetTriggers() []string {
+	c.m.Lock()
+	defer c.m.Unlock()
 	count := len(c.triggers)
 	list := make([]string, count)
 	i := 0
@@ -55,6 +62,8 @@ func (c *calendarImpl) GetTriggers() []string {
 }
 
 func (c *calendarImpl) DeleteTrigger(trigger string) bool {
+	c.m.Lock()
+	defer c.m.Unlock()
 	t, ok := c.triggers[trigger]
 	if ok {
 		t.Stop()
@@ -64,6 +73,8 @@ func (c *calendarImpl) DeleteTrigger(trigger string) bool {
 }
 
 func (c *calendarImpl) GetEvents(trigger string) Events {
+	c.m.Lock()
+	defer c.m.Unlock()
 	e, ok := c.triggers[trigger]
 	if !ok {
 		return nil
@@ -72,6 +83,8 @@ func (c *calendarImpl) GetEvents(trigger string) Events {
 }
 
 func (c *calendarImpl) GetTriggerAlert(trigger string) (t time.Time, ok bool) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	e, ok := c.triggers[trigger]
 	if !ok {
 		return
@@ -80,6 +93,8 @@ func (c *calendarImpl) GetTriggerAlert(trigger string) (t time.Time, ok bool) {
 }
 
 func (c *calendarImpl) FindEvents(parameters SearchParameters) ([]Event, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	events := make([]Event, 0, 10)
 	for _, t := range c.triggers {
 		if checkSearchParameters(t.alerttime, parameters) {

@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/gmax79/otusgolang/grpc/internal/calendar"
 	nlog "github.com/gmax79/otusgolang/grpc/internal/log"
 	"go.uber.org/zap"
 )
@@ -52,12 +53,14 @@ func main() {
 		return
 	}
 
-	grpc, err := createGrpc(config.GrpcHost)
+	calen := calendar.Create()
+
+	grpc, err := createGrpc(calen, config.GrpcHost, logger)
 	if err != nil {
 		return
 	}
 
-	server := createServer(config.ListenHTTP, logger)
+	server := createServer(calen, config.ListenHTTP, logger)
 	logger.Info("Calendar service started")
 	logger.Info("Caledar api ", zap.String("host", config.ListenHTTP))
 	logger.Info("Calendar grpc api ", zap.String("host", config.GrpcHost))

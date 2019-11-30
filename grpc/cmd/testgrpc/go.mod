@@ -6,5 +6,6 @@ replace github.com/gmax79/otusgolang/grpc/cmd/mycalendar/pbcalendar => ../mycale
 
 require (
 	github.com/gmax79/otusgolang/grpc/cmd/mycalendar/pbcalendar v0.0.0-00010101000000-000000000000
+	github.com/golang/protobuf v1.3.2
 	google.golang.org/grpc v1.25.1
 )
