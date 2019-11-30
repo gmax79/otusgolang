@@ -3,5 +3,6 @@
     "log_level": "info",
     "log_encoding": "console",
     "log_debug": 0,
-    "host": "localhost:8080"
+    "host": "localhost:8080",
+    "grpc": "localhost:9090"
 }

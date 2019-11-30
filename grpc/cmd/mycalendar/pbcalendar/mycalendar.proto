@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pbcalendar;
+
+import "google/protobuf/timestamp.proto";
+
+service MyCalendar {
+    rpc addEvent (Event) returns (Result);
+}
+
+message Result {
+    string status  = 1;
+}
+
+message Event {
+    google.protobuf.Timestamp alerttime = 1;
+    string information = 2;
+}

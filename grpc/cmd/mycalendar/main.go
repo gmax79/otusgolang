@@ -16,6 +16,7 @@ import (
 
 type CalendarServiceConfig struct {
 	ListenHTTP string `json:"host"`
+	GrpcHost   string `json:"grpc"`
 }
 
 func (cc *CalendarServiceConfig) Check() error {
@@ -50,15 +51,23 @@ func main() {
 	if logger, err = nlog.CreateLogger(configJSON); err != nil {
 		return
 	}
+
+	grpc, err := createGrpc(config.GrpcHost)
+	if err != nil {
+		return
+	}
+
 	server := createServer(config.ListenHTTP, logger)
 	logger.Info("Calendar service started")
-	logger.Info("Go in browser at host ", zap.String("url", config.ListenHTTP))
+	logger.Info("Caledar api ", zap.String("host", config.ListenHTTP))
+	logger.Info("Calendar grpc api ", zap.String("host", config.GrpcHost))
 
 	server.ListenAndServe()
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 	<-stop
 
+	grpc.Shutdown()
 	server.Shutdown()
 	if httperr := server.GetLastError(); httperr != nil {
 		logger.Error("error", zap.Error(httperr))
