@@ -3,11 +3,20 @@ syntax = "proto3";
 package pbcalendar;
 
 service MyCalendar {
-    rpc addEvent (Event) returns (Result);
+    rpc createEvent (Event) returns (Result);
+    rpc deleteEvent (Date) returns (Result);
+    rpc moveEvent (MoveEvent) returns (Result);
+    rpc eventsForDay(EventsForDay) returns (Count);
+    rpc eventsForMonth(EventsForMonth) returns (Count);
+    rpc eventsForWeek(EventsForWeek) returns (Count);
 }
 
 message Result {
     string status  = 1;
+}
+
+message Count {
+    int32 count = 1;
 }
 
 message Date {
@@ -22,4 +31,25 @@ message Date {
 message Event {
     Date alerttime = 1;
     string information = 2;
+}
+
+message MoveEvent {
+    Event event = 1;
+    Date newdate = 2;
+}
+
+message EventsForDay {
+    int32 Year = 1;
+    int32 Month = 2;
+    int32 Day = 3;
+}
+
+message EventsForWeek {
+    int32 Year = 1;
+    int32 Week = 2;
+}
+
+message EventsForMonth {
+    int32 Year = 1;
+    int32 Month = 2;
 }

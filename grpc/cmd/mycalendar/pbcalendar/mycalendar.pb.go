@@ -63,6 +63,45 @@ func (m *Result) GetStatus() string {
 	return ""
 }
 
+type Count struct {
+	Count                int32    `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Count) Reset()         { *m = Count{} }
+func (m *Count) String() string { return proto.CompactTextString(m) }
+func (*Count) ProtoMessage()    {}
+func (*Count) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9a09cb90c53a1eb3, []int{1}
+}
+
+func (m *Count) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Count.Unmarshal(m, b)
+}
+func (m *Count) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Count.Marshal(b, m, deterministic)
+}
+func (m *Count) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Count.Merge(m, src)
+}
+func (m *Count) XXX_Size() int {
+	return xxx_messageInfo_Count.Size(m)
+}
+func (m *Count) XXX_DiscardUnknown() {
+	xxx_messageInfo_Count.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Count proto.InternalMessageInfo
+
+func (m *Count) GetCount() int32 {
+	if m != nil {
+		return m.Count
+	}
+	return 0
+}
+
 type Date struct {
 	Year                 int32    `protobuf:"varint,1,opt,name=Year,proto3" json:"Year,omitempty"`
 	Month                int32    `protobuf:"varint,2,opt,name=Month,proto3" json:"Month,omitempty"`
@@ -79,7 +118,7 @@ func (m *Date) Reset()         { *m = Date{} }
 func (m *Date) String() string { return proto.CompactTextString(m) }
 func (*Date) ProtoMessage()    {}
 func (*Date) Descriptor() ([]byte, []int) {
-	return fileDescriptor_9a09cb90c53a1eb3, []int{1}
+	return fileDescriptor_9a09cb90c53a1eb3, []int{2}
 }
 
 func (m *Date) XXX_Unmarshal(b []byte) error {
@@ -154,7 +193,7 @@ func (m *Event) Reset()         { *m = Event{} }
 func (m *Event) String() string { return proto.CompactTextString(m) }
 func (*Event) ProtoMessage()    {}
 func (*Event) Descriptor() ([]byte, []int) {
-	return fileDescriptor_9a09cb90c53a1eb3, []int{2}
+	return fileDescriptor_9a09cb90c53a1eb3, []int{3}
 }
 
 func (m *Event) XXX_Unmarshal(b []byte) error {
@@ -189,32 +228,243 @@ func (m *Event) GetInformation() string {
 	return ""
 }
 
+type MoveEvent struct {
+	Event                *Event   `protobuf:"bytes,1,opt,name=event,proto3" json:"event,omitempty"`
+	Newdate              *Date    `protobuf:"bytes,2,opt,name=newdate,proto3" json:"newdate,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *MoveEvent) Reset()         { *m = MoveEvent{} }
+func (m *MoveEvent) String() string { return proto.CompactTextString(m) }
+func (*MoveEvent) ProtoMessage()    {}
+func (*MoveEvent) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9a09cb90c53a1eb3, []int{4}
+}
+
+func (m *MoveEvent) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_MoveEvent.Unmarshal(m, b)
+}
+func (m *MoveEvent) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_MoveEvent.Marshal(b, m, deterministic)
+}
+func (m *MoveEvent) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MoveEvent.Merge(m, src)
+}
+func (m *MoveEvent) XXX_Size() int {
+	return xxx_messageInfo_MoveEvent.Size(m)
+}
+func (m *MoveEvent) XXX_DiscardUnknown() {
+	xxx_messageInfo_MoveEvent.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MoveEvent proto.InternalMessageInfo
+
+func (m *MoveEvent) GetEvent() *Event {
+	if m != nil {
+		return m.Event
+	}
+	return nil
+}
+
+func (m *MoveEvent) GetNewdate() *Date {
+	if m != nil {
+		return m.Newdate
+	}
+	return nil
+}
+
+type EventsForDay struct {
+	Year                 int32    `protobuf:"varint,1,opt,name=Year,proto3" json:"Year,omitempty"`
+	Month                int32    `protobuf:"varint,2,opt,name=Month,proto3" json:"Month,omitempty"`
+	Day                  int32    `protobuf:"varint,3,opt,name=Day,proto3" json:"Day,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *EventsForDay) Reset()         { *m = EventsForDay{} }
+func (m *EventsForDay) String() string { return proto.CompactTextString(m) }
+func (*EventsForDay) ProtoMessage()    {}
+func (*EventsForDay) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9a09cb90c53a1eb3, []int{5}
+}
+
+func (m *EventsForDay) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EventsForDay.Unmarshal(m, b)
+}
+func (m *EventsForDay) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EventsForDay.Marshal(b, m, deterministic)
+}
+func (m *EventsForDay) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EventsForDay.Merge(m, src)
+}
+func (m *EventsForDay) XXX_Size() int {
+	return xxx_messageInfo_EventsForDay.Size(m)
+}
+func (m *EventsForDay) XXX_DiscardUnknown() {
+	xxx_messageInfo_EventsForDay.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EventsForDay proto.InternalMessageInfo
+
+func (m *EventsForDay) GetYear() int32 {
+	if m != nil {
+		return m.Year
+	}
+	return 0
+}
+
+func (m *EventsForDay) GetMonth() int32 {
+	if m != nil {
+		return m.Month
+	}
+	return 0
+}
+
+func (m *EventsForDay) GetDay() int32 {
+	if m != nil {
+		return m.Day
+	}
+	return 0
+}
+
+type EventsForWeek struct {
+	Year                 int32    `protobuf:"varint,1,opt,name=Year,proto3" json:"Year,omitempty"`
+	Week                 int32    `protobuf:"varint,2,opt,name=Week,proto3" json:"Week,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *EventsForWeek) Reset()         { *m = EventsForWeek{} }
+func (m *EventsForWeek) String() string { return proto.CompactTextString(m) }
+func (*EventsForWeek) ProtoMessage()    {}
+func (*EventsForWeek) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9a09cb90c53a1eb3, []int{6}
+}
+
+func (m *EventsForWeek) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EventsForWeek.Unmarshal(m, b)
+}
+func (m *EventsForWeek) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EventsForWeek.Marshal(b, m, deterministic)
+}
+func (m *EventsForWeek) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EventsForWeek.Merge(m, src)
+}
+func (m *EventsForWeek) XXX_Size() int {
+	return xxx_messageInfo_EventsForWeek.Size(m)
+}
+func (m *EventsForWeek) XXX_DiscardUnknown() {
+	xxx_messageInfo_EventsForWeek.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EventsForWeek proto.InternalMessageInfo
+
+func (m *EventsForWeek) GetYear() int32 {
+	if m != nil {
+		return m.Year
+	}
+	return 0
+}
+
+func (m *EventsForWeek) GetWeek() int32 {
+	if m != nil {
+		return m.Week
+	}
+	return 0
+}
+
+type EventsForMonth struct {
+	Year                 int32    `protobuf:"varint,1,opt,name=Year,proto3" json:"Year,omitempty"`
+	Month                int32    `protobuf:"varint,2,opt,name=Month,proto3" json:"Month,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *EventsForMonth) Reset()         { *m = EventsForMonth{} }
+func (m *EventsForMonth) String() string { return proto.CompactTextString(m) }
+func (*EventsForMonth) ProtoMessage()    {}
+func (*EventsForMonth) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9a09cb90c53a1eb3, []int{7}
+}
+
+func (m *EventsForMonth) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EventsForMonth.Unmarshal(m, b)
+}
+func (m *EventsForMonth) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EventsForMonth.Marshal(b, m, deterministic)
+}
+func (m *EventsForMonth) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EventsForMonth.Merge(m, src)
+}
+func (m *EventsForMonth) XXX_Size() int {
+	return xxx_messageInfo_EventsForMonth.Size(m)
+}
+func (m *EventsForMonth) XXX_DiscardUnknown() {
+	xxx_messageInfo_EventsForMonth.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EventsForMonth proto.InternalMessageInfo
+
+func (m *EventsForMonth) GetYear() int32 {
+	if m != nil {
+		return m.Year
+	}
+	return 0
+}
+
+func (m *EventsForMonth) GetMonth() int32 {
+	if m != nil {
+		return m.Month
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterType((*Result)(nil), "pbcalendar.Result")
+	proto.RegisterType((*Count)(nil), "pbcalendar.Count")
 	proto.RegisterType((*Date)(nil), "pbcalendar.Date")
 	proto.RegisterType((*Event)(nil), "pbcalendar.Event")
+	proto.RegisterType((*MoveEvent)(nil), "pbcalendar.MoveEvent")
+	proto.RegisterType((*EventsForDay)(nil), "pbcalendar.EventsForDay")
+	proto.RegisterType((*EventsForWeek)(nil), "pbcalendar.EventsForWeek")
+	proto.RegisterType((*EventsForMonth)(nil), "pbcalendar.EventsForMonth")
 }
 
 func init() { proto.RegisterFile("mycalendar.proto", fileDescriptor_9a09cb90c53a1eb3) }
 
 var fileDescriptor_9a09cb90c53a1eb3 = []byte{
-	// 246 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x4c, 0x90, 0x31, 0x4f, 0xc3, 0x30,
-	0x10, 0x85, 0x55, 0x9a, 0x44, 0xe4, 0xba, 0x84, 0x13, 0x42, 0x16, 0x53, 0x94, 0x89, 0x29, 0x12,
-	0xe5, 0x07, 0x30, 0x50, 0x24, 0x96, 0x2c, 0x66, 0xea, 0xe8, 0x36, 0x87, 0x88, 0x94, 0xd8, 0x95,
-	0x73, 0x41, 0xca, 0x1f, 0xe0, 0x77, 0x23, 0x9f, 0x83, 0x9a, 0xed, 0xbd, 0xcf, 0x7e, 0xbe, 0xe7,
-	0x83, 0x62, 0x98, 0xcf, 0xa6, 0x27, 0xdb, 0x1a, 0x5f, 0x5f, 0xbc, 0x63, 0x87, 0x70, 0x39, 0xfd,
-	0x93, 0xaa, 0x84, 0x4c, 0xd3, 0x38, 0xf5, 0x8c, 0x0f, 0x90, 0x8d, 0x6c, 0x78, 0x1a, 0xd5, 0xa6,
-	0xdc, 0x3c, 0xe5, 0x7a, 0x71, 0xd5, 0xef, 0x06, 0x92, 0x83, 0x61, 0x42, 0x84, 0xe4, 0x48, 0xc6,
-	0xcb, 0x71, 0xaa, 0x45, 0xe3, 0x3d, 0xa4, 0x8d, 0xb3, 0xfc, 0xad, 0x6e, 0x04, 0x46, 0x83, 0x05,
-	0x6c, 0x0f, 0x66, 0x56, 0x5b, 0x61, 0x41, 0x86, 0xec, 0x87, 0x9b, 0xbc, 0x4a, 0x62, 0x36, 0xe8,
-	0x30, 0xb0, 0xe9, 0xec, 0xc4, 0xa4, 0x52, 0xa1, 0x8b, 0x0b, 0xfc, 0x93, 0xce, 0xce, 0xb6, 0x2a,
-	0x8b, 0x3c, 0xba, 0xea, 0x08, 0xe9, 0xfb, 0x0f, 0x59, 0xc6, 0x1a, 0x72, 0xd3, 0x93, 0x67, 0xee,
-	0x06, 0x92, 0x36, 0xbb, 0x7d, 0x51, 0x5f, 0xff, 0x54, 0x87, 0xb6, 0xfa, 0x7a, 0x05, 0x4b, 0xd8,
-	0x75, 0xf6, 0xcb, 0xf9, 0xc1, 0x70, 0xe7, 0xac, 0x54, 0xcd, 0xf5, 0x1a, 0xed, 0x5f, 0x01, 0x9a,
-	0xf9, 0x6d, 0xc9, 0xe3, 0x33, 0xdc, 0x9a, 0xb6, 0x8d, 0xb3, 0xee, 0xd6, 0x0f, 0x0b, 0x7a, 0xc4,
-	0x35, 0x8a, 0xcb, 0x3b, 0x65, 0xb2, 0xd9, 0x97, 0xbf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x1d, 0x02,
-	0x0d, 0x9e, 0x6d, 0x01, 0x00, 0x00,
+	// 412 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x53, 0x4d, 0xab, 0xd3, 0x40,
+	0x14, 0xa5, 0xef, 0x25, 0x91, 0xdc, 0xbc, 0xf7, 0xa8, 0x83, 0x4a, 0x2c, 0x08, 0x65, 0x36, 0x8a,
+	0x8b, 0x2c, 0x5a, 0x51, 0x50, 0xc4, 0x45, 0xab, 0x88, 0x90, 0x4d, 0x5c, 0x48, 0x77, 0x4e, 0x93,
+	0x2b, 0x06, 0x93, 0x99, 0x32, 0x99, 0x54, 0xfa, 0x07, 0xfc, 0xb5, 0xfe, 0x08, 0x99, 0x8f, 0xa6,
+	0x29, 0x9d, 0x85, 0xbc, 0xdd, 0xbd, 0xe7, 0xcc, 0x39, 0x9c, 0x9c, 0xc9, 0xc0, 0xb4, 0x3d, 0x94,
+	0xac, 0x41, 0x5e, 0x31, 0x99, 0xed, 0xa4, 0x50, 0x82, 0xc0, 0x6e, 0x7b, 0x44, 0xe8, 0x1c, 0xa2,
+	0x02, 0xbb, 0xbe, 0x51, 0xe4, 0x09, 0x44, 0x9d, 0x62, 0xaa, 0xef, 0xd2, 0xc9, 0x7c, 0xf2, 0x22,
+	0x2e, 0xdc, 0x46, 0x9f, 0x41, 0xb8, 0x12, 0x3d, 0x57, 0xe4, 0x11, 0x84, 0xa5, 0x1e, 0x0c, 0x1f,
+	0x16, 0x76, 0xa1, 0x7f, 0x26, 0x10, 0xac, 0x99, 0x42, 0x42, 0x20, 0xd8, 0x20, 0x93, 0x8e, 0x35,
+	0xb3, 0x96, 0xe4, 0x82, 0xab, 0x9f, 0xe9, 0x95, 0x95, 0x98, 0x85, 0x4c, 0xe1, 0x7a, 0xcd, 0x0e,
+	0xe9, 0xb5, 0xc1, 0xf4, 0xa8, 0xb5, 0x9f, 0x45, 0x2f, 0xd3, 0xc0, 0x6a, 0xf5, 0xac, 0xf3, 0xe4,
+	0x35, 0xef, 0x15, 0xa6, 0xa1, 0x41, 0xdd, 0xa6, 0xf1, 0xaf, 0x58, 0x0a, 0x5e, 0xa5, 0x91, 0xc5,
+	0xed, 0x46, 0x37, 0x10, 0x7e, 0xdc, 0x23, 0x57, 0x24, 0x83, 0x98, 0x35, 0x28, 0x95, 0xaa, 0x5b,
+	0x34, 0x69, 0x92, 0xc5, 0x34, 0x3b, 0x7d, 0x72, 0xa6, 0xd3, 0x16, 0xa7, 0x23, 0x64, 0x0e, 0x49,
+	0xcd, 0x7f, 0x08, 0xd9, 0x32, 0x55, 0x0b, 0x6e, 0xa2, 0xc6, 0xc5, 0x18, 0xa2, 0xdf, 0x21, 0xce,
+	0xc5, 0x1e, 0xad, 0xfd, 0x73, 0x08, 0x51, 0x0f, 0xce, 0xfa, 0xe1, 0xd8, 0xda, 0x9c, 0x28, 0x2c,
+	0x4f, 0x5e, 0xc2, 0x03, 0x8e, 0xbf, 0x2b, 0xa6, 0xd0, 0x78, 0xfa, 0x52, 0x1c, 0x0f, 0xd0, 0x2f,
+	0x70, 0x63, 0xb4, 0xdd, 0x27, 0x21, 0x5d, 0x21, 0xf7, 0x2d, 0x93, 0xbe, 0x81, 0xdb, 0xc1, 0xeb,
+	0x1b, 0xe2, 0x2f, 0xaf, 0x19, 0x81, 0x40, 0x73, 0xce, 0xcb, 0xcc, 0xf4, 0x2d, 0xdc, 0x0d, 0x42,
+	0x6b, 0xfe, 0xdf, 0x31, 0x16, 0x7f, 0xaf, 0x00, 0xf2, 0xc3, 0xca, 0x7d, 0x1d, 0x79, 0x05, 0x49,
+	0x29, 0x91, 0x29, 0xd7, 0xd9, 0x65, 0x49, 0x33, 0x32, 0x86, 0xdc, 0x2f, 0xb8, 0x84, 0xa4, 0xc2,
+	0x06, 0x8f, 0xaa, 0x8b, 0xbe, 0xbc, 0xa2, 0xd7, 0x10, 0xb7, 0xc3, 0xe5, 0x3c, 0x1e, 0x1f, 0x18,
+	0xee, 0xcc, 0xab, 0x7b, 0x07, 0x37, 0x38, 0xae, 0x3c, 0xbd, 0xc8, 0xe8, 0x98, 0xd9, 0x59, 0x7a,
+	0xfb, 0x16, 0x3e, 0xc0, 0x1d, 0x9e, 0x57, 0x35, 0xf3, 0xca, 0x0d, 0xe7, 0x33, 0x78, 0x0f, 0xb7,
+	0x78, 0x76, 0x49, 0x4f, 0xbd, 0x7a, 0x4d, 0x79, 0xe4, 0xdb, 0xc8, 0xbc, 0xe4, 0xe5, 0xbf, 0x00,
+	0x00, 0x00, 0xff, 0xff, 0x64, 0x12, 0x77, 0x92, 0xdd, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -229,7 +479,12 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MyCalendarClient interface {
-	AddEvent(ctx context.Context, in *Event, opts ...grpc.CallOption) (*Result, error)
+	CreateEvent(ctx context.Context, in *Event, opts ...grpc.CallOption) (*Result, error)
+	DeleteEvent(ctx context.Context, in *Date, opts ...grpc.CallOption) (*Result, error)
+	MoveEvent(ctx context.Context, in *MoveEvent, opts ...grpc.CallOption) (*Result, error)
+	EventsForDay(ctx context.Context, in *EventsForDay, opts ...grpc.CallOption) (*Count, error)
+	EventsForMonth(ctx context.Context, in *EventsForMonth, opts ...grpc.CallOption) (*Count, error)
+	EventsForWeek(ctx context.Context, in *EventsForWeek, opts ...grpc.CallOption) (*Count, error)
 }
 
 type myCalendarClient struct {
@@ -240,9 +495,54 @@ func NewMyCalendarClient(cc *grpc.ClientConn) MyCalendarClient {
 	return &myCalendarClient{cc}
 }
 
-func (c *myCalendarClient) AddEvent(ctx context.Context, in *Event, opts ...grpc.CallOption) (*Result, error) {
+func (c *myCalendarClient) CreateEvent(ctx context.Context, in *Event, opts ...grpc.CallOption) (*Result, error) {
 	out := new(Result)
-	err := c.cc.Invoke(ctx, "/pbcalendar.MyCalendar/addEvent", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/pbcalendar.MyCalendar/createEvent", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *myCalendarClient) DeleteEvent(ctx context.Context, in *Date, opts ...grpc.CallOption) (*Result, error) {
+	out := new(Result)
+	err := c.cc.Invoke(ctx, "/pbcalendar.MyCalendar/deleteEvent", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *myCalendarClient) MoveEvent(ctx context.Context, in *MoveEvent, opts ...grpc.CallOption) (*Result, error) {
+	out := new(Result)
+	err := c.cc.Invoke(ctx, "/pbcalendar.MyCalendar/moveEvent", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *myCalendarClient) EventsForDay(ctx context.Context, in *EventsForDay, opts ...grpc.CallOption) (*Count, error) {
+	out := new(Count)
+	err := c.cc.Invoke(ctx, "/pbcalendar.MyCalendar/eventsForDay", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *myCalendarClient) EventsForMonth(ctx context.Context, in *EventsForMonth, opts ...grpc.CallOption) (*Count, error) {
+	out := new(Count)
+	err := c.cc.Invoke(ctx, "/pbcalendar.MyCalendar/eventsForMonth", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *myCalendarClient) EventsForWeek(ctx context.Context, in *EventsForWeek, opts ...grpc.CallOption) (*Count, error) {
+	out := new(Count)
+	err := c.cc.Invoke(ctx, "/pbcalendar.MyCalendar/eventsForWeek", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -251,35 +551,145 @@ func (c *myCalendarClient) AddEvent(ctx context.Context, in *Event, opts ...grpc
 
 // MyCalendarServer is the server API for MyCalendar service.
 type MyCalendarServer interface {
-	AddEvent(context.Context, *Event) (*Result, error)
+	CreateEvent(context.Context, *Event) (*Result, error)
+	DeleteEvent(context.Context, *Date) (*Result, error)
+	MoveEvent(context.Context, *MoveEvent) (*Result, error)
+	EventsForDay(context.Context, *EventsForDay) (*Count, error)
+	EventsForMonth(context.Context, *EventsForMonth) (*Count, error)
+	EventsForWeek(context.Context, *EventsForWeek) (*Count, error)
 }
 
 // UnimplementedMyCalendarServer can be embedded to have forward compatible implementations.
 type UnimplementedMyCalendarServer struct {
 }
 
-func (*UnimplementedMyCalendarServer) AddEvent(ctx context.Context, req *Event) (*Result, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddEvent not implemented")
+func (*UnimplementedMyCalendarServer) CreateEvent(ctx context.Context, req *Event) (*Result, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateEvent not implemented")
+}
+func (*UnimplementedMyCalendarServer) DeleteEvent(ctx context.Context, req *Date) (*Result, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteEvent not implemented")
+}
+func (*UnimplementedMyCalendarServer) MoveEvent(ctx context.Context, req *MoveEvent) (*Result, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MoveEvent not implemented")
+}
+func (*UnimplementedMyCalendarServer) EventsForDay(ctx context.Context, req *EventsForDay) (*Count, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EventsForDay not implemented")
+}
+func (*UnimplementedMyCalendarServer) EventsForMonth(ctx context.Context, req *EventsForMonth) (*Count, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EventsForMonth not implemented")
+}
+func (*UnimplementedMyCalendarServer) EventsForWeek(ctx context.Context, req *EventsForWeek) (*Count, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EventsForWeek not implemented")
 }
 
 func RegisterMyCalendarServer(s *grpc.Server, srv MyCalendarServer) {
 	s.RegisterService(&_MyCalendar_serviceDesc, srv)
 }
 
-func _MyCalendar_AddEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MyCalendar_CreateEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Event)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MyCalendarServer).AddEvent(ctx, in)
+		return srv.(MyCalendarServer).CreateEvent(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pbcalendar.MyCalendar/AddEvent",
+		FullMethod: "/pbcalendar.MyCalendar/CreateEvent",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MyCalendarServer).AddEvent(ctx, req.(*Event))
+		return srv.(MyCalendarServer).CreateEvent(ctx, req.(*Event))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MyCalendar_DeleteEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Date)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MyCalendarServer).DeleteEvent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pbcalendar.MyCalendar/DeleteEvent",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MyCalendarServer).DeleteEvent(ctx, req.(*Date))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MyCalendar_MoveEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MoveEvent)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MyCalendarServer).MoveEvent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pbcalendar.MyCalendar/MoveEvent",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MyCalendarServer).MoveEvent(ctx, req.(*MoveEvent))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MyCalendar_EventsForDay_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EventsForDay)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MyCalendarServer).EventsForDay(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pbcalendar.MyCalendar/EventsForDay",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MyCalendarServer).EventsForDay(ctx, req.(*EventsForDay))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MyCalendar_EventsForMonth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EventsForMonth)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MyCalendarServer).EventsForMonth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pbcalendar.MyCalendar/EventsForMonth",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MyCalendarServer).EventsForMonth(ctx, req.(*EventsForMonth))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MyCalendar_EventsForWeek_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EventsForWeek)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MyCalendarServer).EventsForWeek(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pbcalendar.MyCalendar/EventsForWeek",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MyCalendarServer).EventsForWeek(ctx, req.(*EventsForWeek))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -289,8 +699,28 @@ var _MyCalendar_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*MyCalendarServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "addEvent",
-			Handler:    _MyCalendar_AddEvent_Handler,
+			MethodName: "createEvent",
+			Handler:    _MyCalendar_CreateEvent_Handler,
+		},
+		{
+			MethodName: "deleteEvent",
+			Handler:    _MyCalendar_DeleteEvent_Handler,
+		},
+		{
+			MethodName: "moveEvent",
+			Handler:    _MyCalendar_MoveEvent_Handler,
+		},
+		{
+			MethodName: "eventsForDay",
+			Handler:    _MyCalendar_EventsForDay_Handler,
+		},
+		{
+			MethodName: "eventsForMonth",
+			Handler:    _MyCalendar_EventsForMonth_Handler,
+		},
+		{
+			MethodName: "eventsForWeek",
+			Handler:    _MyCalendar_EventsForWeek_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

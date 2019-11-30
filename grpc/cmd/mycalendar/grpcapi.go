@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net"
 
 	"github.com/gmax79/otusgolang/grpc/cmd/mycalendar/pbcalendar"
@@ -42,9 +43,50 @@ func (g *grpcCalendarAPI) GetLastError() error {
 	return g.lasterror
 }
 
-func (g *grpcCalendarAPI) AddEvent(ctx context.Context, e *pbcalendar.Event) (*pbcalendar.Result, error) {
-	g.logger.Info("grpc AddEvent", zap.String("event", e.String()))
+func pbTimeToString(t *pbcalendar.Date) string {
+	return fmt.Sprintf("%02d-%02d-%02d %02d:%02d:%02d", t.Year, t.Month, t.Day, t.Hour, t.Minute, t.Second)
+}
+
+func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, e *pbcalendar.Event) (*pbcalendar.Result, error) {
+	g.logger.Info("grpc CreateEvent", zap.String("event", e.String()))
+	t := e.Alerttime
+	if t == nil {
+		return nil, fmt.Errorf("nil time accepted")
+	}
+	trigger := pbTimeToString(t)
+	events, err := g.calen.AddTrigger(trigger)
+	if err != nil {
+		g.logger.Error("grpc CreateEvent", zap.String("error", err.Error()))
+		return nil, err
+	}
+	events.AddEvent(&SimpleEvent{event: e.Information})
+
 	var result pbcalendar.Result
-	result.Status = "OK"
+	result.Status = fmt.Sprintf("Event at %s added", trigger)
 	return &result, nil
+}
+
+func (g *grpcCalendarAPI) DeleteEvent(context.Context, *pbcalendar.Date) (*pbcalendar.Result, error) {
+	var result pbcalendar.Result
+	return &result, nil
+}
+
+func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, req *pbcalendar.MoveEvent) (*pbcalendar.Result, error) {
+	var result pbcalendar.Result
+	return &result, nil
+}
+
+func (g *grpcCalendarAPI) EventsForDay(ctx context.Context, req *pbcalendar.EventsForDay) (*pbcalendar.Count, error) {
+	var c pbcalendar.Count
+	return &c, nil
+}
+
+func (g *grpcCalendarAPI) EventsForMonth(ctx context.Context, req *pbcalendar.EventsForMonth) (*pbcalendar.Count, error) {
+	var c pbcalendar.Count
+	return &c, nil
+}
+
+func (g *grpcCalendarAPI) EventsForWeek(ctx context.Context, req *pbcalendar.EventsForWeek) (*pbcalendar.Count, error) {
+	var c pbcalendar.Count
+	return &c, nil
 }

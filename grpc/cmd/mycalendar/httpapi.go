@@ -62,18 +62,6 @@ func (s *httpCalendarAPI) httpRoot(w http.ResponseWriter, r *http.Request) {
 	support.HTTPResponse(w, http.StatusNotFound)
 }
 
-type dummyEvent struct {
-	event string
-}
-
-func (d *dummyEvent) GetName() string {
-	return d.event
-}
-
-func (d *dummyEvent) Invoke() {
-	fmt.Println("Event", d.event, "!!!")
-}
-
 func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request) {
 	s.logRequest(r)
 	if pr := support.ReadPostRequest(r, w); pr != nil {
@@ -88,7 +76,7 @@ func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, err)
 			return
 		}
-		if !events.AddEvent(&dummyEvent{event: event}) {
+		if !events.AddEvent(&SimpleEvent{event: event}) {
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
