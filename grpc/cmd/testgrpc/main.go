@@ -39,12 +39,49 @@ func (c *client) Shutdown() {
 	c.cancel()
 }
 
-func (c *client) AddEvent(e pbcalendar.Event) (string, error) {
-	result, err := c.client.AddEvent(c.ctx, &e)
+func (c *client) CreateEvent(e pbcalendar.Event) {
+	result, err := c.client.CreateEvent(c.ctx, &e)
 	if err != nil {
-		return "", err
+		log.Fatal(err)
 	}
-	return result.Status, nil
+	fmt.Println(result.Status)
+}
+
+func (c *client) DeleteEvent(e pbcalendar.Event) {
+	result, err := c.client.DeleteEvent(c.ctx, &e)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(result.Status)
+}
+
+func (c *client) MoveEvent(e *pbcalendar.Event, nd *pbcalendar.Date) {
+	var ne pbcalendar.MoveEvent
+	ne.Newdate = nd
+	ne.Event = e
+	result, err := c.client.MoveEvent(c.ctx, &ne)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(result.Status)
+}
+
+func (c *client) GetEventsForDay(e *pbcalendar.EventsForDay) {
+	fmt.Println("GetEventsForDay", e)
+	result, err := c.client.EventsForDay(c.ctx, e)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Get :", result.Count, "days")
+}
+
+func (c *client) GetEventsForWeek(e *pbcalendar.EventsForWeek) {
+	fmt.Println("GetEventsForWeek", e)
+	result, err := c.client.EventsForWeek(c.ctx, e)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Get :", result.Count, "days")
 }
 
 func s2date(stime string) *pbcalendar.Date {
@@ -72,13 +109,36 @@ func main() {
 	e.Alerttime = s2date("2020-01-07 12:00:00")
 	e.Information = "Exam in school"
 
-	var r string
-	r, err = c.AddEvent(e)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(r)
-	}
+	c.CreateEvent(e)
+	c.DeleteEvent(e)
+
+	c.CreateEvent(e)
+	var nd *pbcalendar.Date
+	nd = s2date("2020-01-09 15:00:00")
+	c.MoveEvent(&e, nd)
+
+	e.Information = "Pay credit"
+	e.Alerttime = s2date("2020-01-12 8:00:00")
+	c.CreateEvent(e)
+
+	e.Information = "Send pacel to Jack"
+	e.Alerttime = s2date("2020-01-14 10:00:00")
+	c.CreateEvent(e)
+
+	var eday pbcalendar.EventsForDay
+	eday.Year = 2020
+	eday.Month = 1
+	eday.Day = 9
+	c.GetEventsForDay(&eday)
+
+	var eweek pbcalendar.EventsForWeek
+	eweek.Week = 1
+	eweek.Year = 2020
+	c.GetEventsForWeek(&eweek)
+
+	eweek.Week = 2
+	eweek.Year = 2020
+	c.GetEventsForWeek(&eweek)
 
 	c.Shutdown()
 	fmt.Println("Connection at grpc host closed")

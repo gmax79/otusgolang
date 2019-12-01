@@ -15,14 +15,19 @@ import (
 	"go.uber.org/zap"
 )
 
+// CalendarServiceConfig - base parameters
 type CalendarServiceConfig struct {
 	ListenHTTP string `json:"host"`
 	GrpcHost   string `json:"grpc"`
 }
 
+// Check - check paraameters
 func (cc *CalendarServiceConfig) Check() error {
 	if cc.ListenHTTP == "" {
 		return fmt.Errorf("Host address not declared")
+	}
+	if cc.GrpcHost == "" {
+		return fmt.Errorf("Grpc host address not declared")
 	}
 	return nil
 }
@@ -54,16 +59,16 @@ func main() {
 	}
 
 	calen := calendar.Create()
-
-	grpc, err := createGrpc(calen, config.GrpcHost, logger)
-	if err != nil {
-		return
-	}
-
 	server := createServer(calen, config.ListenHTTP, logger)
 	logger.Info("Calendar service started")
 	logger.Info("Caledar api ", zap.String("host", config.ListenHTTP))
 	logger.Info("Calendar grpc api ", zap.String("host", config.GrpcHost))
+
+	grpc, err := createGrpc(calen, config.GrpcHost, logger)
+	if err != nil {
+		logger.Error("Grpc", zap.String("error", err.Error()))
+		return
+	}
 
 	server.ListenAndServe()
 	stop := make(chan os.Signal, 1)

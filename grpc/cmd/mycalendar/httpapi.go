@@ -14,7 +14,7 @@ import (
 type httpCalendarAPI struct {
 	server    *http.Server
 	logger    *zap.Logger
-	lasterror error
+	lastError error
 	calen     calendar.Calendar
 }
 
@@ -49,12 +49,12 @@ func (s *httpCalendarAPI) Shutdown() {
 
 func (s *httpCalendarAPI) ListenAndServe() {
 	go func() {
-		s.lasterror = s.server.ListenAndServe()
+		s.lastError = s.server.ListenAndServe()
 	}()
 }
 
 func (s *httpCalendarAPI) GetLastError() error {
-	return s.lasterror
+	return s.lastError
 }
 
 func (s *httpCalendarAPI) httpRoot(w http.ResponseWriter, r *http.Request) {

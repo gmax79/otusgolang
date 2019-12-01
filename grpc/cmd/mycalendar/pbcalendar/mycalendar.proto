@@ -4,7 +4,7 @@ package pbcalendar;
 
 service MyCalendar {
     rpc createEvent (Event) returns (Result);
-    rpc deleteEvent (Date) returns (Result);
+    rpc deleteEvent (Event) returns (Result);
     rpc moveEvent (MoveEvent) returns (Result);
     rpc eventsForDay(EventsForDay) returns (Count);
     rpc eventsForMonth(EventsForMonth) returns (Count);

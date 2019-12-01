@@ -128,7 +128,7 @@ func checkSearchParameters(t time.Time, p SearchParameters) bool {
 			}
 		}
 		if p.Day > 0 {
-			fmt.Println(t.Year(), int(t.Month()), t.Day(), p)
+			//fmt.Println(t.Year(), int(t.Month()), t.Day(), p)
 			if p.Year == t.Year() && p.Month == int(t.Month()) && p.Day == t.Day() {
 				return true
 			}
