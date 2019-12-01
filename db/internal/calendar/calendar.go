@@ -40,8 +40,8 @@ type Calendar interface {
 }
 
 // Create - create calendar instance
-func Create() Calendar {
-	return createCalendar()
+func Create(psqlConnect string) (Calendar, error) {
+	return createCalendar(psqlConnect)
 }
 
 // DurationToTimeString - get time parameter, now + duration

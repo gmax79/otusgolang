@@ -11,13 +11,23 @@ type calendarImpl struct {
 	triggers map[string]*timerimpl
 	finished chan string
 	m        *sync.Mutex
+	db       *dbConnect
 }
 
-func createCalendar() Calendar {
+func createCalendar(psqlConnect string) (Calendar, error) {
+	db, err := dbconnect(psqlConnect)
+	if err != nil {
+		return nil, err
+	}
+	err = db.CreateStructure()
+	if err != nil {
+		return nil, err
+	}
 	newcalendar := &calendarImpl{}
 	newcalendar.triggers = make(map[string]*timerimpl)
 	newcalendar.finished = make(chan string, 1)
 	newcalendar.m = &sync.Mutex{}
+	newcalendar.db = db
 	go func(c *calendarImpl) {
 		for {
 			id := <-c.finished
@@ -30,7 +40,7 @@ func createCalendar() Calendar {
 			}
 		}
 	}(newcalendar)
-	return newcalendar
+	return newcalendar, nil
 }
 
 func (c *calendarImpl) AddTrigger(trigger string) (Events, error) {

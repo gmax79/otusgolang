@@ -4,5 +4,10 @@
     "log_encoding": "console",
     "log_debug": 0,
     "host": "localhost:8080",
-    "grpc": "localhost:9090"
+    "grpc": "localhost:9090",
+    "postgres_host": "do.cc3.ru:5432",
+    "postgres_user": "postgres",
+    "postgres_password": "Vfnhtirf79",
+    "postgres_database": "calendar"
 }
+
