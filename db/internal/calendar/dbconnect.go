@@ -13,9 +13,14 @@ type dbConnect struct {
 
 const createSchema = `
 	create table if not exists events (
-		information  varchar(255) not null,
-		alert date
+		id serial primary key,
+		information  varchar(255) not null
 	);
+	create table if not exists triggers {
+		id serial primary key,
+		alert date
+		
+	}
 `
 
 // Connect - create connection
@@ -27,15 +32,21 @@ func dbconnect(pghost string) (*dbConnect, error) {
 	return &dbConnect{db: connection}, nil
 }
 
+func log(err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 func (c *dbConnect) CreateSchema() error {
 	db := c.db
 	_, err := db.Exec(createSchema)
-	fmt.Println(err)
+	log(err)
 	return err
 }
 
-func (c *dbConnect) AddEvent() error {
+func (c *dbConnect) FindEvent() error {
 	_, err := c.db.Exec("insert into events ")
-	fmt.Println(err)
+	log(err)
 	return err
 }

@@ -21,15 +21,11 @@ func (t *timerimpl) String() string {
 	return t.alerttime.String()
 }
 
-func createTimer(trigger string, timerend chan<- string) (*timerimpl, error) {
-	var p Date
-	if err := p.ParseDate(trigger); err != nil {
-		return nil, err
-	}
+func createTimer(date Date, timerend chan<- string) (*timerimpl, error) {
 	stopch := make(chan struct{})
-	timer := &timerimpl{events: createEvents(), timerend: timerend, stop: stopch, id: trigger, alerttime: p.Value()}
+	timer := &timerimpl{events: createEvents(), timerend: timerend, stop: stopch, id: date.String(), alerttime: date.Value()}
 
-	if timer.alerttime.Before(p.SetNow()) {
+	if timer.alerttime.Before(date.SetNow()) {
 		return nil, fmt.Errorf("Cant set, time from past")
 	}
 

@@ -19,7 +19,7 @@ func createCalendar(psqlConnect string) (Calendar, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = db.CreateStructure()
+	err = db.CreateSchema()
 	if err != nil {
 		return nil, err
 	}
@@ -46,9 +46,16 @@ func createCalendar(psqlConnect string) (Calendar, error) {
 func (c *calendarImpl) AddTrigger(trigger string) (Events, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
+
+	var p Date
+	if err := p.ParseDate(trigger); err != nil {
+		return nil, err
+	}
+
 	timer, ok := c.triggers[trigger]
 	if !ok {
-		newtimer, err := createTimer(trigger, c.finished)
+		//c.db.AddEvent()
+		newtimer, err := createTimer(p, c.finished)
 		if err != nil {
 			return nil, err
 		}

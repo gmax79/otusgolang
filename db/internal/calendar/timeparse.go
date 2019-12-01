@@ -67,7 +67,7 @@ func (tp *Date) Valid() error {
 		return fmt.Errorf("Date with invalid value")
 	}
 	d := days[tp.Month-1]
-	if (tp.Year%4) == 0 && tp.Month == 2 {
+	if tp.Month == 2 && (tp.Year%4) == 0 {
 		d++
 	}
 	if tp.Day > d {
@@ -80,6 +80,10 @@ func (tp *Date) Valid() error {
 func (tp *Date) Value() time.Time {
 	month := time.Month(tp.Month)
 	return time.Date(tp.Year, month, tp.Day, tp.Hour, tp.Minute, tp.Second, 0, time.UTC)
+}
+
+func (tp *Date) String() string {
+	return fmt.Sprintf("%d-%02d-%02d %d:%02d:02d", tp.Year, tp.Month, tp.Day, tp.Hour, tp.Minute, tp.Second)
 }
 
 // SetNow - set and return Now time
