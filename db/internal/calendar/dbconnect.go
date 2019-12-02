@@ -8,19 +8,22 @@ import (
 )
 
 type dbConnect struct {
-	db *sql.DB
+	db      *sql.DB
+	notable bool
 }
 
 const createSchema = `
-	create table if not exists events (
-		id serial primary key,
-		information  varchar(255) not null
-	);
-	create table if not exists triggers {
-		id serial primary key,
-		alert date
-		
-	}
+create table if not exists events (
+id serial primary key,
+alarm date not null,
+information varchar(255) not null
+);
+`
+
+const checkSchema = `
+select column_name,data_type 
+from information_schema.columns 
+where table_name = 'events2' order by column_name;
 `
 
 // Connect - create connection
@@ -38,10 +41,52 @@ func log(err error) {
 	}
 }
 
-func (c *dbConnect) CreateSchema() error {
+func (c *dbConnect) checkSchema() error {
 	db := c.db
-	_, err := db.Exec(createSchema)
-	log(err)
+	rows, err := db.Query(checkSchema)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	columns, err := rows.Columns()
+	if err != nil {
+		return err
+	}
+	schemaErr := fmt.Errorf("Database schema different from required")
+	if len(columns) != 2 {
+		return schemaErr
+	}
+	c.notable = true
+	tt := make(map[string]string)
+	tt["alert"] = "date"
+	tt["information"] = "character varying"
+	tt["id"] = "integer"
+
+	for rows.Next() {
+		c.notable = false
+		var cname, ctype string
+		if err := rows.Scan(&cname, &ctype); err != nil {
+			return err
+		}
+		if v, ok := tt[cname]; !ok {
+			return schemaErr
+		} else {
+			if v != ctype {
+				return schemaErr
+			}
+		}
+	}
+	return nil
+}
+
+func (c *dbConnect) CreateSchema() error {
+	err := c.checkSchema()
+	if err != nil {
+		return err
+	}
+	if c.notable {
+		_, err = c.db.Exec(createSchema)
+	}
 	return err
 }
 
