@@ -55,9 +55,9 @@ func out(resp *http.Response, requiredCode int) {
 
 func main() {
 	fmt.Println("Testing calendar app")
-	post("", map[string]string{}, http.StatusNotFound)
+	/*post("", map[string]string{}, http.StatusNotFound)
 	post("a", map[string]string{}, http.StatusNotFound)
-	post("b", map[string]string{}, http.StatusNotFound)
+	post("b", map[string]string{}, http.StatusNotFound)*/
 
 	r1 := map[string]string{
 		"time":  "2020-10-22 18:00:00",
@@ -65,7 +65,7 @@ func main() {
 	}
 	post("create_event", r1, http.StatusOK)
 
-	r2 := map[string]string{
+	/*r2 := map[string]string{
 		"time":  "2020-10-22 18:00:00",
 		"event": "Maks birthday",
 	}
@@ -98,6 +98,6 @@ func main() {
 	get("events_for_day?day=2020-01-07", http.StatusOK)
 	get("events_for_day?day=2020-01-10", http.StatusOK)
 	get("events_for_week?week=2020-02", http.StatusOK)
-	get("events_for_month?month=2020-01", http.StatusOK)
+	get("events_for_month?month=2020-01", http.StatusOK)*/
 
 }

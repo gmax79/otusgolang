@@ -58,7 +58,7 @@ func (tp *Date) ParseDate(dateString string) error {
 	return nil
 }
 
-// Valid - validate date
+// Valid - validate date and time
 func (tp *Date) Valid() error {
 	if tp.Hour < 0 || tp.Hour > 23 || tp.Minute < 0 || tp.Minute > 59 || tp.Second < 0 || tp.Second > 59 {
 		return fmt.Errorf("Time with invalid value")
@@ -83,7 +83,7 @@ func (tp *Date) Value() time.Time {
 }
 
 func (tp *Date) String() string {
-	return fmt.Sprintf("%d-%02d-%02d %d:%02d:02d", tp.Year, tp.Month, tp.Day, tp.Hour, tp.Minute, tp.Second)
+	return fmt.Sprintf("%d-%02d-%02d %d:%02d:%02d", tp.Year, tp.Month, tp.Day, tp.Hour, tp.Minute, tp.Second)
 }
 
 // SetNow - set and return Now time
