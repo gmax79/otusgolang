@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/gmax79/otusgolang/db/cmd/mycalendar/pbcalendar"
-	"github.com/gmax79/otusgolang/db/internal/calendar"
+	"../../internal/calendar"
+	"./pbcalendar"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -24,11 +24,13 @@ func createGrpc(calen calendar.Calendar, host string, zaplog *zap.Logger) (*grpc
 	if err != nil {
 		return nil, err
 	}
+
 	g := &grpcCalendarAPI{}
 	g.server = grpc.NewServer()
 	g.logger = zaplog
 	g.calen = calen
 	pbcalendar.RegisterMyCalendarServer(g.server, g)
+
 	go func() {
 		g.lasterror = g.server.Serve(listen)
 	}()
@@ -49,6 +51,7 @@ func pbTimeToString(t *pbcalendar.Date) string {
 
 func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, e *pbcalendar.Event) (*pbcalendar.Result, error) {
 	g.logger.Info("grpc CreateEvent", zap.String("event", e.String()))
+
 	t := e.Alerttime
 	trigger := pbTimeToString(t)
 	events, err := g.calen.AddTrigger(trigger)
@@ -65,6 +68,7 @@ func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, e *pbcalendar.Event) 
 
 func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.Event) (*pbcalendar.Result, error) {
 	g.logger.Info("grpc DeleteEvent", zap.String("event", e.String()))
+
 	var result pbcalendar.Result
 	t := e.Alerttime
 	trigger := pbTimeToString(t)
@@ -83,24 +87,29 @@ func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.Event) 
 
 func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, e *pbcalendar.MoveEvent) (*pbcalendar.Result, error) {
 	g.logger.Info("grpc MoveEvent", zap.String("event", e.String()))
+
 	t := e.Event.Alerttime
 	trigger := pbTimeToString(t)
 	events := g.calen.GetEvents(trigger)
 	if events == nil {
 		return nil, fmt.Errorf("Trigger %s not found", trigger)
 	}
+
 	index := events.FindEvent(e.Event.Information)
 	if index == -1 {
 		return nil, fmt.Errorf("Event %s in trigger %s not found", e.Event.Information, trigger)
 	}
+
 	newtime := pbTimeToString(e.Newdate)
 	newevents, err := g.calen.AddTrigger(newtime)
 	if err != nil {
 		return nil, err
 	}
+
 	foundevent := events.GetEvent(index)
 	events.DeleteEvent(index)
 	newevents.AddEvent(foundevent)
+
 	var result pbcalendar.Result
 	result.Status = fmt.Sprintf("Event %s moved from %s to %s", e.Event.Information, trigger, newtime)
 	return &result, nil
@@ -118,6 +127,7 @@ func (g *grpcCalendarAPI) EventsForDay(ctx context.Context, e *pbcalendar.Events
 	if err != nil {
 		return nil, err
 	}
+
 	count := len(events)
 	var c pbcalendar.Count
 	c.Count = int32(count)
@@ -135,6 +145,7 @@ func (g *grpcCalendarAPI) EventsForMonth(ctx context.Context, e *pbcalendar.Even
 	if err != nil {
 		return nil, err
 	}
+
 	count := len(events)
 	var c pbcalendar.Count
 	c.Count = int32(count)
@@ -152,6 +163,7 @@ func (g *grpcCalendarAPI) EventsForWeek(ctx context.Context, e *pbcalendar.Event
 	if err != nil {
 		return nil, err
 	}
+
 	count := len(events)
 	var c pbcalendar.Count
 	c.Count = int32(count)

@@ -10,8 +10,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/gmax79/otusgolang/db/internal/calendar"
-	nlog "github.com/gmax79/otusgolang/db/internal/log"
+	"../../internal/calendar"
+	nlog "../../internal/log"
 	"go.uber.org/zap"
 )
 

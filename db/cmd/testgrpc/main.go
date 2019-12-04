@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/gmax79/otusgolang/db/cmd/mycalendar/pbcalendar"
+	"../mycalendar/pbcalendar"
 	"google.golang.org/grpc"
 )
 

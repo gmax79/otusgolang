@@ -1,6 +1,9 @@
 /pkg/
 /.vscode/
-/gotelnet/gotelnet
-/echoserver/echoserver
-/http/cmd/mycalendar/mycalendar
 /bin/
+/src/
+gotelnet
+echoserver
+mycalendar
+testapp
+testgrpc

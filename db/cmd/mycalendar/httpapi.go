@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gmax79/otusgolang/db/internal/calendar"
-	"github.com/gmax79/otusgolang/db/internal/support"
+	"../../internal/calendar"
+	"../../internal/support"
 	"go.uber.org/zap"
 )
 
