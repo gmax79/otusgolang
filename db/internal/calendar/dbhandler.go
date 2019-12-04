@@ -6,12 +6,12 @@ type dbHandler struct {
 
 const createSchema = `
 create table if not exists events (
-triggerid int not null,
+timerid int not null,
 information varchar(255) not null
 );
-create table if not exists triggers (
+create table if not exists timers (
 id serial primary key,
-alarm date not null,
+alarm date not null
 );
 `
 
@@ -26,7 +26,7 @@ func dbconnect(pghost string) (*dbHandler, error) {
 
 func (c *dbHandler) CheckOrCreateSchema() error {
 	et := map[string]string{
-		"triggerid":   "integer",
+		"timerid":     "integer",
 		"information": "character varying",
 	}
 	if err := skipMissedTable(c.db.checkTable("events", et)); err != nil {
@@ -36,7 +36,7 @@ func (c *dbHandler) CheckOrCreateSchema() error {
 		"id":    "integer",
 		"alarm": "date",
 	}
-	if err := skipMissedTable(c.db.checkTable("triggers", tt)); err != nil {
+	if err := skipMissedTable(c.db.checkTable("timers", tt)); err != nil {
 		return err
 	}
 	err := c.db.Exec(createSchema)
