@@ -3,22 +3,21 @@ package calendar
 import (
 	"database/sql"
 	"fmt"
-
-	// attach pgx postgres driver
-	_ "github.com/jackc/pgx/stdlib"
 )
 
-type dbConnection struct {
-	db *sql.DB
+type dbSchema struct {
 }
 
-func connectToDatabase(dsn string) (*dbConnection, error) {
-	connection, err := sql.Open("pgx", dsn) // *sql.DB
-	if err != nil {
-		return nil, err
-	}
-	return &dbConnection{db: connection}, nil
-}
+const createSchema = `
+CREATE TABLE IF NOT EXISTS events (
+timerid int NOT NULL,
+information VARCHAR(255) NOT NULL
+);
+CREATE TABLE IF NOT EXISTS timers (
+id serial PRIMARY KEY,
+alarm date NOT NULL
+);
+`
 
 // DbSchemaError - type of error, where table schema not equal at checking
 type DbSchemaError struct {
@@ -44,10 +43,10 @@ from information_schema.columns
 where table_name = $1 order by column_name;
 `
 
-func (h *dbConnection) checkTable(name string, schema map[string]string) error {
+func (h dbSchema) checkTable(dbc *sql.DB, name string, schema map[string]string) error {
 	var err error
 	var rows *sql.Rows
-	if rows, err = h.db.Query(getTableSchema, name); err != nil {
+	if rows, err = dbc.Query(getTableSchema, name); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -72,14 +71,24 @@ func (h *dbConnection) checkTable(name string, schema map[string]string) error {
 	return nil
 }
 
-func (h *dbConnection) Exec(request string, args ...interface{}) error {
-	_, err := h.db.Exec(request, args...)
+// CheckOrCreateSchema - function to create schema in empty db or error is schema is different
+func (h dbSchema) CheckOrCreateSchema(dbc *sql.DB) error {
+	et := map[string]string{
+		"timerid":     "integer",
+		"information": "character varying",
+	}
+	if err := skipMissedTable(h.checkTable(dbc, "events", et)); err != nil {
+		return err
+	}
+	tt := map[string]string{
+		"id":    "integer",
+		"alarm": "date",
+	}
+	if err := skipMissedTable(h.checkTable(dbc, "timers", tt)); err != nil {
+		return err
+	}
+	_, err := dbc.Exec(createSchema)
 	return err
-}
-
-func (h *dbConnection) Query(request string, args ...interface{}) (*sql.Rows, error) {
-	r, err := h.db.Query(request, args...)
-	return r, err
 }
 
 func skipMissedTable(err error) error {
