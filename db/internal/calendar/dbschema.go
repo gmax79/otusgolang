@@ -15,7 +15,7 @@ information VARCHAR(255) NOT NULL
 );
 CREATE TABLE IF NOT EXISTS timers (
 id serial PRIMARY KEY,
-alarm date NOT NULL
+alarm TIMESTAMP NOT NULL
 );
 `
 
@@ -82,7 +82,7 @@ func (h dbSchema) CheckOrCreateSchema(dbc *sql.DB) error {
 	}
 	tt := map[string]string{
 		"id":    "integer",
-		"alarm": "date",
+		"alarm": "timestamp",
 	}
 	if err := skipMissedTable(h.checkTable(dbc, "timers", tt)); err != nil {
 		return err

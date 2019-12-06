@@ -22,14 +22,16 @@ func getProvider(db *sql.DB) *dbProvder {
 	return &dbProvder{db: db}
 }
 
-func (p *dbProvder) addTrigger(trigger string) (int, error) {
+func (p *dbProvder) AddTrigger(trigger string) (int64, error) {
 	request := `INSERT INTO timers (alarm) 
-	SELECT $1 WHERE NOT EXISTS (SELECT id FROM timers WHERE alarm = '$1')
+	SELECT $1 WHERE NOT EXISTS (SELECT id FROM timers WHERE alarm = '$2')
 	RETURNING id;`
 
-	result, err := p.db.Exec(request)
-
-	return 0, nil
+	result, err := p.db.Exec(request, trigger, trigger)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
 }
 
 /*func (c *dbHandler) AddEvent(d Date, info string) error {

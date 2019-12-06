@@ -53,7 +53,12 @@ func (c *calendarImpl) AddTrigger(trigger string) (Events, error) {
 		return nil, err
 	}
 
-	err := c.db.AddEvent(p, newtrigger)
+	id, err := c.db.AddTrigger(p.String())
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(id)
 
 	/*if err := c.db.FindEvent(p); err != nil {
 		return nil, err
