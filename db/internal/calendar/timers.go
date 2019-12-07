@@ -6,27 +6,29 @@ import (
 )
 
 type timerimpl struct {
-	timerend  chan<- string
-	stop      <-chan struct{}
-	id        string
-	alerttime time.Time
+	timerend chan<- date
+	stop     <-chan struct{}
+	id       string
+	alert    date
+	duration time.Duration
 }
 
-func createTimer(id string, alert date, timerend chan<- string, stopch <-chan struct{}) (*timerimpl, error) {
+func createTimer(alert date, timerend chan<- date, stopch <-chan struct{}) error {
+	var p date
+	p.SetNow()
 	a := alert.Value()
-	if a.Before(alert.SetNow()) {
-		return nil, fmt.Errorf("Cant set, time from past")
+	if a.Before(p.Value()) {
+		return fmt.Errorf("Cant set, time from past")
 	}
-	timer := &timerimpl{timerend: timerend, stop: stopch, id: id, alerttime: a}
+	timer := &timerimpl{timerend: timerend, stop: stopch, alert: alert}
+	timer.duration = a.Sub(p.Value())
 	go func(t *timerimpl) {
-		var p date
-		duration := t.alerttime.Sub(p.SetNow())
-		timer := time.NewTimer(duration)
+		timer := time.NewTimer(t.duration)
 		select {
 		case <-timer.C:
-			t.timerend <- t.id
+			t.timerend <- t.alert
 		case <-t.stop:
 		}
 	}(timer)
-	return timer, nil
+	return nil
 }

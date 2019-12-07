@@ -6,7 +6,7 @@ import (
 
 // Calendar implementaion
 type calendarImpl struct {
-	finished   chan string
+	finished   chan date
 	stoptimers chan struct{}
 	db         *dbProvder
 }
@@ -22,13 +22,13 @@ func createCalendar(psqlConnect string) (Calendar, error) {
 		return nil, err
 	}
 	newcalendar := &calendarImpl{}
-	newcalendar.finished = make(chan string, 1)
+	newcalendar.finished = make(chan date, 1)
 	newcalendar.stoptimers = make(chan struct{})
 	newcalendar.db = getProvider(db)
 	go func(c *calendarImpl) {
 		for {
 			id := <-c.finished
-			c.db.Invoke(id)
+			c.db.Invoke(id.String()) //todo
 		}
 	}(newcalendar)
 	return newcalendar, nil
@@ -46,11 +46,15 @@ func (c *calendarImpl) AddTrigger(d Date) (Events, error) {
 	if t, err = valid(d); err != nil {
 		return nil, err
 	}
-	id, err := c.db.AddTrigger(t)
+	err = c.db.AddTrigger(t)
 	if err != nil {
 		return nil, err
 	}
-	return createEvents(id, c.db), nil
+	err = createTimer(t, c.finished, c.stoptimers)
+	if err != nil {
+		return nil, err
+	}
+	return createEvents(t, c.db), nil
 }
 
 func (c *calendarImpl) GetTriggers() ([]Date, error) {
@@ -72,7 +76,7 @@ func (c *calendarImpl) GetEvents(d Date) (Events, error) {
 	if t, err = valid(d); err != nil {
 		return nil, err
 	}
-	return &eventsimpl{db: c.db, id: t.String()}, nil
+	return &eventsimpl{db: c.db, d: t}, nil
 }
 
 func (c *calendarImpl) FindEvents(parameters SearchParameters) ([]Event, error) {

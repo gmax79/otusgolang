@@ -23,8 +23,8 @@ func (d *Date) String() string {
 
 // Events - contains all events per trigger
 type Events interface {
-	AddEvent(e Event) bool
-	GetEventsCount() int
+	AddEvent(e Event) error
+	GetEventsCount() (int, error)
 	DeleteEvent(index int) bool
 	GetEvent(index int) Event
 	FindEvent(name string) int
@@ -57,13 +57,15 @@ func DurationToTimeString(d time.Duration) string {
 }
 
 // ParseDate - create calendar date from string
-func ParseDate(trigger string) (dd Date, err error) {
+func ParseDate(trigger string) (Date, error) {
+	var err error
+	var zero Date
 	var d date
 	if err = d.ParseDate(trigger); err != nil {
-		return
+		return zero, err
 	}
 	if err = d.Valid(); err != nil {
-		return
+		return zero, err
 	}
 	return d.d, nil
 }

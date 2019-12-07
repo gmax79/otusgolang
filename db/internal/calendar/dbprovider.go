@@ -2,6 +2,7 @@ package calendar
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/jackc/pgx/stdlib" // attach pgx postgres driver
 )
@@ -22,21 +23,12 @@ func getProvider(db *sql.DB) *dbProvder {
 	return &dbProvder{db: db}
 }
 
-func (p *dbProvder) AddTrigger(d date) (string, error) {
+func (p *dbProvder) AddTrigger(d date) error {
 	timer := d.String()
 	request := `INSERT INTO timers (timer) 
 	SELECT $1::timestamp WHERE NOT EXISTS
 	(SELECT 1 FROM timers WHERE timer = $1::timestamp)`
 	_, err := p.db.Exec(request, timer)
-	if err != nil {
-		return "", err
-	}
-	return timer, nil
-}
-
-func (p *dbProvder) AddEvent(d date, info string) error {
-	timer := d.String()
-	_, err := p.db.Exec("INSERT INTO events timer, information values($1, $2)", timer, info)
 	return err
 }
 
@@ -71,5 +63,22 @@ func (p *dbProvder) DeleteTrigger(d date) error {
 }
 
 func (p *dbProvder) Invoke(id string) {
-	//	p.db.Query("SELECT ")
+	fmt.Println("Invoked!!!", id)
+}
+
+func (p *dbProvder) AddEvent(d date, info string) error {
+	timer := d.String()
+	_, err := p.db.Exec("INSERT INTO events (timer, information) VALUES($1, $2)", timer, info)
+	return err
+}
+
+func (p *dbProvder) GetEventsCount(d date) (int, error) {
+	timer := d.String()
+	var count int
+	err := p.db.QueryRow("COUNT (*) FROM events WHERE timer = $1", timer).Scan(&count)
+	return count, err
+}
+
+func (p *dbProvder) DeleteEvent(d date, index int) error {
+
 }

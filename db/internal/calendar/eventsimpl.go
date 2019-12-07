@@ -1,34 +1,20 @@
 package calendar
 
 type eventsimpl struct {
-	//events []Event
-	id string
+	d  date
 	db *dbProvder
 }
 
-func createEvents(id string, dbc *dbProvder) Events {
-	return &eventsimpl{db: dbc}
+func createEvents(alert date, dbc *dbProvder) Events {
+	return &eventsimpl{db: dbc, d: alert}
 }
 
-/*func (t *eventsimpl) Invoke() {
-	for _, e := range t.events {
-		e.Invoke()
-	}
-}*/
-
-func (t *eventsimpl) AddEvent(e Event) bool {
-	/*if e == nil {
-		return false
-	}
-	t.events = append(t.events, e)
-	return true*/
-
-	return false
+func (t *eventsimpl) AddEvent(e Event) error {
+	return t.db.AddEvent(t.d, string(e))
 }
 
-func (t *eventsimpl) GetEventsCount() int {
-	//return len(t.events)
-	return 0
+func (t *eventsimpl) GetEventsCount() (int, error) {
+	return t.db.GetEventsCount(t.d)
 }
 
 func (t *eventsimpl) DeleteEvent(index int) bool {
