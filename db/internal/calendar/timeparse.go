@@ -8,9 +8,8 @@ import (
 )
 
 // Date - calendar date with time
-type Date struct {
-	Year, Month, Day     int
-	Hour, Minute, Second int
+type date struct {
+	d Date
 }
 
 var parseTime *regexp.Regexp
@@ -23,7 +22,7 @@ func init() {
 }
 
 // ParseDate - parse string for date and time
-func (tp *Date) ParseDate(dateString string) error {
+func (tp *date) ParseDate(dateString string) error {
 	if dateString == "" {
 		return fmt.Errorf("Time or date doesn't declared")
 	}
@@ -39,6 +38,7 @@ func (tp *Date) ParseDate(dateString string) error {
 		return i
 	}
 
+	ref := &tp.d
 	p := parseTime.FindStringSubmatch(dateString)
 	d := parseDate.FindStringSubmatch(dateString)
 	if p == nil && d == nil {
@@ -46,54 +46,57 @@ func (tp *Date) ParseDate(dateString string) error {
 	}
 
 	if p != nil {
-		tp.Hour = atoi(p[1], false)
-		tp.Minute = atoi(p[2], true)
-		tp.Second = atoi(p[3], true)
+		ref.Hour = atoi(p[1], false)
+		ref.Minute = atoi(p[2], true)
+		ref.Second = atoi(p[3], true)
 	}
 	if d != nil {
-		tp.Year = atoi(d[1], false)
-		tp.Month = atoi(d[2], true)
-		tp.Day = atoi(d[3], true)
+		ref.Year = atoi(d[1], false)
+		ref.Month = atoi(d[2], true)
+		ref.Day = atoi(d[3], true)
 	}
 	return nil
 }
 
 // Valid - validate date and time
-func (tp *Date) Valid() error {
-	if tp.Hour < 0 || tp.Hour > 23 || tp.Minute < 0 || tp.Minute > 59 || tp.Second < 0 || tp.Second > 59 {
+func (tp *date) Valid() error {
+	ref := &tp.d
+	if ref.Hour < 0 || ref.Hour > 23 || ref.Minute < 0 || ref.Minute > 59 || ref.Second < 0 || ref.Second > 59 {
 		return fmt.Errorf("Time with invalid value")
 	}
-	if tp.Year < 0 || tp.Month < 1 || tp.Month > 12 || tp.Day < 1 {
+	if ref.Year < 0 || ref.Month < 1 || ref.Month > 12 || ref.Day < 1 {
 		return fmt.Errorf("Date with invalid value")
 	}
-	d := days[tp.Month-1]
-	if tp.Month == 2 && (tp.Year%4) == 0 {
+	d := days[ref.Month-1]
+	if ref.Month == 2 && (ref.Year%4) == 0 {
 		d++
 	}
-	if tp.Day > d {
+	if ref.Day > d {
 		return fmt.Errorf("Date with invalid value")
 	}
 	return nil
 }
 
 // Value - return time.Time
-func (tp *Date) Value() time.Time {
-	month := time.Month(tp.Month)
-	return time.Date(tp.Year, month, tp.Day, tp.Hour, tp.Minute, tp.Second, 0, time.UTC)
+func (tp *date) Value() time.Time {
+	ref := &tp.d
+	month := time.Month(ref.Month)
+	return time.Date(ref.Year, month, ref.Day, ref.Hour, ref.Minute, ref.Second, 0, time.UTC)
 }
 
-func (tp *Date) String() string {
-	return fmt.Sprintf("%d-%02d-%02d %d:%02d:%02d", tp.Year, tp.Month, tp.Day, tp.Hour, tp.Minute, tp.Second)
+func (tp *date) String() string {
+	return tp.d.String()
 }
 
 // SetNow - set and return Now time
-func (tp *Date) SetNow() time.Time {
+func (tp *date) SetNow() time.Time {
 	t := time.Now()
-	tp.Hour = t.Hour()
-	tp.Minute = t.Minute()
-	tp.Second = t.Second()
-	tp.Year = t.Year()
-	tp.Month = int(t.Month())
-	tp.Day = t.Day()
+	ref := &tp.d
+	ref.Hour = t.Hour()
+	ref.Minute = t.Minute()
+	ref.Second = t.Second()
+	ref.Year = t.Year()
+	ref.Month = int(t.Month())
+	ref.Day = t.Day()
 	return tp.Value()
 }

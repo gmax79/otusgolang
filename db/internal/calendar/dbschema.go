@@ -10,37 +10,36 @@ type dbSchema struct {
 
 const createSchema = `
 CREATE TABLE IF NOT EXISTS events (
-timerid int NOT NULL,
+timer TIMESTAMP NOT NULL,
 information VARCHAR(255) NOT NULL
 );
 CREATE TABLE IF NOT EXISTS timers (
-id serial PRIMARY KEY,
-alarm TIMESTAMP NOT NULL
+timer TIMESTAMP PRIMARY KEY NOT NULL
 );
 `
 
 // DbSchemaError - type of error, where table schema not equal at checking
-type DbSchemaError struct {
+type dbSchemaError struct {
 	tableName string
 }
 
-func (e *DbSchemaError) Error() string {
+func (e *dbSchemaError) Error() string {
 	return fmt.Sprintf("Table's %s schema is different from required", e.tableName)
 }
 
 // DbTableMissingError - table is missing in database
-type DbTableMissingError struct {
+type dbTableMissingError struct {
 	tableName string
 }
 
-func (e *DbTableMissingError) Error() string {
+func (e *dbTableMissingError) Error() string {
 	return fmt.Sprintf("Table %s is missing in database", e.tableName)
 }
 
 const getTableSchema = `
-select column_name,data_type 
-from information_schema.columns 
-where table_name = $1 order by column_name;
+SELECT column_name,data_type 
+FROM information_schema.columns 
+WHERE table_name = $1 order by column_name;
 `
 
 func (h dbSchema) checkTable(dbc *sql.DB, name string, schema map[string]string) error {
@@ -58,15 +57,15 @@ func (h dbSchema) checkTable(dbc *sql.DB, name string, schema map[string]string)
 		}
 		v, ok := schema[cname]
 		if !ok || v != ctype {
-			return &DbSchemaError{tableName: name}
+			return &dbSchemaError{tableName: name}
 		}
 		count++
 	}
 	if count == 0 {
-		return &DbTableMissingError{tableName: name}
+		return &dbTableMissingError{tableName: name}
 	}
 	if count != len(schema) {
-		return &DbSchemaError{tableName: name}
+		return &dbSchemaError{tableName: name}
 	}
 	return nil
 }
@@ -74,15 +73,14 @@ func (h dbSchema) checkTable(dbc *sql.DB, name string, schema map[string]string)
 // CheckOrCreateSchema - function to create schema in empty db or error is schema is different
 func (h dbSchema) CheckOrCreateSchema(dbc *sql.DB) error {
 	et := map[string]string{
-		"timerid":     "integer",
+		"timer":       "timestamp without time zone",
 		"information": "character varying",
 	}
 	if err := skipMissedTable(h.checkTable(dbc, "events", et)); err != nil {
 		return err
 	}
 	tt := map[string]string{
-		"id":    "integer",
-		"alarm": "timestamp",
+		"timer": "timestamp without time zone",
 	}
 	if err := skipMissedTable(h.checkTable(dbc, "timers", tt)); err != nil {
 		return err
@@ -93,7 +91,7 @@ func (h dbSchema) CheckOrCreateSchema(dbc *sql.DB) error {
 
 func skipMissedTable(err error) error {
 	switch err.(type) {
-	case *DbTableMissingError:
+	case *dbTableMissingError:
 		return nil
 	}
 	return err
