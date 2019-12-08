@@ -69,7 +69,7 @@ func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, e *pbcalendar.Event) 
 	events.AddEvent(calendar.Event(e.Information))
 
 	var result pbcalendar.Result
-	result.Status = fmt.Sprintf("Event at %s added", trigger)
+	result.Status = fmt.Sprintf("Event at %s added", trigger.String())
 	return &result, nil
 }
 
@@ -80,14 +80,14 @@ func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.Event) 
 	t := e.Alerttime
 	trigger := pbDateToCalendarDate(t)
 	events, err := g.calen.GetEvents(trigger)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 	err = events.DeleteEvent(calendar.Event(e.Information))
 	if err != nil {
 		return nil, err
 	}
-	result.Status = fmt.Sprintf("Event %s at %s deleted", e.Information, trigger)
+	result.Status = fmt.Sprintf("Event %s at %s deleted", e.Information, trigger.String())
 	return &result, nil
 }
 
@@ -107,7 +107,7 @@ func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, e *pbcalendar.MoveEvent
 	}
 
 	var result pbcalendar.Result
-	result.Status = fmt.Sprintf("Event %s moved from %s to %s", e.Event.Information, trigger, newtime)
+	result.Status = fmt.Sprintf("Event %s moved from %s to %s", e.Event.Information, trigger.String(), newtime.String())
 	return &result, nil
 }
 

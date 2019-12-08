@@ -56,6 +56,10 @@ func (c *client) DeleteEvent(e pbcalendar.Event) {
 }
 
 func (c *client) MoveEvent(e *pbcalendar.Event, nd *pbcalendar.Date) {
+	var old pbcalendar.Event
+	old.Alerttime = nd
+	old.Information = e.Information
+	c.DeleteEvent(old)
 	var ne pbcalendar.MoveEvent
 	ne.Newdate = nd
 	ne.Event = e
