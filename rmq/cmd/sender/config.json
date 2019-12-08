@@ -1,0 +1,6 @@
+{
+    "rabbitmq_host": "do.cc3.ru:5672",
+    "rabbitmq_user": "grader",
+    "rabbitmq_password": "Vfnhtirf79"
+}
+
