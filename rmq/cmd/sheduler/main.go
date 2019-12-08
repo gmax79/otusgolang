@@ -65,24 +65,26 @@ func main() {
 		return
 	}
 
-	rmqchan, err := rabbitChan.Consume(
-		"calendar", // queue name
-		"",         // consumer
-		false,      // auto ask
-		false,      // exclusive
-		false,      // no-local
-		false,      // no-wait
-		nil)        // arguments
-	if err != nil {
-		return
-	}
-
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
 	var m api.RmqMessage
 	m.Event = "test"
-	rmqchan <- m
+	data, err := json.Marshal(m)
+	if err != nil {
+		return
+	}
+	fmt.Println(string(data))
+	err = rabbitChan.Publish(
+		"",         // exchange
+		"calendar", // routing key
+		false,      // mandatory
+		false,
+		amqp.Publishing{
+			DeliveryMode: amqp.Persistent,
+			ContentType:  "application/json",
+			Body:         data,
+		})
 
 loop:
 	for {
@@ -92,5 +94,4 @@ loop:
 		}
 	}
 	fmt.Println("Sheduler stopped")
-
 }

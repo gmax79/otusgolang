@@ -83,6 +83,7 @@ loop:
 				continue
 			}
 			mq := &api.RmqMessage{}
+			fmt.Println(string(msg.Body))
 			if err := json.Unmarshal(msg.Body, mq); err != nil {
 				fmt.Printf("Got invalid blob: %v\n", err)
 			} else {

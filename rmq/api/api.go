@@ -1,5 +1,5 @@
 package api
 
 type RmqMessage struct {
-	Event string
+	Event string `json:"event"`
 }
