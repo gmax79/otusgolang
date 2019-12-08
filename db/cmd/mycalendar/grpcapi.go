@@ -83,11 +83,10 @@ func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.Event) 
 	if err == nil {
 		return nil, err
 	}
-	index := events.FindEvent(e.Information)
-	if index == -1 {
-		return nil, fmt.Errorf("Event %s in trigger %s not found", e.Information, trigger)
+	err = events.DeleteEvent(calendar.Event(e.Information))
+	if err != nil {
+		return nil, err
 	}
-	events.DeleteEvent(index)
 	result.Status = fmt.Sprintf("Event %s at %s deleted", e.Information, trigger)
 	return &result, nil
 }
@@ -95,27 +94,17 @@ func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.Event) 
 func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, e *pbcalendar.MoveEvent) (*pbcalendar.Result, error) {
 	g.logger.Info("grpc MoveEvent", zap.String("event", e.String()))
 
-	t := e.Event.Alerttime
-	trigger := pbDateToCalendarDate(t)
+	trigger := pbDateToCalendarDate(e.Event.Alerttime)
+	newtime := pbDateToCalendarDate(e.Newdate)
 	events, err := g.calen.GetEvents(trigger)
 	if err != nil {
 		return nil, err
 	}
-
-	index := events.FindEvent(e.Event.Information)
-	if index == -1 {
-		return nil, fmt.Errorf("Event %s in trigger %s not found", e.Event.Information, trigger)
-	}
-
-	newtime := pbDateToCalendarDate(e.Newdate)
-	newevents, err := g.calen.AddTrigger(newtime)
+	event := (calendar.Event)(e.Event.Information)
+	err = events.MoveEvent(event, newtime)
 	if err != nil {
 		return nil, err
 	}
-
-	foundevent := events.GetEvent(index)
-	events.DeleteEvent(index)
-	newevents.AddEvent(foundevent)
 
 	var result pbcalendar.Result
 	result.Status = fmt.Sprintf("Event %s moved from %s to %s", e.Event.Information, trigger, newtime)

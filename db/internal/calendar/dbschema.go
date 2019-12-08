@@ -11,10 +11,8 @@ type dbSchema struct {
 const createSchema = `
 CREATE TABLE IF NOT EXISTS events (
 timer TIMESTAMP NOT NULL,
-information VARCHAR(255) NOT NULL
-);
-CREATE TABLE IF NOT EXISTS timers (
-timer TIMESTAMP PRIMARY KEY NOT NULL
+information VARCHAR(255) NOT NULL,
+CONSTRAINT ti UNIQUE (timer, information)
 );
 `
 
@@ -77,12 +75,6 @@ func (h dbSchema) CheckOrCreateSchema(dbc *sql.DB) error {
 		"information": "character varying",
 	}
 	if err := skipMissedTable(h.checkTable(dbc, "events", et)); err != nil {
-		return err
-	}
-	tt := map[string]string{
-		"timer": "timestamp without time zone",
-	}
-	if err := skipMissedTable(h.checkTable(dbc, "timers", tt)); err != nil {
 		return err
 	}
 	_, err := dbc.Exec(createSchema)

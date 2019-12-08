@@ -8,7 +8,6 @@ import (
 type timerimpl struct {
 	timerend chan<- date
 	stop     <-chan struct{}
-	id       string
 	alert    date
 	duration time.Duration
 }

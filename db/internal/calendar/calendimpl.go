@@ -1,14 +1,11 @@
 package calendar
 
-import (
-	"time"
-)
-
 // Calendar implementaion
 type calendarImpl struct {
 	finished   chan date
 	stoptimers chan struct{}
 	db         *dbProvder
+	timersset  map[Date]struct{}
 }
 
 func createCalendar(psqlConnect string) (Calendar, error) {
@@ -25,6 +22,7 @@ func createCalendar(psqlConnect string) (Calendar, error) {
 	newcalendar.finished = make(chan date, 1)
 	newcalendar.stoptimers = make(chan struct{})
 	newcalendar.db = getProvider(db)
+	newcalendar.timersset = make(map[Date]struct{})
 	go func(c *calendarImpl) {
 		for {
 			id := <-c.finished
@@ -46,13 +44,11 @@ func (c *calendarImpl) AddTrigger(d Date) (Events, error) {
 	if t, err = valid(d); err != nil {
 		return nil, err
 	}
-	err = c.db.AddTrigger(t)
-	if err != nil {
-		return nil, err
-	}
-	err = createTimer(t, c.finished, c.stoptimers)
-	if err != nil {
-		return nil, err
+	if _, ok := c.timersset[d]; !ok {
+		err = createTimer(t, c.finished, c.stoptimers)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return createEvents(t, c.db), nil
 }
@@ -67,6 +63,7 @@ func (c *calendarImpl) DeleteTrigger(d Date) error {
 	if t, err = valid(d); err != nil {
 		return err
 	}
+	delete(c.timersset, d)
 	return c.db.DeleteTrigger(t)
 }
 
@@ -80,43 +77,5 @@ func (c *calendarImpl) GetEvents(d Date) (Events, error) {
 }
 
 func (c *calendarImpl) FindEvents(parameters SearchParameters) ([]Event, error) {
-	events := make([]Event, 0, 10)
-	/*for _, t := range c.triggers {
-		if checkSearchParameters(t.alerttime, parameters) {
-			//todo optimize
-			count := t.events.GetEventsCount()
-			for i := 0; i < count; i++ {
-				events = append(events, t.events.GetEvent(i))
-			}
-		}
-	}*/
-	return events, nil
-}
-
-func checkSearchParameters(t time.Time, p SearchParameters) bool {
-	if p.Year <= 0 {
-		return false
-	}
-	if p.Week > 0 {
-		if p.Month == 0 && p.Day == 0 {
-			year, week := t.ISOWeek()
-			if year == p.Year && week == p.Week {
-				return true
-			}
-		}
-		return false
-	}
-	if p.Month > 0 {
-		if p.Day == 0 {
-			if p.Month == int(t.Month()) {
-				return true
-			}
-		}
-		if p.Day > 0 {
-			if p.Year == t.Year() && p.Month == int(t.Month()) && p.Day == t.Day() {
-				return true
-			}
-		}
-	}
-	return false
+	return c.db.FindEvents(parameters)
 }

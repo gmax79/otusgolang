@@ -17,26 +17,20 @@ func (t *eventsimpl) GetEventsCount() (int, error) {
 	return t.db.GetEventsCount(t.d)
 }
 
-func (t *eventsimpl) DeleteEvent(index int) bool {
-	/*if index >= 0 && index < len(t.events) {
-		t.events = append(t.events[:index], t.events[index+1:]...)
-		return true
-	}*/
-	return false
+func (t *eventsimpl) DeleteEventIndex(index int) error {
+	return t.db.DeleteEventIndex(t.d, index)
 }
 
-func (t *eventsimpl) GetEvent(index int) Event {
-	/*if index >= 0 && index < len(t.events) {
-		return t.events[index]
-	}*/
-	return ""
+func (t *eventsimpl) DeleteEvent(e Event) error {
+	return t.db.DeleteEvent(t.d, e)
 }
 
-func (t *eventsimpl) FindEvent(name string) int {
-	/*for i, e := range t.events {
-		if e.GetName() == name {
-			return i
-		}
-	}*/
-	return -1
+func (t *eventsimpl) GetEvent(index int) (Event, error) {
+	return t.db.GetEvent(t.d, index)
+}
+
+func (t *eventsimpl) MoveEvent(e Event, to Date) error {
+	var newdate date
+	newdate.d = to
+	return t.db.MoveEvent(t.d, e, newdate)
 }

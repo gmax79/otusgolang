@@ -71,7 +71,7 @@ func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
-		t, err := calendar.ParseDate(time)
+		t, err := calendar.ParseValidDate(time)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
@@ -81,8 +81,9 @@ func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, err)
 			return
 		}
-		if !events.AddEvent(calendar.Event(event)) {
-			support.HTTPResponse(w, http.StatusBadRequest)
+		err = events.AddEvent(calendar.Event(event))
+		if err != nil {
+			support.HTTPResponse(w, err)
 			return
 		}
 		s.logger.Info("new", zap.String("time", t.String()), zap.String("event", event))
@@ -101,7 +102,7 @@ func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
-		t, err := calendar.ParseDate(time)
+		t, err := calendar.ParseValidDate(time)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
@@ -111,12 +112,11 @@ func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, err)
 			return
 		}
-		index := events.FindEvent(event)
-		if index == -1 {
-			support.HTTPResponse(w, fmt.Errorf("event %s in trigger %s not found", event, time))
+		err = events.DeleteEvent(calendar.Event(event))
+		if err != nil {
+			support.HTTPResponse(w, err)
 			return
 		}
-		events.DeleteEvent(index)
 		s.logger.Info("delete", zap.String("time", time), zap.String("event", event))
 		support.HTTPResponse(w, http.StatusOK)
 		return
@@ -134,7 +134,12 @@ func (s *httpCalendarAPI) httpMoveEvent(w http.ResponseWriter, r *http.Request) 
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
-		t, err := calendar.ParseDate(time)
+		t, err := calendar.ParseValidDate(time)
+		if err != nil {
+			support.HTTPResponse(w, err)
+			return
+		}
+		newt, err := calendar.ParseValidDate(newtime)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
@@ -144,19 +149,11 @@ func (s *httpCalendarAPI) httpMoveEvent(w http.ResponseWriter, r *http.Request) 
 			support.HTTPResponse(w, err)
 			return
 		}
-		index := events.FindEvent(event)
-		if index == -1 {
-			support.HTTPResponse(w, fmt.Errorf("event %s in trigger %s not found", event, time))
-			return
-		}
-		newevents, err := s.calen.AddTrigger(t)
+		err = events.MoveEvent(calendar.Event(event), newt)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
 		}
-		foundevent := events.GetEvent(index)
-		events.DeleteEvent(index)
-		newevents.AddEvent(foundevent)
 		support.HTTPResponse(w, http.StatusOK)
 		return
 	}
@@ -171,7 +168,7 @@ func (s *httpCalendarAPI) httpEventsForDay(w http.ResponseWriter, r *http.Reques
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
-		d, err := calendar.ParseDate(time)
+		d, err := calendar.ParseValidDate(time)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
@@ -186,7 +183,7 @@ func (s *httpCalendarAPI) httpEventsForDay(w http.ResponseWriter, r *http.Reques
 			support.HTTPResponse(w, err)
 			return
 		}
-		result := fmt.Sprintf(`{ "result": %d }`, len(count))
+		result := fmt.Sprintf("{ \"result\": %d }", len(count))
 		support.HTTPResponse(w, result)
 		return
 	}
@@ -215,7 +212,7 @@ func (s *httpCalendarAPI) httpEventsForWeek(w http.ResponseWriter, r *http.Reque
 			support.HTTPResponse(w, err)
 			return
 		}
-		result := fmt.Sprintf(`{ "result": %d }`, len(count))
+		result := fmt.Sprintf("{ \"result\": %d }", len(count))
 		support.HTTPResponse(w, result)
 		return
 	}
@@ -244,7 +241,7 @@ func (s *httpCalendarAPI) httpEventsForMonth(w http.ResponseWriter, r *http.Requ
 			support.HTTPResponse(w, err)
 			return
 		}
-		result := fmt.Sprintf(`{ "result": %d }`, len(count))
+		result := fmt.Sprintf("{ \"result\": %d }", len(count))
 		support.HTTPResponse(w, result)
 		return
 	}

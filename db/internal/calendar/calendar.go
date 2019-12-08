@@ -25,9 +25,10 @@ func (d *Date) String() string {
 type Events interface {
 	AddEvent(e Event) error
 	GetEventsCount() (int, error)
-	DeleteEvent(index int) bool
-	GetEvent(index int) Event
-	FindEvent(name string) int
+	DeleteEventIndex(index int) error
+	DeleteEvent(e Event) error
+	GetEvent(index int) (Event, error)
+	MoveEvent(e Event, to Date) error
 }
 
 // SearchParameters - custom filters to search events
@@ -56,8 +57,8 @@ func DurationToTimeString(d time.Duration) string {
 	return s[:len(DateLayout)]
 }
 
-// ParseDate - create calendar date from string
-func ParseDate(trigger string) (Date, error) {
+// ParseValidDate - create calendar date from string and validate
+func ParseValidDate(trigger string) (Date, error) {
 	var err error
 	var zero Date
 	var d date
@@ -65,6 +66,17 @@ func ParseDate(trigger string) (Date, error) {
 		return zero, err
 	}
 	if err = d.Valid(); err != nil {
+		return zero, err
+	}
+	return d.d, nil
+}
+
+// ParseDate - create calendar date from string
+func ParseDate(trigger string) (Date, error) {
+	var err error
+	var zero Date
+	var d date
+	if err = d.ParseDate(trigger); err != nil {
 		return zero, err
 	}
 	return d.d, nil
