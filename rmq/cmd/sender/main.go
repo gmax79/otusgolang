@@ -11,7 +11,6 @@ import (
 	"syscall"
 
 	"../../api"
-	"github.com/streadway/amqp"
 )
 
 // SenderConfig - base parameters
@@ -23,9 +22,6 @@ type senderConfig struct {
 
 func (s *senderConfig) RabbitMQAddr() string {
 	return fmt.Sprintf("amqp://%s:%s@%s", s.RmqlUser, s.RmqPassword, s.RmqlHost)
-}
-
-type mqMessage struct {
 }
 
 func main() {
@@ -46,50 +42,34 @@ func main() {
 		return
 	}
 
-	var rabbitConn *amqp.Connection
-	if rabbitConn, err = amqp.Dial(config.RabbitMQAddr()); err != nil {
+	rabbitConn, err := api.RabbitMQConnect(config.RabbitMQAddr())
+	if err != nil {
 		return
 	}
 	defer rabbitConn.Close()
 
-	var rabbitChan *amqp.Channel
-	if rabbitChan, err = rabbitConn.Channel(); err != nil {
-		return
-	}
-	defer rabbitChan.Close()
-
-	rmqchan, err := rabbitChan.Consume(
-		"calendar", // queue name
-		"",         // consumer
-		false,      // auto ask
-		false,      // exclusive
-		false,      // no-local
-		false,      // no-wait
-		nil)        // arguments
-	if err != nil {
-		return
-	}
-
+	datachan, err := rabbitConn.Subscribe("calendar")
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
+	fmt.Println("Sender started")
 loop:
 	for {
 		select {
-		case msg := <-rmqchan:
-			if len(msg.Body) == 0 {
+		case msg, ok := <-datachan:
+			if !ok {
+				break loop
+			}
+			if len(msg) == 0 {
 				fmt.Println("empty body from rmq ???")
-				msg.Ack(false)
 				continue
 			}
 			mq := &api.RmqMessage{}
-			fmt.Println(string(msg.Body))
-			if err := json.Unmarshal(msg.Body, mq); err != nil {
+			if err := json.Unmarshal(msg, mq); err != nil {
 				fmt.Printf("Got invalid blob: %v\n", err)
 			} else {
-				fmt.Println(mq)
+				fmt.Println("Event from calendar:", mq.Event)
 			}
-			msg.Ack(false)
 		case <-stop:
 			break loop
 		}

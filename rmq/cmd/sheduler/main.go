@@ -11,14 +11,17 @@ import (
 	"syscall"
 
 	"../../api"
-	"github.com/streadway/amqp"
 )
 
 // ShedulerConfig - base parameters
 type shedulerConfig struct {
-	RmqlHost    string `json:"rabbitmq_host"`
-	RmqlUser    string `json:"rabbitmq_user"`
-	RmqPassword string `json:"rabbitmq_password"`
+	RmqlHost     string `json:"rabbitmq_host"`
+	RmqlUser     string `json:"rabbitmq_user"`
+	RmqPassword  string `json:"rabbitmq_password"`
+	PsqlHost     string `json:"postgres_host"`
+	PsqlUser     string `json:"postgres_user"`
+	PsqlPassword string `json:"postgres_password"`
+	PsqlDatabase string `json:"postgres_database"`
 }
 
 func (s *shedulerConfig) RabbitMQAddr() string {
@@ -42,26 +45,14 @@ func main() {
 	if err = json.Unmarshal(configJSON, &config); err != nil {
 		return
 	}
-	var rabbitConn *amqp.Connection
-	if rabbitConn, err = amqp.Dial(config.RabbitMQAddr()); err != nil {
+
+	rabbitConn, err := api.RabbitMQConnect(config.RabbitMQAddr())
+	if err != nil {
 		return
 	}
 	defer rabbitConn.Close()
 
-	var rabbitChan *amqp.Channel
-	if rabbitChan, err = rabbitConn.Channel(); err != nil {
-		return
-	}
-	defer rabbitChan.Close()
-
-	if _, err = rabbitChan.QueueDeclare(
-		"calendar", // queue name
-		true,       // durable
-		false,      // delete when unused
-		false,      // exclusive
-		false,      // no-wait
-		nil,        // arguments
-	); err != nil {
+	if err = rabbitConn.DeclareQueue("calendar"); err != nil {
 		return
 	}
 
@@ -75,17 +66,10 @@ func main() {
 		return
 	}
 	fmt.Println(string(data))
-	err = rabbitChan.Publish(
-		"",         // exchange
-		"calendar", // routing key
-		false,      // mandatory
-		false,
-		amqp.Publishing{
-			DeliveryMode: amqp.Persistent,
-			ContentType:  "application/json",
-			Body:         data,
-		})
-
+	err = rabbitConn.SendMessage("calendar", data)
+	if err != nil {
+		return
+	}
 loop:
 	for {
 		select {
