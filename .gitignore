@@ -2,8 +2,3 @@
 /.vscode/
 /bin/
 /src/
-gotelnet
-echoserver
-mycalendar
-testapp
-testgrpc
