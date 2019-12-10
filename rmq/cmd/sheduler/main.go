@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"../../api"
 )
@@ -26,6 +27,10 @@ type shedulerConfig struct {
 
 func (s *shedulerConfig) RabbitMQAddr() string {
 	return fmt.Sprintf("amqp://%s:%s@%s", s.RmqlUser, s.RmqPassword, s.RmqlHost)
+}
+
+func (s *shedulerConfig) PostgresAddr() string {
+	return fmt.Sprintf("postgresql://%s:%s@%s/%s", s.PsqlUser, s.PsqlPassword, s.PsqlHost, s.PsqlDatabase)
 }
 
 func main() {
@@ -46,12 +51,20 @@ func main() {
 		return
 	}
 
+	var db *dbMonitor
+	if db, err = connectToDatabase(config.PostgresAddr()); err != nil {
+		return
+	}
+	defer db.Close()
+	if err = db.ReadEvents(); err != nil {
+		return
+	}
+
 	rabbitConn, err := api.RabbitMQConnect(config.RabbitMQAddr())
 	if err != nil {
 		return
 	}
 	defer rabbitConn.Close()
-
 	if err = rabbitConn.DeclareQueue("calendar"); err != nil {
 		return
 	}
@@ -70,9 +83,16 @@ func main() {
 	if err != nil {
 		return
 	}
+	ticker := time.NewTicker(time.Minute)
+
 loop:
 	for {
 		select {
+		case <-ticker.C:
+			if err = db.ReadEvents(); err != nil {
+				return
+			}
+			db.SelectNextEvent() //todo
 		case <-stop:
 			break loop
 		}
