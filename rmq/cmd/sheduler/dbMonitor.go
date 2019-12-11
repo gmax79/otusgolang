@@ -48,5 +48,19 @@ func (m *dbMonitor) ReadEvents() error {
 	return nil
 }
 
-func (m *dbMonitor) SelectNextEvent() {
+func (m *dbMonitor) GetNearestEvent() (event time.Time, ok bool) {
+	if len(m.timers) == 0 {
+		return
+	}
+	for t := range m.timers {
+		event = t
+		break
+	}
+	for t, e := range m.timers {
+		if event.After(t) {
+			event = t
+		}
+	}
+	return event, true
+
 }
