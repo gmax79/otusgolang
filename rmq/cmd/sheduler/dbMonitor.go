@@ -42,6 +42,9 @@ func (m *dbMonitor) ReadEvents() error {
 			m.timers[timer] = info
 		}
 	}
+	if err = rows.Err(); err != nil {
+		return err
+	}
 	return nil
 }
 

@@ -59,6 +59,9 @@ func (h dbSchema) checkTable(dbc *sql.DB, name string, schema map[string]string)
 		}
 		count++
 	}
+	if err = rows.Err(); err != nil {
+		return err
+	}
 	if count == 0 {
 		return &dbTableMissingError{tableName: name}
 	}

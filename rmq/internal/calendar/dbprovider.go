@@ -40,6 +40,9 @@ func (p *dbProvder) GetTriggers() ([]Date, error) {
 		d.ParseDate(timer)
 		ids = append(ids, d.d)
 	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
 	return ids, nil
 }
 
@@ -110,6 +113,9 @@ func (p *dbProvder) FindEvents(parameters SearchParameters) ([]Event, error) {
 			return events, err
 		}
 		events = append(events, Event(info))
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return events, nil
 }
