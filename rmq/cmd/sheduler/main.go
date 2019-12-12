@@ -71,31 +71,36 @@ func main() {
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-
-	var m api.RmqMessage
-	m.Event = "test"
-	data, err := json.Marshal(m)
-	if err != nil {
-		return
-	}
-	fmt.Println(string(data))
-	err = rabbitConn.SendMessage("calendar", data)
-	if err != nil {
-		return
-	}
-	ticker := time.NewTicker(time.Minute)
+	ticker := time.NewTicker(time.Second * 10)
 
 loop:
 	for {
 		select {
 		case <-ticker.C:
 			if err = db.ReadEvents(); err != nil {
-				return
+				fmt.Println(err)
+				continue
 			}
-			db.SelectNextEvent() //todo
+			event, ok := db.GetNearestEvent()
+			if ok {
+				duration := event.Sub(time.Now())
+				fmt.Println("Next event after", duration.String())
+			}
 		case <-stop:
 			break loop
 		}
 	}
+	ticker.Stop()
 	fmt.Println("Sheduler stopped")
+}
+
+func sendEventToRabbit(conn *api.RmqConnection, event string) error {
+	var m api.RmqMessage
+	m.Event = event
+	data, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+	err = conn.SendMessage("calendar", data)
+	return err
 }

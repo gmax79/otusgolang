@@ -38,7 +38,7 @@ func (m *dbMonitor) ReadEvents() error {
 		if err = rows.Scan(&timer, &info); err != nil {
 			return err
 		}
-		if now.After(timer) {
+		if now.Before(timer) {
 			m.timers[timer] = info
 		}
 	}
@@ -56,8 +56,8 @@ func (m *dbMonitor) GetNearestEvent() (event time.Time, ok bool) {
 		event = t
 		break
 	}
-	for t, e := range m.timers {
-		if event.After(t) {
+	for t := range m.timers {
+		if t.Before(event) {
 			event = t
 		}
 	}
