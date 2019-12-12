@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"net"
 
-	"../../internal/calendar"
-	"./pbcalendar"
+	"github.com/gmax79/otusgolang/rmq/internal/calendar"
+	"github.com/gmax79/otusgolang/rmq/api/pbcalendar"
+
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )

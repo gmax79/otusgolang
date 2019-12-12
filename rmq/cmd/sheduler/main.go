@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"../../api"
+	"github.com/gmax79/otusgolang/rmq/api"
 )
 
 // ShedulerConfig - base parameters

@@ -62,5 +62,4 @@ func (m *dbMonitor) GetNearestEvent() (event time.Time, ok bool) {
 		}
 	}
 	return event, true
-
 }

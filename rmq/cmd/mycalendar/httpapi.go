@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"../../internal/calendar"
-	"../../internal/support"
+	"github.com/gmax79/otusgolang/rmq/internal/calendar"
+	"github.com/gmax79/otusgolang/rmq/internal/support"
 	"go.uber.org/zap"
 )
 

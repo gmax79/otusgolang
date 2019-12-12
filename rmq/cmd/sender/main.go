@@ -10,7 +10,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"../../api"
+	"github.com/gmax79/otusgolang/rmq/api"
 )
 
 // SenderConfig - base parameters
