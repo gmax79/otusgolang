@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/gmax79/otusgolang/rmq/internal/simple"
@@ -44,7 +43,7 @@ func (m *dbMonitor) ReadEvents() error {
 		}
 		if now.Before(timer) {
 			m.timers[timer] = info
-			fmt.Println(timer)
+			//fmt.Println(timer)
 		}
 	}
 	if err = rows.Err(); err != nil {

@@ -1,7 +1,7 @@
 gen:
 	cd api/pbcalendar && ./genpb.sh
 
-main:
+main: gen
 	cd cmd/mycalendar && go build -o mycalendar
 
 testapp:
@@ -16,11 +16,14 @@ sender:
 sheduler:
 	cd cmd/sheduler &&  go build -o scheduler
 
-tests: testapp testgrpc
+testmq:
+	cd cmd/testmq && go build -o testmq
+
+tests: testapp testgrpc testmq
 
 rabbitmq: sender scheduler
 
 all: gen main testapp testgrpc sender sheduler
 
 clean: 
-	-rm cmd/mycalendar/mycalendar cmd/testapp/testapp cmd/testgrpc/testgrpc cmd/sender/sender cmd/sheduler/sheduler 2> /dev/null 
+	-rm cmd/mycalendar/mycalendar cmd/testapp/testapp cmd/testgrpc/testgrpc cmd/testmq/testmq cmd/sender/sender cmd/sheduler/sheduler 2> /dev/null 

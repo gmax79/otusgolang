@@ -72,7 +72,7 @@ func main() {
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-	ticker := time.NewTicker(time.Second * 10)
+	ticker := time.NewTicker(time.Second * 2)
 	fmt.Println("Sheduler started")
 
 loop:
