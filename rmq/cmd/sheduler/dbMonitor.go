@@ -8,18 +8,19 @@ import (
 	_ "github.com/jackc/pgx/stdlib" // attach pgx postgres driver
 )
 
-func connectToDatabase(dsn string) (*dbMonitor, error) {
+func connectToDatabase(dsn string, finished chan<- string) (*dbMonitor, error) {
 	connection, err := sql.Open("pgx", dsn) // *sql.DB
 	if err != nil {
 		return nil, err
 	}
 	timers := make(map[time.Time]string)
-	return &dbMonitor{db: connection, timers: timers}, nil
+	return &dbMonitor{db: connection, timers: timers, finished: finished}, nil
 }
 
 type dbMonitor struct {
-	db     *sql.DB
-	timers map[time.Time]string
+	db       *sql.DB
+	timers   map[time.Time]string
+	finished chan<- string
 }
 
 func (m *dbMonitor) Close() {
@@ -33,7 +34,7 @@ func (m *dbMonitor) ReadEvents() error {
 	}
 	defer rows.Close()
 
-	m.timers = map[time.Time]string{}
+	newtimers := map[time.Time]string{}
 	now := simple.NowDate()
 	for rows.Next() {
 		var timer time.Time
@@ -42,13 +43,22 @@ func (m *dbMonitor) ReadEvents() error {
 			return err
 		}
 		if now.Before(timer) {
-			m.timers[timer] = info
-			//fmt.Println(timer)
+			newtimers[timer] = info
 		}
 	}
 	if err = rows.Err(); err != nil {
 		return err
 	}
+	for nt, e := range newtimers {
+		if _, ok := m.timers[nt]; !ok {
+			go func(event string, duration time.Duration) {
+				t := time.NewTimer(duration)
+				<-t.C
+				m.finished <- event
+			}(e, nt.Sub(now))
+		}
+	}
+	m.timers = newtimers
 	return nil
 }
 

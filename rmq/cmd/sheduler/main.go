@@ -52,14 +52,12 @@ func main() {
 		return
 	}
 
+	finishedEvents := make(chan string)
 	var db *dbMonitor
-	if db, err = connectToDatabase(config.PostgresAddr()); err != nil {
+	if db, err = connectToDatabase(config.PostgresAddr(), finishedEvents); err != nil {
 		return
 	}
 	defer db.Close()
-	if err = db.ReadEvents(); err != nil {
-		return
-	}
 
 	rabbitConn, err := api.RabbitMQConnect(config.RabbitMQAddr())
 	if err != nil {
@@ -72,22 +70,33 @@ func main() {
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-	ticker := time.NewTicker(time.Second * 2)
+	tickerTimeout := time.Second * 2
+	ticker := time.NewTicker(tickerTimeout)
 	fmt.Println("Sheduler started")
+	var tickerSummaryTimeout time.Duration
 
 loop:
 	for {
 		select {
 		case <-ticker.C:
+			tickerSummaryTimeout += tickerTimeout
 			if err = db.ReadEvents(); err != nil {
-				//fmt.Println(err)
+				fmt.Println(err)
 				continue
 			}
-			event, ok := db.GetNearestEvent()
-			if ok {
-				duration := event.Sub(simple.NowDate())
-				fmt.Println("Next event after", duration.String())
+			if tickerSummaryTimeout > time.Second*5 {
+				tickerSummaryTimeout = 0
 			}
+			nearest, ok := db.GetNearestEvent()
+			if ok {
+				fmt.Println("found")
+				duration := nearest.Sub(simple.NowDate())
+				if duration < time.Second*10 || tickerSummaryTimeout == 0 {
+					fmt.Println("Next event after", duration.String())
+				}
+			}
+		case e := <-finishedEvents:
+			sendEventToRabbit(rabbitConn, e)
 		case <-stop:
 			break loop
 		}
