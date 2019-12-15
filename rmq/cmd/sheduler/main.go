@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/gmax79/otusgolang/rmq/api"
-	"github.com/gmax79/otusgolang/rmq/internal/simple"
 )
 
 // ShedulerConfig - base parameters
@@ -70,30 +69,16 @@ func main() {
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-	tickerTimeout := time.Second * 2
-	ticker := time.NewTicker(tickerTimeout)
+	ticker := time.NewTicker(time.Second * 2)
 	fmt.Println("Sheduler started")
-	var tickerSummaryTimeout time.Duration
 
 loop:
 	for {
 		select {
 		case <-ticker.C:
-			tickerSummaryTimeout += tickerTimeout
 			if err = db.ReadEvents(); err != nil {
 				fmt.Println(err)
 				continue
-			}
-			if tickerSummaryTimeout > time.Second*5 {
-				tickerSummaryTimeout = 0
-			}
-			nearest, ok := db.GetNearestEvent()
-			if ok {
-				fmt.Println("found")
-				duration := nearest.Sub(simple.NowDate())
-				if duration < time.Second*10 || tickerSummaryTimeout == 0 {
-					fmt.Println("Next event after", duration.String())
-				}
 			}
 		case e := <-finishedEvents:
 			sendEventToRabbit(rabbitConn, e)
@@ -106,6 +91,7 @@ loop:
 }
 
 func sendEventToRabbit(conn *api.RmqConnection, event string) error {
+	fmt.Println("Send to RabbitMQ:", event)
 	var m api.RmqMessage
 	m.Event = event
 	data, err := json.Marshal(m)

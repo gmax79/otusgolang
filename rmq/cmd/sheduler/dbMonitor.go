@@ -13,13 +13,13 @@ func connectToDatabase(dsn string, finished chan<- string) (*dbMonitor, error) {
 	if err != nil {
 		return nil, err
 	}
-	timers := make(map[time.Time]string)
+	timers := make(map[time.Time][]string)
 	return &dbMonitor{db: connection, timers: timers, finished: finished}, nil
 }
 
 type dbMonitor struct {
 	db       *sql.DB
-	timers   map[time.Time]string
+	timers   map[time.Time][]string
 	finished chan<- string
 }
 
@@ -34,7 +34,7 @@ func (m *dbMonitor) ReadEvents() error {
 	}
 	defer rows.Close()
 
-	newtimers := map[time.Time]string{}
+	newtimers := map[time.Time][]string{}
 	now := simple.NowDate()
 	for rows.Next() {
 		var timer time.Time
@@ -43,7 +43,9 @@ func (m *dbMonitor) ReadEvents() error {
 			return err
 		}
 		if now.Before(timer) {
-			newtimers[timer] = info
+			sl, _ := newtimers[timer]
+			sl = append(sl, info)
+			newtimers[timer] = sl
 		}
 	}
 	if err = rows.Err(); err != nil {
@@ -51,29 +53,15 @@ func (m *dbMonitor) ReadEvents() error {
 	}
 	for nt, e := range newtimers {
 		if _, ok := m.timers[nt]; !ok {
-			go func(event string, duration time.Duration) {
+			go func(events []string, duration time.Duration) {
 				t := time.NewTimer(duration)
 				<-t.C
-				m.finished <- event
+				for _, e := range events {
+					m.finished <- e
+				}
 			}(e, nt.Sub(now))
 		}
 	}
 	m.timers = newtimers
 	return nil
-}
-
-func (m *dbMonitor) GetNearestEvent() (event time.Time, ok bool) {
-	if len(m.timers) == 0 {
-		return
-	}
-	for t := range m.timers {
-		event = t
-		break
-	}
-	for t := range m.timers {
-		if t.Before(event) {
-			event = t
-		}
-	}
-	return event, true
 }
