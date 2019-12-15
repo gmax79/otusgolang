@@ -1,15 +1,21 @@
 package calendar
 
+import (
+	"github.com/gmax79/otusgolang/rmq/internal/objects"
+	"github.com/gmax79/otusgolang/rmq/internal/simple"
+	"github.com/gmax79/otusgolang/rmq/internal/storage"
+)
+
 type eventsimpl struct {
-	d  date
-	db *dbProvder
+	d  simple.Date
+	db *storage.DbProvider
 }
 
-func createEvents(alert date, dbc *dbProvder) Events {
+func createEvents(alert simple.Date, dbc *storage.DbProvider) Events {
 	return &eventsimpl{db: dbc, d: alert}
 }
 
-func (t *eventsimpl) AddEvent(e Event) error {
+func (t *eventsimpl) AddEvent(e objects.Event) error {
 	return t.db.AddEvent(t.d, string(e))
 }
 
@@ -21,16 +27,14 @@ func (t *eventsimpl) DeleteEventIndex(index int) error {
 	return t.db.DeleteEventIndex(t.d, index)
 }
 
-func (t *eventsimpl) DeleteEvent(e Event) error {
+func (t *eventsimpl) DeleteEvent(e objects.Event) error {
 	return t.db.DeleteEvent(t.d, e)
 }
 
-func (t *eventsimpl) GetEvent(index int) (Event, error) {
+func (t *eventsimpl) GetEvent(index int) (objects.Event, error) {
 	return t.db.GetEvent(t.d, index)
 }
 
-func (t *eventsimpl) MoveEvent(e Event, to Date) error {
-	var newdate date
-	newdate.d = to
-	return t.db.MoveEvent(t.d, e, newdate)
+func (t *eventsimpl) MoveEvent(e objects.Event, to simple.Date) error {
+	return t.db.MoveEvent(t.d, e, to)
 }

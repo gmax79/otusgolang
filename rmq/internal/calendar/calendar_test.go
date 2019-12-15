@@ -2,9 +2,11 @@ package calendar
 
 import (
 	"testing"
+
+	"github.com/gmax79/otusgolang/rmq/internal/simple"
 )
 
-func test(trigger string, d *Date) error {
+func test(trigger string, d *simple.Date) error {
 	t, err := ParseDate(trigger)
 	if err != nil {
 		return err
@@ -14,7 +16,7 @@ func test(trigger string, d *Date) error {
 }
 
 func TestTimeParser(t *testing.T) {
-	var p Date
+	var p simple.Date
 	if test("10:20:30", &p) != nil {
 		t.Fatal("Error at correct time")
 	}

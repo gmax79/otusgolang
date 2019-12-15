@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/gmax79/otusgolang/rmq/internal/calendar"
+	"github.com/gmax79/otusgolang/rmq/internal/objects"
+	"github.com/gmax79/otusgolang/rmq/internal/simple"
 	"github.com/gmax79/otusgolang/rmq/internal/support"
 	"go.uber.org/zap"
 )
@@ -71,7 +73,7 @@ func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
-		t, err := calendar.ParseValidDate(time)
+		t, err := simple.ParseValidDate(time)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
@@ -81,7 +83,7 @@ func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, err)
 			return
 		}
-		err = events.AddEvent(calendar.Event(event))
+		err = events.AddEvent(objects.Event(event))
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
@@ -102,7 +104,7 @@ func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
-		t, err := calendar.ParseValidDate(time)
+		t, err := simple.ParseValidDate(time)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
@@ -112,7 +114,7 @@ func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, err)
 			return
 		}
-		err = events.DeleteEvent(calendar.Event(event))
+		err = events.DeleteEvent(objects.Event(event))
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
@@ -134,12 +136,12 @@ func (s *httpCalendarAPI) httpMoveEvent(w http.ResponseWriter, r *http.Request) 
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
-		t, err := calendar.ParseValidDate(time)
+		t, err := simple.ParseValidDate(time)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
 		}
-		newt, err := calendar.ParseValidDate(newtime)
+		newt, err := simple.ParseValidDate(newtime)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
@@ -149,7 +151,7 @@ func (s *httpCalendarAPI) httpMoveEvent(w http.ResponseWriter, r *http.Request) 
 			support.HTTPResponse(w, err)
 			return
 		}
-		err = events.MoveEvent(calendar.Event(event), newt)
+		err = events.MoveEvent(objects.Event(event), newt)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
@@ -168,12 +170,12 @@ func (s *httpCalendarAPI) httpEventsForDay(w http.ResponseWriter, r *http.Reques
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
-		d, err := calendar.ParseValidDate(time)
+		d, err := simple.ParseValidDate(time)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
 		}
-		var sp calendar.SearchParameters
+		var sp objects.SearchParameters
 		sp.Day = d.Day
 		sp.Month = d.Month
 		sp.Year = d.Year
@@ -198,12 +200,12 @@ func (s *httpCalendarAPI) httpEventsForWeek(w http.ResponseWriter, r *http.Reque
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
-		d, err := calendar.ParseDate(time)
+		d, err := simple.ParseDate(time)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
 		}
-		var sp calendar.SearchParameters
+		var sp objects.SearchParameters
 		sp.Week = d.Month
 		sp.Year = d.Year
 
@@ -227,12 +229,12 @@ func (s *httpCalendarAPI) httpEventsForMonth(w http.ResponseWriter, r *http.Requ
 			support.HTTPResponse(w, http.StatusBadRequest)
 			return
 		}
-		d, err := calendar.ParseDate(time)
+		d, err := simple.ParseDate(time)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
 		}
-		var sp calendar.SearchParameters
+		var sp objects.SearchParameters
 		sp.Month = d.Month
 		sp.Year = d.Year
 

@@ -1,11 +1,12 @@
-package calendar
+package storage
 
 import (
 	"database/sql"
 	"fmt"
 )
 
-type dbSchema struct {
+// DbSchema - object to check or create db schema
+type DbSchema struct {
 }
 
 const createSchema = `
@@ -40,7 +41,7 @@ FROM information_schema.columns
 WHERE table_name = $1 order by column_name;
 `
 
-func (h dbSchema) checkTable(dbc *sql.DB, name string, schema map[string]string) error {
+func (h DbSchema) checkTable(dbc *sql.DB, name string, schema map[string]string) error {
 	var err error
 	var rows *sql.Rows
 	if rows, err = dbc.Query(getTableSchema, name); err != nil {
@@ -72,7 +73,7 @@ func (h dbSchema) checkTable(dbc *sql.DB, name string, schema map[string]string)
 }
 
 // CheckOrCreateSchema - function to create schema in empty db or error is schema is different
-func (h dbSchema) CheckOrCreateSchema(dbc *sql.DB) error {
+func (h DbSchema) CheckOrCreateSchema(dbc *sql.DB) error {
 	et := map[string]string{
 		"timer":       "timestamp without time zone",
 		"information": "character varying",

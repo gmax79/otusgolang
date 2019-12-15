@@ -1,28 +1,34 @@
 package calendar
 
+import (
+	"github.com/gmax79/otusgolang/rmq/internal/objects"
+	"github.com/gmax79/otusgolang/rmq/internal/simple"
+	"github.com/gmax79/otusgolang/rmq/internal/storage"
+)
+
 // Calendar implementaion
 type calendarImpl struct {
-	finished   chan date
+	finished   chan simple.Date
 	stoptimers chan struct{}
-	db         *dbProvder
-	timersset  map[Date]struct{}
+	db         *storage.DbProvider
+	timersset  map[simple.Date]struct{}
 }
 
 func createCalendar(psqlConnect string) (Calendar, error) {
-	db, err := connectToDatabase(psqlConnect)
+	db, err := storage.ConnectToDatabase(psqlConnect)
 	if err != nil {
 		return nil, err
 	}
-	var checkdb dbSchema
+	var checkdb storage.DbSchema
 	err = checkdb.CheckOrCreateSchema(db)
 	if err != nil {
 		return nil, err
 	}
 	newcalendar := &calendarImpl{}
-	newcalendar.finished = make(chan date, 1)
+	newcalendar.finished = make(chan simple.Date, 1)
 	newcalendar.stoptimers = make(chan struct{})
-	newcalendar.db = getProvider(db)
-	newcalendar.timersset = make(map[Date]struct{})
+	newcalendar.db = storage.CreateProvider(db)
+	newcalendar.timersset = make(map[simple.Date]struct{})
 	go func(c *calendarImpl) {
 		for {
 			id := <-c.finished
@@ -32,50 +38,41 @@ func createCalendar(psqlConnect string) (Calendar, error) {
 	return newcalendar, nil
 }
 
-func valid(d Date) (date, error) {
-	var t date
-	t.d = d
-	return t, t.Valid()
-}
-
-func (c *calendarImpl) AddTrigger(d Date) (Events, error) {
+func (c *calendarImpl) AddTrigger(d simple.Date) (Events, error) {
 	var err error
-	var t date
-	if t, err = valid(d); err != nil {
+	if err = d.Valid(); err != nil {
 		return nil, err
 	}
 	if _, ok := c.timersset[d]; !ok {
-		err = createTimer(t, c.finished, c.stoptimers)
+		err = createTimer(d, c.finished, c.stoptimers)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return createEvents(t, c.db), nil
+	return createEvents(d, c.db), nil
 }
 
-func (c *calendarImpl) GetTriggers() ([]Date, error) {
+func (c *calendarImpl) GetTriggers() ([]simple.Date, error) {
 	return c.db.GetTriggers()
 }
 
-func (c *calendarImpl) DeleteTrigger(d Date) error {
+func (c *calendarImpl) DeleteTrigger(d simple.Date) error {
 	var err error
-	var t date
-	if t, err = valid(d); err != nil {
+	if err = d.Valid(); err != nil {
 		return err
 	}
 	delete(c.timersset, d)
-	return c.db.DeleteTrigger(t)
+	return c.db.DeleteTrigger(d)
 }
 
-func (c *calendarImpl) GetEvents(d Date) (Events, error) {
+func (c *calendarImpl) GetEvents(d simple.Date) (Events, error) {
 	var err error
-	var t date
-	if t, err = valid(d); err != nil {
+	if err = d.Valid(); err != nil {
 		return nil, err
 	}
-	return &eventsimpl{db: c.db, d: t}, nil
+	return &eventsimpl{db: c.db, d: d}, nil
 }
 
-func (c *calendarImpl) FindEvents(parameters SearchParameters) ([]Event, error) {
+func (c *calendarImpl) FindEvents(parameters objects.SearchParameters) ([]objects.Event, error) {
 	return c.db.FindEvents(parameters)
 }

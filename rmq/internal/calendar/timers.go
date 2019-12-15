@@ -3,17 +3,19 @@ package calendar
 import (
 	"fmt"
 	"time"
+
+	"github.com/gmax79/otusgolang/rmq/internal/simple"
 )
 
 type timerimpl struct {
-	timerend chan<- date
+	timerend chan<- simple.Date
 	stop     <-chan struct{}
-	alert    date
+	alert    simple.Date
 	duration time.Duration
 }
 
-func createTimer(alert date, timerend chan<- date, stopch <-chan struct{}) error {
-	var p date
+func createTimer(alert simple.Date, timerend chan<- simple.Date, stopch <-chan struct{}) error {
+	var p simple.Date
 	p.SetNow()
 	a := alert.Value()
 	if a.Before(p.Value()) {

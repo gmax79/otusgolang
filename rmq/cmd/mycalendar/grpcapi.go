@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/gmax79/otusgolang/rmq/internal/calendar"
 	"github.com/gmax79/otusgolang/rmq/api/pbcalendar"
+	"github.com/gmax79/otusgolang/rmq/internal/calendar"
+	"github.com/gmax79/otusgolang/rmq/internal/objects"
+	"github.com/gmax79/otusgolang/rmq/internal/simple"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -46,8 +48,8 @@ func (g *grpcCalendarAPI) GetLastError() error {
 	return g.lasterror
 }
 
-func pbDateToCalendarDate(t *pbcalendar.Date) calendar.Date {
-	var d calendar.Date
+func pbDateToCalendarDate(t *pbcalendar.Date) simple.Date {
+	var d simple.Date
 	d.Day = int(t.GetDay())
 	d.Month = int(t.GetMonth())
 	d.Year = int(t.GetYear())
@@ -67,7 +69,7 @@ func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, e *pbcalendar.Event) 
 		g.logger.Error("grpc CreateEvent", zap.String("error", err.Error()))
 		return nil, err
 	}
-	events.AddEvent(calendar.Event(e.Information))
+	events.AddEvent(objects.Event(e.Information))
 
 	var result pbcalendar.Result
 	result.Status = fmt.Sprintf("Event at %s added", trigger.String())
@@ -84,7 +86,7 @@ func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.Event) 
 	if err != nil {
 		return nil, err
 	}
-	err = events.DeleteEvent(calendar.Event(e.Information))
+	err = events.DeleteEvent(objects.Event(e.Information))
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +103,7 @@ func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, e *pbcalendar.MoveEvent
 	if err != nil {
 		return nil, err
 	}
-	event := (calendar.Event)(e.Event.Information)
+	event := (objects.Event)(e.Event.Information)
 	err = events.MoveEvent(event, newtime)
 	if err != nil {
 		return nil, err
@@ -115,7 +117,7 @@ func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, e *pbcalendar.MoveEvent
 func (g *grpcCalendarAPI) EventsForDay(ctx context.Context, e *pbcalendar.EventsForDay) (*pbcalendar.Count, error) {
 	g.logger.Info("grpc EventsForDay", zap.String("event", e.String()))
 
-	var sp calendar.SearchParameters
+	var sp objects.SearchParameters
 	sp.Day = int(e.Day)
 	sp.Month = int(e.Month)
 	sp.Year = int(e.Year)
@@ -134,7 +136,7 @@ func (g *grpcCalendarAPI) EventsForDay(ctx context.Context, e *pbcalendar.Events
 func (g *grpcCalendarAPI) EventsForMonth(ctx context.Context, e *pbcalendar.EventsForMonth) (*pbcalendar.Count, error) {
 	g.logger.Info("grpc EventsForMonth", zap.String("event", e.String()))
 
-	var sp calendar.SearchParameters
+	var sp objects.SearchParameters
 	sp.Month = int(e.Month)
 	sp.Year = int(e.Year)
 
@@ -152,7 +154,7 @@ func (g *grpcCalendarAPI) EventsForMonth(ctx context.Context, e *pbcalendar.Even
 func (g *grpcCalendarAPI) EventsForWeek(ctx context.Context, e *pbcalendar.EventsForWeek) (*pbcalendar.Count, error) {
 	g.logger.Info("grpc EventsForWeek", zap.String("event", e.String()))
 
-	var sp calendar.SearchParameters
+	var sp objects.SearchParameters
 	sp.Week = int(e.Week)
 	sp.Year = int(e.Year)
 
