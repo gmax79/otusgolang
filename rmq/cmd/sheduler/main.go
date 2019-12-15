@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gmax79/otusgolang/rmq/api"
+	"github.com/gmax79/otusgolang/rmq/internal/simple"
 )
 
 // ShedulerConfig - base parameters
@@ -79,12 +80,12 @@ loop:
 		select {
 		case <-ticker.C:
 			if err = db.ReadEvents(); err != nil {
-				fmt.Println(err)
+				//fmt.Println(err)
 				continue
 			}
 			event, ok := db.GetNearestEvent()
 			if ok {
-				duration := event.Sub(time.Now())
+				duration := event.Sub(simple.NowDate())
 				fmt.Println("Next event after", duration.String())
 			}
 		case <-stop:

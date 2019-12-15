@@ -98,6 +98,13 @@ func (da *Date) SetNow() time.Time {
 	return da.Value()
 }
 
+// NowDate - return time without timezone
+func NowDate() time.Time {
+	var d Date
+	d.SetNow()
+	return d.Value()
+}
+
 // ParseValidDate - create calendar date from string and validate
 func ParseValidDate(trigger string) (Date, error) {
 	var err error

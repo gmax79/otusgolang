@@ -2,8 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
+	"github.com/gmax79/otusgolang/rmq/internal/simple"
 	_ "github.com/jackc/pgx/stdlib" // attach pgx postgres driver
 )
 
@@ -31,7 +33,9 @@ func (m *dbMonitor) ReadEvents() error {
 		return err
 	}
 	defer rows.Close()
-	now := time.Now()
+
+	m.timers = map[time.Time]string{}
+	now := simple.NowDate()
 	for rows.Next() {
 		var timer time.Time
 		var info string
@@ -40,6 +44,7 @@ func (m *dbMonitor) ReadEvents() error {
 		}
 		if now.Before(timer) {
 			m.timers[timer] = info
+			fmt.Println(timer)
 		}
 	}
 	if err = rows.Err(); err != nil {
