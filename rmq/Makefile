@@ -14,7 +14,7 @@ sender:
 	cd cmd/sender &&  go build -o sender
 
 sheduler:
-	cd cmd/sheduler &&  go build -o scheduler
+	cd cmd/sheduler &&  go build -o sheduler
 
 testmq:
 	cd cmd/testmq && go build -o testmq
@@ -23,7 +23,7 @@ tests: testapp testgrpc testmq
 
 rabbitmq: sender scheduler
 
-all: gen main testapp testgrpc sender sheduler
+all: main tests sender sheduler
 
 clean: 
-	-rm cmd/mycalendar/mycalendar cmd/testapp/testapp cmd/testgrpc/testgrpc cmd/testmq/testmq cmd/sender/sender cmd/sheduler/sheduler 2> /dev/null 
+	-rm cmd/mycalendar/mycalendar cmd/testapp/testapp cmd/testgrpc/testgrpc cmd/testmq/testmq cmd/sender/sender cmd/sheduler/sheduler 2>/dev/null 
