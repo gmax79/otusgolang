@@ -7,7 +7,7 @@ import (
 )
 
 func test(trigger string, d *simple.Date) error {
-	t, err := ParseDate(trigger)
+	t, err := simple.ParseDate(trigger)
 	if err != nil {
 		return err
 	}
