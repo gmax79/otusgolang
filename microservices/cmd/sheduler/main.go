@@ -16,21 +16,18 @@ import (
 
 // ShedulerConfig - base parameters
 type shedulerConfig struct {
-	RmqlHost     string `json:"rabbitmq_host"`
-	RmqlUser     string `json:"rabbitmq_user"`
-	RmqPassword  string `json:"rabbitmq_password"`
-	PsqlHost     string `json:"postgres_host"`
-	PsqlUser     string `json:"postgres_user"`
-	PsqlPassword string `json:"postgres_password"`
-	PsqlDatabase string `json:"postgres_database"`
+	RmqlHost    string `json:"rabbitmq_host"`
+	RmqlUser    string `json:"rabbitmq_user"`
+	RmqPassword string `json:"rabbitmq_password"`
+	GrpcHost    string `json:"grpc_host"`
 }
 
 func (s *shedulerConfig) RabbitMQAddr() string {
 	return fmt.Sprintf("amqp://%s:%s@%s", s.RmqlUser, s.RmqPassword, s.RmqlHost)
 }
 
-func (s *shedulerConfig) PostgresAddr() string {
-	return fmt.Sprintf("postgresql://%s:%s@%s/%s", s.PsqlUser, s.PsqlPassword, s.PsqlHost, s.PsqlDatabase)
+func (s *shedulerConfig) ApplicationAddr() string {
+	return s.GrpcHost
 }
 
 func main() {

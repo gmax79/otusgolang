@@ -2,8 +2,5 @@
     "rabbitmq_host": "do.cc3.ru:5672",
     "rabbitmq_user": "grader",
     "rabbitmq_password": "Vfnhtirf79",
-    "postgres_host": "do.cc3.ru:5432",
-    "postgres_user": "postgres",
-    "postgres_password": "Vfnhtirf79",
-    "postgres_database": "calendar"
+    "grpc_host": "localhost:9090"
 }
