@@ -59,7 +59,7 @@ func pbDateToCalendarDate(t *pbcalendar.Date) simple.Date {
 	return d
 }
 
-func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, e *pbcalendar.Event) (*pbcalendar.Result, error) {
+func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, e *pbcalendar.CreateEventRequest) (*pbcalendar.CreateEventResponse, error) {
 	g.logger.Info("grpc CreateEvent", zap.String("event", e.String()))
 
 	t := e.Alerttime
@@ -71,15 +71,15 @@ func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, e *pbcalendar.Event) 
 	}
 	events.AddEvent(objects.Event(e.Information))
 
-	var result pbcalendar.Result
+	var result pbcalendar.CreateEventResponse
 	result.Status = fmt.Sprintf("Event at %s added", trigger.String())
 	return &result, nil
 }
 
-func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.Event) (*pbcalendar.Result, error) {
+func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.DeleteEventRequest) (*pbcalendar.DeleteEventResponse, error) {
 	g.logger.Info("grpc DeleteEvent", zap.String("event", e.String()))
 
-	var result pbcalendar.Result
+	var result pbcalendar.DeleteEventResponse
 	t := e.Alerttime
 	trigger := pbDateToCalendarDate(t)
 	events, err := g.calen.GetEvents(trigger)
@@ -94,27 +94,27 @@ func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.Event) 
 	return &result, nil
 }
 
-func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, e *pbcalendar.MoveEvent) (*pbcalendar.Result, error) {
+func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, e *pbcalendar.MoveEventRequest) (*pbcalendar.MoveEventResponse, error) {
 	g.logger.Info("grpc MoveEvent", zap.String("event", e.String()))
 
-	trigger := pbDateToCalendarDate(e.Event.Alerttime)
+	trigger := pbDateToCalendarDate(e.Alerttime)
 	newtime := pbDateToCalendarDate(e.Newdate)
 	events, err := g.calen.GetEvents(trigger)
 	if err != nil {
 		return nil, err
 	}
-	event := (objects.Event)(e.Event.Information)
+	event := (objects.Event)(e.Information)
 	err = events.MoveEvent(event, newtime)
 	if err != nil {
 		return nil, err
 	}
 
-	var result pbcalendar.Result
-	result.Status = fmt.Sprintf("Event %s moved from %s to %s", e.Event.Information, trigger.String(), newtime.String())
+	var result pbcalendar.MoveEventResponse
+	result.Status = fmt.Sprintf("Event %s moved from %s to %s", e.Information, trigger.String(), newtime.String())
 	return &result, nil
 }
 
-func (g *grpcCalendarAPI) EventsForDay(ctx context.Context, e *pbcalendar.EventsForDay) (*pbcalendar.Count, error) {
+func (g *grpcCalendarAPI) EventsForDay(ctx context.Context, e *pbcalendar.EventsForDayRequest) (*pbcalendar.Count, error) {
 	g.logger.Info("grpc EventsForDay", zap.String("event", e.String()))
 
 	var sp objects.SearchParameters
@@ -133,7 +133,7 @@ func (g *grpcCalendarAPI) EventsForDay(ctx context.Context, e *pbcalendar.Events
 	return &c, nil
 }
 
-func (g *grpcCalendarAPI) EventsForMonth(ctx context.Context, e *pbcalendar.EventsForMonth) (*pbcalendar.Count, error) {
+func (g *grpcCalendarAPI) EventsForMonth(ctx context.Context, e *pbcalendar.EventsForMonthRequest) (*pbcalendar.Count, error) {
 	g.logger.Info("grpc EventsForMonth", zap.String("event", e.String()))
 
 	var sp objects.SearchParameters
@@ -151,7 +151,7 @@ func (g *grpcCalendarAPI) EventsForMonth(ctx context.Context, e *pbcalendar.Even
 	return &c, nil
 }
 
-func (g *grpcCalendarAPI) EventsForWeek(ctx context.Context, e *pbcalendar.EventsForWeek) (*pbcalendar.Count, error) {
+func (g *grpcCalendarAPI) EventsForWeek(ctx context.Context, e *pbcalendar.EventsForWeekRequest) (*pbcalendar.Count, error) {
 	g.logger.Info("grpc EventsForWeek", zap.String("event", e.String()))
 
 	var sp objects.SearchParameters

@@ -3,15 +3,39 @@ syntax = "proto3";
 package pbcalendar;
 
 service MyCalendar {
-    rpc createEvent (Event) returns (Result);
-    rpc deleteEvent (Event) returns (Result);
-    rpc moveEvent (MoveEvent) returns (Result);
-    rpc eventsForDay(EventsForDay) returns (Count);
-    rpc eventsForMonth(EventsForMonth) returns (Count);
-    rpc eventsForWeek(EventsForWeek) returns (Count);
+    rpc createEvent (CreateEventRequest) returns (CreateEventResponse);
+    rpc deleteEvent (DeleteEventRequest) returns (DeleteEventResponse);
+    rpc moveEvent (MoveEventRequest) returns (MoveEventResponse);
+    rpc eventsForDay(EventsForDayRequest) returns (Count);
+    rpc eventsForMonth(EventsForMonthRequest) returns (Count);
+    rpc eventsForWeek(EventsForWeekRequest) returns (Count);
 }
 
-message Result {
+message CreateEventRequest {
+    Date alerttime = 1;
+    string information = 2;
+}
+
+message CreateEventResponse {
+    string status  = 1;
+}
+
+message DeleteEventRequest {
+    Date alerttime = 1;
+    string information = 2;
+}
+
+message DeleteEventResponse {
+    string status  = 1;
+}
+
+message MoveEventRequest {
+    Date alerttime = 1;
+    string information = 2;
+    Date newdate = 3;
+}
+
+message MoveEventResponse {
     string status  = 1;
 }
 
@@ -28,28 +52,18 @@ message Date {
     int32 Second = 6;
 }
 
-message Event {
-    Date alerttime = 1;
-    string information = 2;
-}
-
-message MoveEvent {
-    Event event = 1;
-    Date newdate = 2;
-}
-
-message EventsForDay {
+message EventsForDayRequest {
     int32 Year = 1;
     int32 Month = 2;
     int32 Day = 3;
 }
 
-message EventsForWeek {
+message EventsForWeekRequest {
     int32 Year = 1;
     int32 Week = 2;
 }
 
-message EventsForMonth {
+message EventsForMonthRequest {
     int32 Year = 1;
     int32 Month = 2;
 }

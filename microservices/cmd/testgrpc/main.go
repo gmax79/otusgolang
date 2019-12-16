@@ -39,7 +39,7 @@ func (c *client) Shutdown() {
 	c.cancel()
 }
 
-func (c *client) CreateEvent(e pbcalendar.Event) {
+func (c *client) CreateEvent(e pbcalendar.CreateEventRequest) {
 	result, err := c.client.CreateEvent(c.ctx, &e)
 	if err != nil {
 		log.Fatal(err)
@@ -47,7 +47,7 @@ func (c *client) CreateEvent(e pbcalendar.Event) {
 	fmt.Println(result.Status)
 }
 
-func (c *client) DeleteEvent(e pbcalendar.Event) {
+func (c *client) DeleteEvent(e pbcalendar.DeleteEventRequest) {
 	result, err := c.client.DeleteEvent(c.ctx, &e)
 	if err != nil {
 		log.Fatal(err)
@@ -55,22 +55,19 @@ func (c *client) DeleteEvent(e pbcalendar.Event) {
 	fmt.Println(result.Status)
 }
 
-func (c *client) MoveEvent(e *pbcalendar.Event, nd *pbcalendar.Date) {
-	var old pbcalendar.Event
-	old.Alerttime = nd
+func (c *client) MoveEvent(e *pbcalendar.MoveEventRequest) {
+	var old pbcalendar.DeleteEventRequest
+	old.Alerttime = e.Alerttime
 	old.Information = e.Information
 	c.DeleteEvent(old)
-	var ne pbcalendar.MoveEvent
-	ne.Newdate = nd
-	ne.Event = e
-	result, err := c.client.MoveEvent(c.ctx, &ne)
+	result, err := c.client.MoveEvent(c.ctx, e)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(result.Status)
 }
 
-func (c *client) GetEventsForDay(e *pbcalendar.EventsForDay) {
+func (c *client) GetEventsForDay(e *pbcalendar.EventsForDayRequest) {
 	fmt.Println("GetEventsForDay", e)
 	result, err := c.client.EventsForDay(c.ctx, e)
 	if err != nil {
@@ -79,7 +76,7 @@ func (c *client) GetEventsForDay(e *pbcalendar.EventsForDay) {
 	fmt.Println("Get :", result.Count, "days")
 }
 
-func (c *client) GetEventsForWeek(e *pbcalendar.EventsForWeek) {
+func (c *client) GetEventsForWeek(e *pbcalendar.EventsForWeekRequest) {
 	fmt.Println("GetEventsForWeek", e)
 	result, err := c.client.EventsForWeek(c.ctx, e)
 	if err != nil {
@@ -108,34 +105,43 @@ func main() {
 	}
 	fmt.Println("Connnected at grpc host:", host)
 
-	var e pbcalendar.Event
+	var ce pbcalendar.CreateEventRequest
 
-	e.Alerttime = s2date("2020-01-07 12:00:00")
-	e.Information = "Exam in school"
+	ce.Alerttime = s2date("2020-01-07 12:00:00")
+	ce.Information = "Exam in school"
 
-	c.CreateEvent(e)
-	c.DeleteEvent(e)
+	c.CreateEvent(ce)
 
-	c.CreateEvent(e)
+	var de pbcalendar.DeleteEventRequest
+	de.Alerttime = ce.Alerttime
+	de.Information = ce.Information
+	c.DeleteEvent(de)
+
+	c.CreateEvent(ce)
 	var nd *pbcalendar.Date
 	nd = s2date("2020-01-09 15:00:00")
-	c.MoveEvent(&e, nd)
 
-	e.Information = "Pay credit"
-	e.Alerttime = s2date("2020-01-12 8:00:00")
-	c.CreateEvent(e)
+	var me pbcalendar.MoveEventRequest
+	me.Alerttime = ce.Alerttime
+	me.Information = ce.Information
+	me.Newdate = nd
+	c.MoveEvent(&me)
 
-	e.Information = "Send pacel to Jack"
-	e.Alerttime = s2date("2020-01-14 10:00:00")
-	c.CreateEvent(e)
+	ce.Information = "Pay credit"
+	ce.Alerttime = s2date("2020-01-12 8:00:00")
+	c.CreateEvent(ce)
 
-	var eday pbcalendar.EventsForDay
+	ce.Information = "Send pacel to Jack"
+	ce.Alerttime = s2date("2020-01-14 10:00:00")
+	c.CreateEvent(ce)
+
+	var eday pbcalendar.EventsForDayRequest
 	eday.Year = 2020
 	eday.Month = 1
 	eday.Day = 9
 	c.GetEventsForDay(&eday)
 
-	var eweek pbcalendar.EventsForWeek
+	var eweek pbcalendar.EventsForWeekRequest
 	eweek.Week = 1
 	eweek.Year = 2020
 	c.GetEventsForWeek(&eweek)
