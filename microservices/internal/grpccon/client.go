@@ -87,8 +87,12 @@ func (c *Client) MoveEvent(date simple.Date, info string, newdate simple.Date) (
 }
 
 // GetEventsForDay - grpc, calculate events for day
-func (c *Client) GetEventsForDay(e *pbcalendar.EventsForDayRequest) (int, error) {
-	result, err := c.client.EventsForDay(c.ctx, e)
+func (c *Client) GetEventsForDay(day, month, year int) (int, error) {
+	var e pbcalendar.EventsForDayRequest
+	e.Day = int32(day)
+	e.Month = int32(month)
+	e.Year = int32(year)
+	result, err := c.client.EventsForDay(c.ctx, &e)
 	if err != nil {
 		return 0, err
 	}
@@ -96,8 +100,11 @@ func (c *Client) GetEventsForDay(e *pbcalendar.EventsForDayRequest) (int, error)
 }
 
 // GetEventsForWeek - grpc, calculate events for week
-func (c *Client) GetEventsForWeek(e *pbcalendar.EventsForWeekRequest) (int, error) {
-	result, err := c.client.EventsForWeek(c.ctx, e)
+func (c *Client) GetEventsForWeek(week, year int) (int, error) {
+	var e pbcalendar.EventsForWeekRequest
+	e.Week = int32(week)
+	e.Year = int32(year)
+	result, err := c.client.EventsForWeek(c.ctx, &e)
 	if err != nil {
 		return 0, err
 	}
@@ -105,8 +112,11 @@ func (c *Client) GetEventsForWeek(e *pbcalendar.EventsForWeekRequest) (int, erro
 }
 
 // GetEventsForMonth - grpc, calculate events for month
-func (c *Client) GetEventsForMonth(e *pbcalendar.EventsForMonthRequest) (int, error) {
-	result, err := c.client.EventsForMonth(c.ctx, e)
+func (c *Client) GetEventsForMonth(month, year int) (int, error) {
+	var e pbcalendar.EventsForMonthRequest
+	e.Month = int32(month)
+	e.Year = int32(year)
+	result, err := c.client.EventsForMonth(c.ctx, &e)
 	if err != nil {
 		return 0, err
 	}
