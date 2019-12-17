@@ -9,7 +9,7 @@ service MyCalendar {
     rpc eventsForDay(EventsForDayRequest) returns (Count);
     rpc eventsForMonth(EventsForMonthRequest) returns (Count);
     rpc eventsForWeek(EventsForWeekRequest) returns (Count);
-    rpc nearestEvents(NearestEventsRequest) returns (NearestEventsResponse);
+    rpc sinceEvents(SinceEventsRequest) returns (SinceEventsResponse);
 }
 
 message CreateEventRequest {
@@ -40,17 +40,17 @@ message MoveEventResponse {
     string status  = 1;
 }
 
-message NearestEventsRequest {
-    int32 seconds = 1;
+message SinceEventsRequest {
+    Date from = 1;
 }
 
-message NearestEvent {
+message SinceEvent {
     Date alerttime = 1;
     string information = 2;
 }
 
-message NearestEventsResponse {
-    repeated NearestEvent events = 1;
+message SinceEventsResponse {
+    repeated SinceEvent events = 1;
 }
 
 message Count {

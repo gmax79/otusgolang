@@ -7,8 +7,8 @@ import (
 
 	"github.com/gmax79/otusgolang/microservices/api/pbcalendar"
 	"github.com/gmax79/otusgolang/microservices/internal/calendar"
+	"github.com/gmax79/otusgolang/microservices/internal/grpccon"
 	"github.com/gmax79/otusgolang/microservices/internal/objects"
-	"github.com/gmax79/otusgolang/microservices/internal/simple"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -48,22 +48,11 @@ func (g *grpcCalendarAPI) GetLastError() error {
 	return g.lasterror
 }
 
-func pbDateToCalendarDate(t *pbcalendar.Date) simple.Date {
-	var d simple.Date
-	d.Day = int(t.GetDay())
-	d.Month = int(t.GetMonth())
-	d.Year = int(t.GetYear())
-	d.Hour = int(t.GetHour())
-	d.Minute = int(t.GetMinute())
-	d.Second = int(t.GetSecond())
-	return d
-}
-
 func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, e *pbcalendar.CreateEventRequest) (*pbcalendar.CreateEventResponse, error) {
 	g.logger.Info("grpc CreateEvent", zap.String("event", e.String()))
 
 	t := e.Alerttime
-	trigger := pbDateToCalendarDate(t)
+	trigger := grpccon.ProtoToDate(t)
 	events, err := g.calen.AddTrigger(trigger)
 	if err != nil {
 		g.logger.Error("grpc CreateEvent", zap.String("error", err.Error()))
@@ -85,7 +74,7 @@ func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.DeleteE
 
 	var result pbcalendar.DeleteEventResponse
 	t := e.Alerttime
-	trigger := pbDateToCalendarDate(t)
+	trigger := grpccon.ProtoToDate(t)
 	events, err := g.calen.GetEvents(trigger)
 	if err != nil {
 		return nil, err
@@ -105,8 +94,8 @@ func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.DeleteE
 func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, e *pbcalendar.MoveEventRequest) (*pbcalendar.MoveEventResponse, error) {
 	g.logger.Info("grpc MoveEvent", zap.String("event", e.String()))
 
-	trigger := pbDateToCalendarDate(e.Alerttime)
-	newtime := pbDateToCalendarDate(e.Newdate)
+	trigger := grpccon.ProtoToDate(e.Alerttime)
+	newtime := grpccon.ProtoToDate(e.Newdate)
 	events, err := g.calen.GetEvents(trigger)
 	if err != nil {
 		return nil, err
@@ -180,8 +169,8 @@ func (g *grpcCalendarAPI) EventsForWeek(ctx context.Context, e *pbcalendar.Event
 	return &c, nil
 }
 
-func (g *grpcCalendarAPI) NearestEvents(ctx context.Context, e *pbcalendar.NearestEventsRequest) (*pbcalendar.NearestEventsResponse, error) {
-	g.logger.Info("grpc NearestEvents", zap.String("interval", e.String()))
-	var events pbcalendar.NearestEventsResponse
+func (g *grpcCalendarAPI) SinceEvents(ctx context.Context, e *pbcalendar.SinceEventsRequest) (*pbcalendar.SinceEventsResponse, error) {
+	g.logger.Info("grpc SinceEventsResponse", zap.String("interval", e.String()))
+	var events pbcalendar.SinceEventsResponse
 	return &events, nil
 }

@@ -16,7 +16,8 @@ type Client struct {
 	client pbcalendar.MyCalendarClient
 }
 
-func d2pb(s simple.Date) *pbcalendar.Date {
+// DateToProto - convert calendar date to protobuf version
+func DateToProto(s simple.Date) *pbcalendar.Date {
 	var d pbcalendar.Date
 	d.Year = int32(s.Year)
 	d.Month = int32(s.Month)
@@ -25,6 +26,18 @@ func d2pb(s simple.Date) *pbcalendar.Date {
 	d.Minute = int32(s.Minute)
 	d.Second = int32(s.Second)
 	return &d
+}
+
+// ProtoToDate - convert from protobuf into calendar date
+func ProtoToDate(p *pbcalendar.Date) simple.Date {
+	var d simple.Date
+	d.Year = int(p.Year)
+	d.Month = int(p.Month)
+	d.Day = int(p.Day)
+	d.Hour = int(p.Hour)
+	d.Minute = int(p.Minute)
+	d.Second = int(p.Second)
+	return d
 }
 
 // CreateClient - create instance of connection to service
@@ -53,7 +66,7 @@ func (c *Client) Close() {
 // CreateEvent - call grpc to create event
 func (c *Client) CreateEvent(date simple.Date, info string) (string, error) {
 	var e pbcalendar.CreateEventRequest
-	e.Alerttime = d2pb(date)
+	e.Alerttime = DateToProto(date)
 	e.Information = info
 	result, err := c.client.CreateEvent(c.ctx, &e)
 	if err != nil {
@@ -65,7 +78,7 @@ func (c *Client) CreateEvent(date simple.Date, info string) (string, error) {
 // DeleteEvent - call grpc to delete event
 func (c *Client) DeleteEvent(date simple.Date, info string) (string, error) {
 	var e pbcalendar.DeleteEventRequest
-	e.Alerttime = d2pb(date)
+	e.Alerttime = DateToProto(date)
 	e.Information = info
 	result, err := c.client.DeleteEvent(c.ctx, &e)
 	if err != nil {
@@ -77,9 +90,9 @@ func (c *Client) DeleteEvent(date simple.Date, info string) (string, error) {
 // MoveEvent - call grpc to move event
 func (c *Client) MoveEvent(date simple.Date, info string, newdate simple.Date) (string, error) {
 	var e pbcalendar.MoveEventRequest
-	e.Alerttime = d2pb(date)
+	e.Alerttime = DateToProto(date)
 	e.Information = info
-	e.Newdate = d2pb(newdate)
+	e.Newdate = DateToProto(newdate)
 	result, err := c.client.MoveEvent(c.ctx, &e)
 	if err != nil {
 		return "", err
@@ -124,29 +137,18 @@ func (c *Client) GetEventsForMonth(month, year int) (int, error) {
 	return int(result.Count), nil
 }
 
-func pb2d(p *pbcalendar.Date) simple.Date {
-	var d simple.Date
-	d.Year = int(p.Year)
-	d.Month = int(p.Month)
-	d.Day = int(p.Day)
-	d.Hour = int(p.Hour)
-	d.Minute = int(p.Minute)
-	d.Second = int(p.Second)
-	return d
-}
-
-// NearestEvents - return events in next interval in seconds
-func (c *Client) NearestEvents(nextseconds int) ([]objects.Event, error) {
-	var interval pbcalendar.NearestEventsRequest
-	interval.Seconds = int32(nextseconds)
-	resp, err := c.client.NearestEvents(c.ctx, &interval)
+// SinceEvents - return events in next interval in seconds
+func (c *Client) SinceEvents(from simple.Date) ([]objects.Event, error) {
+	var r pbcalendar.SinceEventsRequest
+	r.From = DateToProto(from)
+	resp, err := c.client.SinceEvents(c.ctx, &r)
 	if err != nil {
 		return nil, err
 	}
 	count := len(resp.Events)
 	events := make([]objects.Event, count)
 	for i, e := range resp.Events {
-		events[i].Alerttime = pb2d(e.Alerttime)
+		events[i].Alerttime = ProtoToDate(e.Alerttime)
 		events[i].Information = e.Information
 	}
 	return events, nil

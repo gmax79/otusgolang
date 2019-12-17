@@ -11,9 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gmax79/otusgolang/microservices/internal/grpccon"
-
 	"github.com/gmax79/otusgolang/microservices/api"
+	"github.com/gmax79/otusgolang/microservices/internal/grpccon"
 )
 
 // ShedulerConfig - base parameters
@@ -76,14 +75,14 @@ loop:
 	for {
 		select {
 		case <-ticker.C:
-			events, err := con.NearestEvents(5)
+			/*events, err := con.SinceEvents()
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
-			_ = events
+			_ = events*/
 		//case e := <-finishedEvents:
-		//	sendEventToRabbit(rabbitConn, e)
+		//	pusblishEventToRabbit(rabbitConn, e)
 		case <-stop:
 			break loop
 		}
@@ -92,7 +91,7 @@ loop:
 	fmt.Println("Sheduler stopped")
 }
 
-func sendEventToRabbit(conn *api.RmqConnection, event string) error {
+func pusblishEventToRabbit(conn *api.RmqConnection, event string) error {
 	fmt.Println("Send to RabbitMQ:", event)
 	var m api.RmqMessage
 	m.Event = event
