@@ -16,7 +16,7 @@ func createEvents(alert simple.Date, dbc *storage.DbProvider) Events {
 }
 
 func (t *eventsimpl) AddEvent(e objects.Event) error {
-	return t.db.AddEvent(t.d, string(e))
+	return t.db.AddEvent(e)
 }
 
 func (t *eventsimpl) GetEventsCount() (int, error) {
@@ -28,7 +28,7 @@ func (t *eventsimpl) DeleteEventIndex(index int) error {
 }
 
 func (t *eventsimpl) DeleteEvent(e objects.Event) error {
-	return t.db.DeleteEvent(t.d, e)
+	return t.db.DeleteEvent(e)
 }
 
 func (t *eventsimpl) GetEvent(index int) (objects.Event, error) {
@@ -36,5 +36,5 @@ func (t *eventsimpl) GetEvent(index int) (objects.Event, error) {
 }
 
 func (t *eventsimpl) MoveEvent(e objects.Event, to simple.Date) error {
-	return t.db.MoveEvent(t.d, e, to)
+	return t.db.MoveEvent(e, to)
 }

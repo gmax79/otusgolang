@@ -135,9 +135,9 @@ func (c *Client) NearestEvents(nextseconds int) (*[]objects.Event, error) {
 	}
 	count := len(resp.Events)
 	events := make([]objects.Event, count)
-	for i, e := range resp.Events {
+	/*for i, e := range resp.Events {
 		//events[i].
-	}
+	}*/
 
 	return &events, nil
 }

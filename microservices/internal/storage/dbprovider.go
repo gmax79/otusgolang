@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/gmax79/otusgolang/microservices/internal/objects"
 	"github.com/gmax79/otusgolang/microservices/internal/simple"
@@ -60,9 +61,9 @@ func (p *DbProvider) DeleteTrigger(d simple.Date) error {
 }
 
 // AddEvent - new event in db
-func (p *DbProvider) AddEvent(d simple.Date, info string) error {
-	timer := d.String()
-	_, err := p.db.Exec("INSERT INTO events (timer, information) VALUES($1, $2) ON CONFLICT (timer, information) DO NOTHING;", timer, info)
+func (p *DbProvider) AddEvent(e objects.Event) error {
+	timer := e.Alerttime.String()
+	_, err := p.db.Exec("INSERT INTO events (timer, information) VALUES($1, $2) ON CONFLICT (timer, information) DO NOTHING;", timer, e.Information)
 	return err
 }
 
@@ -83,9 +84,9 @@ func (p *DbProvider) DeleteEventIndex(d simple.Date, index int) error {
 }
 
 // DeleteEvent - delete event by date
-func (p *DbProvider) DeleteEvent(d simple.Date, e objects.Event) error {
-	timer := d.String()
-	_, err := p.db.Exec("DELETE FROM events WHERE timer = $1::timestamp AND information = $2;", timer, string(e))
+func (p *DbProvider) DeleteEvent(e objects.Event) error {
+	timer := e.Alerttime.String()
+	_, err := p.db.Exec("DELETE FROM events WHERE timer = $1::timestamp AND information = $2;", timer, e.Information)
 	return err
 }
 
@@ -94,16 +95,17 @@ func (p *DbProvider) GetEvent(d simple.Date, index int) (objects.Event, error) {
 	request := "SELECT information FROM events WHERE timer = $1::timestamp limit 1 offset $2;"
 	timer := d.String()
 	var e objects.Event
-	err := p.db.QueryRow(request, timer, index).Scan(&e)
+	e.Alerttime = d
+	err := p.db.QueryRow(request, timer, index).Scan(&e.Information)
 	return e, err
 }
 
 // MoveEvent - move event from date to another date
-func (p *DbProvider) MoveEvent(d simple.Date, e objects.Event, to simple.Date) error {
-	timer := d.String()
+func (p *DbProvider) MoveEvent(e objects.Event, to simple.Date) error {
+	timer := e.Alerttime.String()
 	newtimer := to.String()
 	request := "UPDATE events SET timer = $1 WHERE timer = $2 AND information = $3"
-	_, err := p.db.Exec(request, newtimer, timer, string(e))
+	_, err := p.db.Exec(request, newtimer, timer, e.Information)
 	return err
 }
 
@@ -114,19 +116,26 @@ func (p *DbProvider) FindEvents(parameters objects.SearchParameters) ([]objects.
 	if where == "" {
 		return events, fmt.Errorf("Invalid search parameters")
 	}
-	request := "SELECT information FROM events WHERE " + where
+	request := "SELECT timer, information FROM events WHERE " + where
 	rows, err := p.db.Query(request)
 	if err != nil {
 		return events, err
 	}
 	defer rows.Close()
 	for rows.Next() {
+		var timer time.Time
 		var info string
-		err = rows.Scan(&info)
+		err = rows.Scan(&timer, &info)
 		if err != nil {
 			return events, err
 		}
-		events = append(events, objects.Event(info))
+		var e objects.Event
+		err = e.Alerttime.ParseDate(timer.String())
+		if err != nil {
+			return events, err
+		}
+		e.Information = info
+		events = append(events, e)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err

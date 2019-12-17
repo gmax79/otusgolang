@@ -69,7 +69,11 @@ func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, e *pbcalendar.CreateE
 		g.logger.Error("grpc CreateEvent", zap.String("error", err.Error()))
 		return nil, err
 	}
-	events.AddEvent(objects.Event(e.Information))
+
+	var newevent objects.Event
+	newevent.Alerttime = trigger
+	newevent.Information = e.Information
+	events.AddEvent(newevent)
 
 	var result pbcalendar.CreateEventResponse
 	result.Status = fmt.Sprintf("Event at %s added", trigger.String())
@@ -86,7 +90,11 @@ func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.DeleteE
 	if err != nil {
 		return nil, err
 	}
-	err = events.DeleteEvent(objects.Event(e.Information))
+
+	var delevent objects.Event
+	delevent.Alerttime = trigger
+	delevent.Information = e.Information
+	err = events.DeleteEvent(delevent)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +111,11 @@ func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, e *pbcalendar.MoveEvent
 	if err != nil {
 		return nil, err
 	}
-	event := (objects.Event)(e.Information)
-	err = events.MoveEvent(event, newtime)
+
+	var moveevent objects.Event
+	moveevent.Alerttime = trigger
+	moveevent.Information = e.Information
+	err = events.MoveEvent(moveevent, newtime)
 	if err != nil {
 		return nil, err
 	}

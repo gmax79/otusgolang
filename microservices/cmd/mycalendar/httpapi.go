@@ -83,7 +83,12 @@ func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, err)
 			return
 		}
-		err = events.AddEvent(objects.Event(event))
+
+		var newevent objects.Event
+		newevent.Alerttime = t
+		newevent.Information = event
+
+		err = events.AddEvent(newevent)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
@@ -114,7 +119,11 @@ func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request
 			support.HTTPResponse(w, err)
 			return
 		}
-		err = events.DeleteEvent(objects.Event(event))
+
+		var delevent objects.Event
+		delevent.Alerttime = t
+		delevent.Information = event
+		err = events.DeleteEvent(delevent)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return
@@ -151,7 +160,11 @@ func (s *httpCalendarAPI) httpMoveEvent(w http.ResponseWriter, r *http.Request) 
 			support.HTTPResponse(w, err)
 			return
 		}
-		err = events.MoveEvent(objects.Event(event), newt)
+
+		var moveevent objects.Event
+		moveevent.Alerttime = t
+		moveevent.Information = event
+		err = events.MoveEvent(moveevent, newt)
 		if err != nil {
 			support.HTTPResponse(w, err)
 			return

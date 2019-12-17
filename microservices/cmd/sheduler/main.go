@@ -76,10 +76,10 @@ loop:
 	for {
 		select {
 		case <-ticker.C:
-			if err = db.ReadEvents(); err != nil {
+			/*if err = db.ReadEvents(); err != nil {
 				fmt.Println(err)
 				continue
-			}
+			}*/
 		//case e := <-finishedEvents:
 		//	sendEventToRabbit(rabbitConn, e)
 		case <-stop:
