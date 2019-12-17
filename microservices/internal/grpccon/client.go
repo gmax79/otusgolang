@@ -124,9 +124,19 @@ func (c *Client) GetEventsForMonth(month, year int) (int, error) {
 	return int(result.Count), nil
 }
 
-// NearestEvents - return events in next interval in seconds
-func (c *Client) NearestEvents(nextseconds int) (*[]objects.Event, error) {
+func pb2d(p *pbcalendar.Date) simple.Date {
+	var d simple.Date
+	d.Year = int(p.Year)
+	d.Month = int(p.Month)
+	d.Day = int(p.Day)
+	d.Hour = int(p.Hour)
+	d.Minute = int(p.Minute)
+	d.Second = int(p.Second)
+	return d
+}
 
+// NearestEvents - return events in next interval in seconds
+func (c *Client) NearestEvents(nextseconds int) ([]objects.Event, error) {
 	var interval pbcalendar.NearestEventsRequest
 	interval.Seconds = int32(nextseconds)
 	resp, err := c.client.NearestEvents(c.ctx, &interval)
@@ -135,9 +145,9 @@ func (c *Client) NearestEvents(nextseconds int) (*[]objects.Event, error) {
 	}
 	count := len(resp.Events)
 	events := make([]objects.Event, count)
-	/*for i, e := range resp.Events {
-		//events[i].
-	}*/
-
-	return &events, nil
+	for i, e := range resp.Events {
+		events[i].Alerttime = pb2d(e.Alerttime)
+		events[i].Information = e.Information
+	}
+	return events, nil
 }
