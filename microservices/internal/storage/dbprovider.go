@@ -111,17 +111,51 @@ func (p *DbProvider) MoveEvent(e objects.Event, to simple.Date) error {
 
 // FindEvents - find events by search parameters
 func (p *DbProvider) FindEvents(parameters objects.SearchParameters) ([]objects.Event, error) {
-	events := make([]objects.Event, 0, 10)
 	where := getWhereParameter(parameters)
 	if where == "" {
-		return events, fmt.Errorf("Invalid search parameters")
+		return nil, fmt.Errorf("Invalid search parameters")
 	}
 	request := "SELECT timer, information FROM events WHERE " + where
 	rows, err := p.db.Query(request)
 	if err != nil {
-		return events, err
+		return nil, err
 	}
 	defer rows.Close()
+	events := make([]objects.Event, 0, 10)
+	for rows.Next() {
+		var timer time.Time
+		var info string
+		err = rows.Scan(&timer, &info)
+		if err != nil {
+			return events, err
+		}
+		var e objects.Event
+		err = e.Alerttime.ParseDate(timer.String())
+		if err != nil {
+			return events, err
+		}
+		e.Information = info
+		events = append(events, e)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return events, nil
+}
+
+// SinceEvents - return events from custom date to now
+func (p *DbProvider) SinceEvents(date simple.Date) ([]objects.Event, error) {
+	if err := date.Valid(); err != nil {
+		return nil, err
+	}
+	timer := date.String()
+	request := "SELECT timer, information FROM events WHERE timer BETWEEN $1:timestamp AND now()::timestamp;"
+	rows, err := p.db.Query(request, timer)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	events := make([]objects.Event, 0, 10)
 	for rows.Next() {
 		var timer time.Time
 		var info string

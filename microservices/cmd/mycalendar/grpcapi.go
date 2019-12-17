@@ -48,10 +48,10 @@ func (g *grpcCalendarAPI) GetLastError() error {
 	return g.lasterror
 }
 
-func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, e *pbcalendar.CreateEventRequest) (*pbcalendar.CreateEventResponse, error) {
-	g.logger.Info("grpc CreateEvent", zap.String("event", e.String()))
+func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, req *pbcalendar.CreateEventRequest) (*pbcalendar.CreateEventResponse, error) {
+	g.logger.Info("grpc CreateEvent", zap.String("event", req.String()))
 
-	t := e.Alerttime
+	t := req.Alerttime
 	trigger := grpccon.ProtoToDate(t)
 	events, err := g.calen.AddTrigger(trigger)
 	if err != nil {
@@ -61,7 +61,7 @@ func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, e *pbcalendar.CreateE
 
 	var newevent objects.Event
 	newevent.Alerttime = trigger
-	newevent.Information = e.Information
+	newevent.Information = req.Information
 	events.AddEvent(newevent)
 
 	var result pbcalendar.CreateEventResponse
@@ -69,11 +69,11 @@ func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, e *pbcalendar.CreateE
 	return &result, nil
 }
 
-func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.DeleteEventRequest) (*pbcalendar.DeleteEventResponse, error) {
-	g.logger.Info("grpc DeleteEvent", zap.String("event", e.String()))
+func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, req *pbcalendar.DeleteEventRequest) (*pbcalendar.DeleteEventResponse, error) {
+	g.logger.Info("grpc DeleteEvent", zap.String("event", req.String()))
 
 	var result pbcalendar.DeleteEventResponse
-	t := e.Alerttime
+	t := req.Alerttime
 	trigger := grpccon.ProtoToDate(t)
 	events, err := g.calen.GetEvents(trigger)
 	if err != nil {
@@ -82,20 +82,20 @@ func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, e *pbcalendar.DeleteE
 
 	var delevent objects.Event
 	delevent.Alerttime = trigger
-	delevent.Information = e.Information
+	delevent.Information = req.Information
 	err = events.DeleteEvent(delevent)
 	if err != nil {
 		return nil, err
 	}
-	result.Status = fmt.Sprintf("Event %s at %s deleted", e.Information, trigger.String())
+	result.Status = fmt.Sprintf("Event %s at %s deleted", req.Information, trigger.String())
 	return &result, nil
 }
 
-func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, e *pbcalendar.MoveEventRequest) (*pbcalendar.MoveEventResponse, error) {
-	g.logger.Info("grpc MoveEvent", zap.String("event", e.String()))
+func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, req *pbcalendar.MoveEventRequest) (*pbcalendar.MoveEventResponse, error) {
+	g.logger.Info("grpc MoveEvent", zap.String("event", req.String()))
 
-	trigger := grpccon.ProtoToDate(e.Alerttime)
-	newtime := grpccon.ProtoToDate(e.Newdate)
+	trigger := grpccon.ProtoToDate(req.Alerttime)
+	newtime := grpccon.ProtoToDate(req.Newdate)
 	events, err := g.calen.GetEvents(trigger)
 	if err != nil {
 		return nil, err
@@ -103,24 +103,24 @@ func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, e *pbcalendar.MoveEvent
 
 	var moveevent objects.Event
 	moveevent.Alerttime = trigger
-	moveevent.Information = e.Information
+	moveevent.Information = req.Information
 	err = events.MoveEvent(moveevent, newtime)
 	if err != nil {
 		return nil, err
 	}
 
 	var result pbcalendar.MoveEventResponse
-	result.Status = fmt.Sprintf("Event %s moved from %s to %s", e.Information, trigger.String(), newtime.String())
+	result.Status = fmt.Sprintf("Event %s moved from %s to %s", req.Information, trigger.String(), newtime.String())
 	return &result, nil
 }
 
-func (g *grpcCalendarAPI) EventsForDay(ctx context.Context, e *pbcalendar.EventsForDayRequest) (*pbcalendar.Count, error) {
-	g.logger.Info("grpc EventsForDay", zap.String("event", e.String()))
+func (g *grpcCalendarAPI) EventsForDay(ctx context.Context, req *pbcalendar.EventsForDayRequest) (*pbcalendar.Count, error) {
+	g.logger.Info("grpc EventsForDay", zap.String("event", req.String()))
 
 	var sp objects.SearchParameters
-	sp.Day = int(e.Day)
-	sp.Month = int(e.Month)
-	sp.Year = int(e.Year)
+	sp.Day = int(req.Day)
+	sp.Month = int(req.Month)
+	sp.Year = int(req.Year)
 
 	events, err := g.calen.FindEvents(sp)
 	if err != nil {
@@ -133,12 +133,12 @@ func (g *grpcCalendarAPI) EventsForDay(ctx context.Context, e *pbcalendar.Events
 	return &c, nil
 }
 
-func (g *grpcCalendarAPI) EventsForMonth(ctx context.Context, e *pbcalendar.EventsForMonthRequest) (*pbcalendar.Count, error) {
-	g.logger.Info("grpc EventsForMonth", zap.String("event", e.String()))
+func (g *grpcCalendarAPI) EventsForMonth(ctx context.Context, req *pbcalendar.EventsForMonthRequest) (*pbcalendar.Count, error) {
+	g.logger.Info("grpc EventsForMonth", zap.String("event", req.String()))
 
 	var sp objects.SearchParameters
-	sp.Month = int(e.Month)
-	sp.Year = int(e.Year)
+	sp.Month = int(req.Month)
+	sp.Year = int(req.Year)
 
 	events, err := g.calen.FindEvents(sp)
 	if err != nil {
@@ -151,12 +151,12 @@ func (g *grpcCalendarAPI) EventsForMonth(ctx context.Context, e *pbcalendar.Even
 	return &c, nil
 }
 
-func (g *grpcCalendarAPI) EventsForWeek(ctx context.Context, e *pbcalendar.EventsForWeekRequest) (*pbcalendar.Count, error) {
-	g.logger.Info("grpc EventsForWeek", zap.String("event", e.String()))
+func (g *grpcCalendarAPI) EventsForWeek(ctx context.Context, req *pbcalendar.EventsForWeekRequest) (*pbcalendar.Count, error) {
+	g.logger.Info("grpc EventsForWeek", zap.String("event", req.String()))
 
 	var sp objects.SearchParameters
-	sp.Week = int(e.Week)
-	sp.Year = int(e.Year)
+	sp.Week = int(req.Week)
+	sp.Year = int(req.Year)
 
 	events, err := g.calen.FindEvents(sp)
 	if err != nil {
@@ -169,8 +169,18 @@ func (g *grpcCalendarAPI) EventsForWeek(ctx context.Context, e *pbcalendar.Event
 	return &c, nil
 }
 
-func (g *grpcCalendarAPI) SinceEvents(ctx context.Context, e *pbcalendar.SinceEventsRequest) (*pbcalendar.SinceEventsResponse, error) {
-	g.logger.Info("grpc SinceEventsResponse", zap.String("interval", e.String()))
-	var events pbcalendar.SinceEventsResponse
-	return &events, nil
+func (g *grpcCalendarAPI) SinceEvents(ctx context.Context, req *pbcalendar.SinceEventsRequest) (*pbcalendar.SinceEventsResponse, error) {
+	g.logger.Info("grpc SinceEventsResponse", zap.String("interval", req.String()))
+
+	events, err := g.calen.SinceEvents(grpccon.ProtoToDate(req.From))
+	if err != nil {
+		return nil, err
+	}
+	pbevents := make([]*pbcalendar.SinceEvent, len(events))
+	for i, e := range events {
+		pbevents[i] = &pbcalendar.SinceEvent{Information: e.Information, Alerttime: grpccon.DateToProto(e.Alerttime)}
+	}
+	var response pbcalendar.SinceEventsResponse
+	response.Events = pbevents
+	return &response, nil
 }

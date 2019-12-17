@@ -76,3 +76,7 @@ func (c *calendarImpl) GetEvents(d simple.Date) (Events, error) {
 func (c *calendarImpl) FindEvents(parameters objects.SearchParameters) ([]objects.Event, error) {
 	return c.db.FindEvents(parameters)
 }
+
+func (c *calendarImpl) SinceEvents(from simple.Date) ([]objects.Event, error) {
+	return c.db.SinceEvents(from)
+}

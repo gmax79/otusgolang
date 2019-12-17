@@ -24,6 +24,7 @@ type Calendar interface {
 	GetEvents(date simple.Date) (Events, error)
 	GetTriggers() ([]simple.Date, error)
 	FindEvents(parameters objects.SearchParameters) ([]objects.Event, error)
+	SinceEvents(from simple.Date) ([]objects.Event, error)
 }
 
 // Create - create calendar instance
