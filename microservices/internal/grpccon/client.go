@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gmax79/otusgolang/microservices/api/pbcalendar"
+	"github.com/gmax79/otusgolang/microservices/internal/objects"
 	"github.com/gmax79/otusgolang/microservices/internal/simple"
 	"google.golang.org/grpc"
 )
@@ -121,4 +122,22 @@ func (c *Client) GetEventsForMonth(month, year int) (int, error) {
 		return 0, err
 	}
 	return int(result.Count), nil
+}
+
+// NearestEvents - return events in next interval in seconds
+func (c *Client) NearestEvents(nextseconds int) (*[]objects.Event, error) {
+
+	var interval pbcalendar.NearestEventsRequest
+	interval.Seconds = int32(nextseconds)
+	resp, err := c.client.NearestEvents(c.ctx, &interval)
+	if err != nil {
+		return nil, err
+	}
+	count := len(resp.Events)
+	events := make([]objects.Event, count)
+	for i, e := range resp.Events {
+		//events[i].
+	}
+
+	return &events, nil
 }

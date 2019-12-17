@@ -11,6 +11,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gmax79/otusgolang/microservices/internal/grpccon"
+
 	"github.com/gmax79/otusgolang/microservices/api"
 )
 
@@ -48,13 +50,14 @@ func main() {
 		return
 	}
 
-	finishedEvents := make(chan string)
-	var db *dbMonitor
-	if db, err = connectToDatabase(config.PostgresAddr(), finishedEvents); err != nil {
+	var con *grpccon.Client
+	con, err = grpccon.CreateClient(config.ApplicationAddr())
+	if err != nil {
 		return
 	}
-	defer db.Close()
+	defer con.Close()
 
+	//finishedEvents := make(chan string)
 	rabbitConn, err := api.RabbitMQConnect(config.RabbitMQAddr())
 	if err != nil {
 		return
@@ -77,8 +80,8 @@ loop:
 				fmt.Println(err)
 				continue
 			}
-		case e := <-finishedEvents:
-			sendEventToRabbit(rabbitConn, e)
+		//case e := <-finishedEvents:
+		//	sendEventToRabbit(rabbitConn, e)
 		case <-stop:
 			break loop
 		}

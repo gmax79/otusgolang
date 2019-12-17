@@ -168,3 +168,9 @@ func (g *grpcCalendarAPI) EventsForWeek(ctx context.Context, e *pbcalendar.Event
 	c.Count = int32(count)
 	return &c, nil
 }
+
+func (g *grpcCalendarAPI) NearestEvents(ctx context.Context, e *pbcalendar.NearestEventsRequest) (*pbcalendar.NearestEventsResponse, error) {
+	g.logger.Info("grpc NearestEvents", zap.String("interval", e.String()))
+	var events pbcalendar.NearestEventsResponse
+	return &events, nil
+}

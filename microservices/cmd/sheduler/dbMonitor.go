@@ -1,12 +1,8 @@
 package main
 
-import (
-	"database/sql"
-	"time"
+//import _ "github.com/jackc/pgx/stdlib" // attach pgx postgres driver
 
-	"github.com/gmax79/otusgolang/microservices/internal/simple"
-	_ "github.com/jackc/pgx/stdlib" // attach pgx postgres driver
-)
+/*
 
 func connectToDatabase(dsn string, finished chan<- string) (*dbMonitor, error) {
 	connection, err := sql.Open("pgx", dsn) // *sql.DB
@@ -65,3 +61,4 @@ func (m *dbMonitor) ReadEvents() error {
 	m.timers = newtimers
 	return nil
 }
+*/
