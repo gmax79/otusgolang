@@ -170,7 +170,7 @@ func (g *grpcCalendarAPI) EventsForWeek(ctx context.Context, req *pbcalendar.Eve
 }
 
 func (g *grpcCalendarAPI) SinceEvents(ctx context.Context, req *pbcalendar.SinceEventsRequest) (*pbcalendar.SinceEventsResponse, error) {
-	g.logger.Info("grpc SinceEventsResponse", zap.String("interval", req.String()))
+	g.logger.Info("grpc SinceEvents", zap.String("interval", req.String()))
 
 	events, err := g.calen.SinceEvents(grpccon.ProtoToDate(req.From))
 	if err != nil {

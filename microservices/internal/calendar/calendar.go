@@ -1,8 +1,6 @@
 package calendar
 
 import (
-	"time"
-
 	"github.com/gmax79/otusgolang/microservices/internal/objects"
 	"github.com/gmax79/otusgolang/microservices/internal/simple"
 )
@@ -30,12 +28,4 @@ type Calendar interface {
 // Create - create calendar instance
 func Create(connect string) (Calendar, error) {
 	return createCalendar(connect)
-}
-
-// DurationToTimeString - get time parameter, now + duration
-func DurationToTimeString(d time.Duration) string {
-	t := time.Now().Add(d)
-	s := t.String()
-	const layout = "2006-01-02 15:04:05"
-	return s[:len(layout)]
 }

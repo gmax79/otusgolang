@@ -87,7 +87,7 @@ func (da *Date) Value() time.Time {
 }
 
 // SetNow - set and return Now time
-func (da *Date) SetNow() time.Time {
+func (da *Date) SetNow() {
 	t := time.Now()
 	da.Hour = t.Hour()
 	da.Minute = t.Minute()
@@ -95,14 +95,6 @@ func (da *Date) SetNow() time.Time {
 	da.Year = t.Year()
 	da.Month = int(t.Month())
 	da.Day = t.Day()
-	return da.Value()
-}
-
-// NowDate - return time without timezone
-func NowDate() time.Time {
-	var d Date
-	d.SetNow()
-	return d.Value()
 }
 
 // ParseValidDate - create calendar date from string and validate

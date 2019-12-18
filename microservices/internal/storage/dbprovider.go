@@ -148,9 +148,10 @@ func (p *DbProvider) SinceEvents(date simple.Date) ([]objects.Event, error) {
 	if err := date.Valid(); err != nil {
 		return nil, err
 	}
-	timer := date.String()
-	request := "SELECT timer, information FROM events WHERE timer BETWEEN $1:timestamp AND now()::timestamp;"
-	rows, err := p.db.Query(request, timer)
+	var now simple.Date
+	now.SetNow()
+	request := "SELECT timer, information FROM events WHERE timer BETWEEN $1::timestamp AND $2::timestamp"
+	rows, err := p.db.Query(request, date.String(), now.String())
 	if err != nil {
 		return nil, err
 	}
