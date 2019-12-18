@@ -131,11 +131,12 @@ func scanEvents(rows *sql.Rows) ([]objects.Event, error) {
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
+	return events, nil
 }
 
 // GetEvents - get events at date
 func (p *DbProvider) GetEvents(date simple.Date) ([]objects.Event, error) {
-	request := "SELECT timer, information FROM events WHERE time == $1::timestamp"
+	request := "SELECT timer, information FROM events WHERE timer = $1::timestamp"
 	rows, err := p.db.Query(request, date.String())
 	if err != nil {
 		return nil, err
@@ -158,9 +159,18 @@ func (p *DbProvider) SinceEvents(date simple.Date) ([]objects.Event, error) {
 	return scanEvents(rows)
 }
 
-// Invoke - event happend method
-func (p *DbProvider) Invoke(id string) {
-
+// FindEvents - find events by Search parameters
+func (p *DbProvider) FindEvents(parameters objects.SearchParameters) ([]objects.Event, error) {
+	where := getWhereParameter(parameters)
+	if where == "" {
+		return nil, fmt.Errorf("Invalid search parameters")
+	}
+	request := "SELECT timer, information FROM events WHERE " + where
+	rows, err := p.db.Query(request)
+	if err != nil {
+		return nil, err
+	}
+	return scanEvents(rows)
 }
 
 func getWhereParameter(p objects.SearchParameters) string {

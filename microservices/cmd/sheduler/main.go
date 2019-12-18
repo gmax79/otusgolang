@@ -13,6 +13,7 @@ import (
 
 	"github.com/gmax79/otusgolang/microservices/api"
 	"github.com/gmax79/otusgolang/microservices/internal/grpccon"
+	"github.com/gmax79/otusgolang/microservices/internal/simple"
 )
 
 // ShedulerConfig - base parameters
@@ -56,7 +57,6 @@ func main() {
 	}
 	defer con.Close()
 
-	//finishedEvents := make(chan string)
 	rabbitConn, err := api.RabbitMQConnect(config.RabbitMQAddr())
 	if err != nil {
 		return
@@ -68,21 +68,25 @@ func main() {
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-	ticker := time.NewTicker(time.Second * 2)
+	ticker := time.NewTicker(time.Second * 3)
 	fmt.Println("Sheduler started")
 
+	var from simple.Date
+	from.SetNow()
 loop:
 	for {
 		select {
 		case <-ticker.C:
-			/*events, err := con.SinceEvents()
+			events, err := con.SinceEvents(from)
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
-			_ = events*/
-		//case e := <-finishedEvents:
-		//	pusblishEventToRabbit(rabbitConn, e)
+			for _, e := range events {
+				text := fmt.Sprint("Event at ", e.Alerttime.String(), "! ", e.Information)
+				pusblishEventToRabbit(rabbitConn, text)
+			}
+			from.SetNow()
 		case <-stop:
 			break loop
 		}

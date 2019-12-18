@@ -1,6 +1,7 @@
 package calendar
 
 import (
+	"fmt"
 	"github.com/gmax79/otusgolang/microservices/internal/objects"
 	"github.com/gmax79/otusgolang/microservices/internal/simple"
 	"github.com/gmax79/otusgolang/microservices/internal/storage"
@@ -32,7 +33,14 @@ func createCalendar(psqlConnect string) (Calendar, error) {
 	go func(c *calendarImpl) {
 		for {
 			id := <-c.finished
-			c.db.Invoke(id.String()) //todo
+			events, err := c.db.GetEvents(id)
+			if err != nil {
+				fmt.Println(id, err)
+			} else {
+				for _, e := range events {
+					fmt.Println("Invoked", e.Information, "at", e.Alerttime.String())
+				}
+			}
 		}
 	}(newcalendar)
 	return newcalendar, nil
