@@ -1,7 +1,7 @@
 gen:
 	cd api/pbcalendar && ./genpb.sh
 
-main: gen
+mycalendar: gen
 	cd cmd/mycalendar && go build -o mycalendar
 
 testapp:
@@ -23,7 +23,16 @@ tests: testapp testgrpc testmq
 
 rabbitmq: sender scheduler
 
-all: main tests sender sheduler
+all: mycalendar tests sender sheduler
+
+docker-mycalendar:
+	docker build -f build/package/mycalendar.dockerfile -t mycalendar
+
+docker-sheduler:
+	docker build -f build/package/sheduler.dockerfile -t sheduler
+
+docker-sender:
+	docker build -f build/package/sender.dockerfile -t sender
 
 clean: 
 	-rm cmd/mycalendar/mycalendar cmd/testapp/testapp cmd/testgrpc/testgrpc cmd/testmq/testmq cmd/sender/sender cmd/sheduler/sheduler 2>/dev/null 
