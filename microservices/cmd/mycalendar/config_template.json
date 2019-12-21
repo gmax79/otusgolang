@@ -1,0 +1,13 @@
+{
+    "log_file" : "/dev/stdout",
+    "log_level": "info",
+    "log_encoding": "console",
+    "log_debug": 0,
+    "host": ":$HTTP_PORT",
+    "grpc": ":$GRPC_PORT",
+    "postgres_host": "$POSTGRES_HOST",
+    "postgres_port": "$POSTGRES_PORT",
+    "postgres_user": "$POSTGRES_USER",
+    "postgres_password": "$POSTGRES_PASSWORD",
+    "postgres_database": "$POSTGRES_DATABASE"
+}

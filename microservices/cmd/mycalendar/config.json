@@ -1,5 +1,5 @@
 {
-    "log_file" : "/tmp/mycalendar",
+    "log_file" : "/dev/stdout",
     "log_level": "info",
     "log_encoding": "console",
     "log_debug": 0,

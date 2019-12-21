@@ -25,14 +25,16 @@ rabbitmq: sender scheduler
 
 all: mycalendar tests sender sheduler
 
-docker-mycalendar:
-	docker build -f build/package/mycalendar.dockerfile -t mycalendar
+docker-mycalendar: mycalendar
+	docker build -f build/package/mycalendar.dockerfile -t mycalendar .
 
-docker-sheduler:
+docker-sheduler: sheduler
 	docker build -f build/package/sheduler.dockerfile -t sheduler
 
-docker-sender:
+docker-sender: sender
 	docker build -f build/package/sender.dockerfile -t sender
+
+docker-all: docker-mycalendar docker-sheduler docker-sender
 
 clean: 
 	-rm cmd/mycalendar/mycalendar cmd/testapp/testapp cmd/testgrpc/testgrpc cmd/testmq/testmq cmd/sender/sender cmd/sheduler/sheduler 2>/dev/null 
