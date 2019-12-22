@@ -26,7 +26,7 @@ services:
             - rabbitmq
       
     mycalendar:
-      image: mycalendar
+      image: gmax079/practice:mycalendar
       container_name: mycalendar
       environment:
         POSTGRES_HOST: postgres:5432
@@ -51,7 +51,7 @@ services:
             - mycalendar
           
     sheduler:
-      image: sheduler
+      image: gmax079/practice:sheduler
       container_name: sheduler
       environment:
         RABBITMQ_HOST: rabbitmq:5672
@@ -71,7 +71,7 @@ services:
             - sheduler
 
     sender:
-      image: sender
+      image: gmax079/practice:sender
       container_name: sender
       environment:
         RABBITMQ_HOST: rabbitmq:5672
