@@ -1,5 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 envsubst < config_template.json > config.json
 echo "Starting mycalendar"
 cat config.json
-./mycalendar
+chmod +x wait
+./wait && ./mycalendar
