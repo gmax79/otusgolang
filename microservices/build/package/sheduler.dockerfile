@@ -1,7 +1,7 @@
 FROM golang:1.13.5 as builder
 COPY . /app
-WORKDIR /app/cmd/mycalendar
-RUN GOOS=linux go build -o mycalendar .
+WORKDIR /app/cmd/sheduler
+RUN GOOS=linux go build -o sheduler .
 
 FROM ubuntu:18.04
 RUN \
@@ -12,6 +12,6 @@ RUN \
 
 WORKDIR /root
 ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait ./wait
-COPY build/package/mycalendar_entrypoint.sh cmd/mycalendar/config_template.json ./ 
-COPY --from=builder /app/cmd/mycalendar/mycalendar ./
-ENTRYPOINT "./mycalendar_entrypoint.sh"
+COPY build/package/sheduler_entrypoint.sh cmd/sheduler/config_template.json ./ 
+COPY --from=builder /app/cmd/sheduler/sheduler ./
+ENTRYPOINT "./sheduler_entrypoint.sh"

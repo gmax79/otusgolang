@@ -1,52 +1,69 @@
 version: "3.7"
 services: 
     postgres:
-        image: postgres:9.6.16        
-        container_name: postgres
-        environment:
-          POSTGRES_USER: "postgres"
-          POSTGRES_PASSWORD: "Vfnhtirf79"
-          POSTGRES_DB: calendar
-        ports:
-          - "5432:5432"
-        networks:
-          calendar_net:
-            ipv4_address: 10.0.0.10
-            aliases:
-              - postgres
+      image: postgres:9.6.16        
+      container_name: postgres
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: Vfnhtirf79
+        POSTGRES_DB: calendar
+      ports:
+        - "5432:5432"
+      networks:
+        calendar_net:
+          ipv4_address: 10.0.0.10
+          aliases:
+            - postgres
     
     rabbitmq:
-        image: rabbitmq:3.8.2
-        container_name: rabbitmq
-        environment:
-          RABBITMQ_DEFAULT_USER: "calendar"
-          RABBITMQ_DEFAULT_PASSWORD: "Vfnhtirf79"
-        ports:
-          - "5672:5672"
-        networks:
-          calendar_net:
-            ipv4_address: 10.0.0.11
-            aliases:
-              - rabbitmq
+      image: rabbitmq:3.8.2
+      container_name: rabbitmq
+      environment:
+        RABBITMQ_DEFAULT_USER: calendar
+        RABBITMQ_DEFAULT_PASSWORD: Vfnhtirf79
+      ports:
+        - "5672:5672"
+      networks:
+        calendar_net:
+          ipv4_address: 10.0.0.11
+          aliases:
+            - rabbitmq
       
     mycalendar:
-        image: mycalendar
-        container_name: mycalendar
-        environment:
-          POSTGRES_HOST: postgres:5432
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: Vfnhtirf79
-          POSTGRES_DB: calendar
-          HTTP_PORT: 8080
-          GRPC_PORT: 9090
-          WAIT_HOSTS: postgres:5432 # for wait tool
-        depends_on:
-          - postgres
-        networks:
-          calendar_net:
-            ipv4_address: 10.0.0.12
-            aliases:
-              - mycalendar
+      image: mycalendar
+      container_name: mycalendar
+      environment:
+        POSTGRES_HOST: postgres:5432
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: Vfnhtirf79
+        POSTGRES_DB: calendar
+        HTTP_PORT: 8080
+        GRPC_PORT: 9090
+        WAIT_HOSTS: postgres:5432 # for wait tool
+      depends_on:
+        - postgres
+      networks:
+        calendar_net:
+          ipv4_address: 10.0.0.12
+          aliases:
+           - mycalendar
+          
+    sheduler:
+      image: sheduler
+      container_name: sheduler
+      environment:
+        RABBITMQ_HOST: do.cc3.ru:5672
+        RABBITMQ_USER: calendar
+        RABBITMQ_PASSWORD: Vfnhtirf79
+        GRPC_HOST: rabbitmq:5672
+        WAIT_HOSTS: rabbitmq:5672 # for wait tool
+      depends_on:
+        - rabbitmq
+      networks:
+        calendar_net:
+          ipv4_address: 10.0.0.13
+          aliases:
+           - sheduler
 
 networks:
   calendar_net:

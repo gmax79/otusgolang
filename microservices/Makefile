@@ -29,10 +29,10 @@ docker-mycalendar: mycalendar
 	docker build -f build/package/mycalendar.dockerfile -t mycalendar .
 
 docker-sheduler: sheduler
-	docker build -f build/package/sheduler.dockerfile -t sheduler
+	docker build -f build/package/sheduler.dockerfile -t sheduler .
 
 docker-sender: sender
-	docker build -f build/package/sender.dockerfile -t sender
+	docker build -f build/package/sender.dockerfile -t sender .
 
 docker-all: docker-mycalendar docker-sheduler docker-sender
 
