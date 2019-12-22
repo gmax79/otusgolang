@@ -1,9 +1,9 @@
 {
-    "log_file" : "/dev/stdout",
+    "log_file" : "/tmp/mycalendar",
     "log_level": "info",
     "log_encoding": "console",
     "log_debug": 0,
-    "host": "localhost:8080",
+    "host": "localhost:8888",
     "grpc": "localhost:9090",
     "postgres_host": "do.cc3.ru:5432",
     "postgres_user": "postgres",
