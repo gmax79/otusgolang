@@ -1,24 +1,55 @@
 version: "3.7"
 services: 
-    db:
+    postgres:
         image: postgres:9.6.16        
         container_name: postgres
         environment:
+          POSTGRES_USER: "postgres"
+          POSTGRES_PASSWORD: "Vfnhtirf79"
+        ports:
+          - "5432:5432"
         networks:
           calendar_net:
-            ipv4_address: 10.0.0.1
+            ipv4_address: 10.0.0.10
             aliases:
               - postgres
     
     rabbitmq:
-        image: rabbitmq: 3.8.2
+        image: rabbitmq:3.8.2
         container_name: rabbitmq
         environment:
+          RABBITMQ_DEFAULT_USER: "calendar"
+          RABBITMQ_DEFAULT_PASSWORD: "Vfnhtirf79"
+        ports:
+          - "5672:5672"
         networks:
-            calendar_net:
-              ipv4_address: 10.0.0.1
-              aliases:
-                - rabbitmq
-    
+          calendar_net:
+            ipv4_address: 10.0.0.11
+            aliases:
+              - rabbitmq
+      
     mycalendar:
-        image: 
+        image: mycalendar
+        container_name: mycalendar
+        environment:
+          POSTGRES_HOST: postgres:5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: Vfnhtirf79
+          POSTGRES_DATABASE: calendar
+          HTTP_PORT: 8080
+          GRPC_PORT: 9090
+        depends_on:
+          - postgres
+          - rabbitmq
+        networks:
+          calendar_net:
+            ipv4_address: 10.0.0.12
+            aliases:
+              - mycalendar
+
+networks:
+  calendar_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: "10.0.0.0/24"
