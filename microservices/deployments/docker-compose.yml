@@ -49,7 +49,7 @@ services:
         calendar_net:
           ipv4_address: 10.0.0.12
           aliases:
-           - mycalendar
+            - mycalendar
           
     sheduler:
       image: sheduler
@@ -66,8 +66,24 @@ services:
         calendar_net:
           ipv4_address: 10.0.0.13
           aliases:
-           - sheduler
+            - sheduler
 
+    sender:
+      image: sender
+      container_name: sender
+      environment:
+        RABBITMQ_HOST: rabbitmq:5672
+        RABBITMQ_USER: calendar
+        RABBITMQ_PASSWORD: Vfnhtirf79
+        WAIT_HOSTS: rabbitmq:5672 # for wait tool
+      depends_on:
+        - rabbitmq
+      networks:
+        calendar_net:
+          ipv4_address: 10.0.0.14
+          aliases:
+            - sender
+      
 networks:
   calendar_net:
     ipam:
