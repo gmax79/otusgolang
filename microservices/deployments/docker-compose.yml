@@ -20,7 +20,7 @@ services:
       container_name: rabbitmq
       environment:
         RABBITMQ_DEFAULT_USER: calendar
-        RABBITMQ_DEFAULT_PASSWORD: Vfnhtirf79
+        RABBITMQ_DEFAULT_PASS: Vfnhtirf79
       ports:
         - "5672:5672"
       networks:
@@ -42,6 +42,9 @@ services:
         WAIT_HOSTS: postgres:5432 # for wait tool
       depends_on:
         - postgres
+      ports:
+        - "8080:8080"
+        - "9090:9090"
       networks:
         calendar_net:
           ipv4_address: 10.0.0.12
@@ -52,10 +55,10 @@ services:
       image: sheduler
       container_name: sheduler
       environment:
-        RABBITMQ_HOST: do.cc3.ru:5672
+        RABBITMQ_HOST: rabbitmq:5672
         RABBITMQ_USER: calendar
         RABBITMQ_PASSWORD: Vfnhtirf79
-        GRPC_HOST: rabbitmq:5672
+        GRPC_HOST: mycalendar:9090
         WAIT_HOSTS: rabbitmq:5672 # for wait tool
       depends_on:
         - rabbitmq
