@@ -42,16 +42,20 @@ func main() {
 		return
 	}
 
-	rabbitConn, err := api.RabbitMQConnect(config.RabbitMQAddr())
+	var rabbitConn *api.RmqConnection
+	rabbitConn, err = api.RabbitMQConnect(config.RabbitMQAddr())
 	if err != nil {
 		return
 	}
 	defer rabbitConn.Close()
 
-	datachan, err := rabbitConn.Subscribe("calendar")
+	var datachan <-chan []byte
+	datachan, err = rabbitConn.Subscribe("calendar")
+	if err != nil {
+		return
+	}
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-
 	fmt.Println("Sender started")
 loop:
 	for {
