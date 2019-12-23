@@ -1,0 +1,6 @@
+{
+    "rabbitmq_host": "$RABBITMQ_HOST",
+    "rabbitmq_user": "$RABBITMQ_USER",
+    "rabbitmq_password": "$RABBITMQ_PASSWORD",
+    "grpc_host": "$GRPC_HOST"
+}

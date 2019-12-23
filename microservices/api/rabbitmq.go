@@ -100,3 +100,11 @@ func (c *RmqConnection) Subscribe(name string) (<-chan []byte, error) {
 	}()
 	return datach, nil
 }
+
+// IsNoQueueError - check error for queue is not declared in rabbitmq
+func IsNoQueueError(err error) bool {
+	if amqperr, ok := err.(*amqp.Error); ok && amqperr.Code == amqp.NotFound {
+		return true
+	}
+	return false
+}

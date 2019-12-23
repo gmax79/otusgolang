@@ -97,6 +97,18 @@ func (da *Date) SetNow() {
 	da.Day = t.Day()
 }
 
+// SetNowPlus - set now + duration
+func (da *Date) SetNowPlus(d time.Duration) {
+	t := time.Now()
+	t = t.Add(d)
+	da.Hour = t.Hour()
+	da.Minute = t.Minute()
+	da.Second = t.Second()
+	da.Year = t.Year()
+	da.Month = int(t.Month())
+	da.Day = t.Day()
+}
+
 // ParseValidDate - create calendar date from string and validate
 func ParseValidDate(trigger string) (Date, error) {
 	var err error

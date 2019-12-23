@@ -86,7 +86,7 @@ loop:
 				text := fmt.Sprint("Event at ", e.Alerttime.String(), "! ", e.Information)
 				pusblishEventToRabbit(rabbitConn, text)
 			}
-			from.SetNow()
+			from.SetNowPlus(time.Second)
 		case <-stop:
 			break loop
 		}

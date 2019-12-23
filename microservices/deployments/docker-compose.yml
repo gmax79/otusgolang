@@ -1,0 +1,94 @@
+version: "3.7"
+services: 
+    postgres:
+      image: postgres:9.6.16        
+      container_name: postgres
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: Vfnhtirf79
+        POSTGRES_DB: calendar
+      networks:
+        calendar_net:
+          ipv4_address: 10.0.0.10
+          aliases:
+            - postgres
+    
+    rabbitmq:
+      image: rabbitmq:3.8.2
+      container_name: rabbitmq
+      environment:
+        RABBITMQ_DEFAULT_USER: calendar
+        RABBITMQ_DEFAULT_PASS: Vfnhtirf79
+      networks:
+        calendar_net:
+          ipv4_address: 10.0.0.11
+          aliases:
+            - rabbitmq
+      
+    mycalendar:
+      image: gmax079/practice:mycalendar
+      container_name: mycalendar
+      environment:
+        POSTGRES_HOST: postgres:5432
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: Vfnhtirf79
+        POSTGRES_DB: calendar
+        HTTP_PORT: 8888
+        GRPC_PORT: 9090
+        WAIT_HOSTS: postgres:5432 # for wait tool
+      volumes:
+        - "/etc/timezone:/etc/timezone:ro"
+        - "/etc/localtime:/etc/localtime:ro"
+      depends_on:
+        - postgres
+      ports:
+        - "8888:8888"
+        - "9090:9090"
+      networks:
+        calendar_net:
+          ipv4_address: 10.0.0.12
+          aliases:
+            - mycalendar
+          
+    sheduler:
+      image: gmax079/practice:sheduler
+      container_name: sheduler
+      environment:
+        RABBITMQ_HOST: rabbitmq:5672
+        RABBITMQ_USER: calendar
+        RABBITMQ_PASSWORD: Vfnhtirf79
+        GRPC_HOST: mycalendar:9090
+        WAIT_HOSTS: rabbitmq:5672 # for wait tool
+      volumes:
+        - "/etc/timezone:/etc/timezone:ro"
+        - "/etc/localtime:/etc/localtime:ro"
+      depends_on:
+        - rabbitmq
+      networks:
+        calendar_net:
+          ipv4_address: 10.0.0.13
+          aliases:
+            - sheduler
+
+    sender:
+      image: gmax079/practice:sender
+      container_name: sender
+      environment:
+        RABBITMQ_HOST: rabbitmq:5672
+        RABBITMQ_USER: calendar
+        RABBITMQ_PASSWORD: Vfnhtirf79
+        WAIT_HOSTS: rabbitmq:5672 # for wait tool
+      depends_on:
+        - rabbitmq
+      networks:
+        calendar_net:
+          ipv4_address: 10.0.0.14
+          aliases:
+            - sender
+      
+networks:
+  calendar_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: "10.0.0.0/24"

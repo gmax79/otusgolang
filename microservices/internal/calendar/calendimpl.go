@@ -5,6 +5,7 @@ import (
 	"github.com/gmax79/otusgolang/microservices/internal/objects"
 	"github.com/gmax79/otusgolang/microservices/internal/simple"
 	"github.com/gmax79/otusgolang/microservices/internal/storage"
+	"sync"
 )
 
 // Calendar implementaion
@@ -13,6 +14,7 @@ type calendarImpl struct {
 	stoptimers chan struct{}
 	db         *storage.DbProvider
 	timersset  map[simple.Date]struct{}
+	mx         *sync.Mutex
 }
 
 func createCalendar(psqlConnect string) (Calendar, error) {
@@ -30,6 +32,7 @@ func createCalendar(psqlConnect string) (Calendar, error) {
 	newcalendar.stoptimers = make(chan struct{})
 	newcalendar.db = storage.CreateProvider(db)
 	newcalendar.timersset = make(map[simple.Date]struct{})
+	newcalendar.mx = &sync.Mutex{}
 	go func(c *calendarImpl) {
 		for {
 			id := <-c.finished
@@ -51,11 +54,14 @@ func (c *calendarImpl) AddTrigger(d simple.Date) (Events, error) {
 	if err = d.Valid(); err != nil {
 		return nil, err
 	}
+	c.mx.Lock()
+	defer c.mx.Unlock()
 	if _, ok := c.timersset[d]; !ok {
 		err = createTimer(d, c.finished, c.stoptimers)
 		if err != nil {
 			return nil, err
 		}
+		c.timersset[d] = struct{}{}
 	}
 	return createEvents(d, c.db), nil
 }
@@ -69,7 +75,9 @@ func (c *calendarImpl) DeleteTrigger(d simple.Date) error {
 	if err = d.Valid(); err != nil {
 		return err
 	}
+	c.mx.Lock()
 	delete(c.timersset, d)
+	c.mx.Unlock()
 	return c.db.DeleteTrigger(d)
 }
 

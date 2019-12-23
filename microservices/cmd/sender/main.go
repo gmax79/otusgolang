@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/gmax79/otusgolang/microservices/api"
 )
@@ -41,17 +42,30 @@ func main() {
 	if err = json.Unmarshal(configJSON, &config); err != nil {
 		return
 	}
+	rmqHost := config.RabbitMQAddr()
 
-	rabbitConn, err := api.RabbitMQConnect(config.RabbitMQAddr())
-	if err != nil {
+	var rabbitConn *api.RmqConnection
+	var datachan <-chan []byte
+	for {
+		rabbitConn, err = api.RabbitMQConnect(rmqHost)
+		if err != nil {
+			return
+		}
+		if datachan, err = rabbitConn.Subscribe("calendar"); err == nil {
+			break
+		}
+		if api.IsNoQueueError(err) {
+			rabbitConn.Close()
+			log.Println("Wait rabbitmq queue")
+			time.Sleep(time.Second * 3)
+			continue
+		}
 		return
 	}
-	defer rabbitConn.Close()
 
-	datachan, err := rabbitConn.Subscribe("calendar")
+	defer rabbitConn.Close()
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-
 	fmt.Println("Sender started")
 loop:
 	for {

@@ -7,7 +7,7 @@ import (
 	tests "github.com/gmax79/otusgolang/microservices/internal/stests"
 )
 
-const host = "http://localhost:8080"
+const host = "http://localhost:8888"
 
 func main() {
 	fmt.Println("Testing calendar app")
