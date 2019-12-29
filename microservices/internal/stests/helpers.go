@@ -13,15 +13,24 @@ type result struct {
 	Count int `json:"result"`
 }
 
-func Post(host, path string, params map[string]string, requiredCode int) {
+// PostRequest - helper to create post request with some parameters
+func PostRequest(host, path string, params map[string]string) (*http.Response, error) {
 	all := []string{}
 	values := url.Values{}
-	for k, v := range params {
-		all = append(all, k+"='"+v+"'")
-		values[k] = []string{v}
+	if params != nil {
+		for k, v := range params {
+			all = append(all, k+"='"+v+"'")
+			values[k] = []string{v}
+		}
 	}
 	println("POST", "/"+path, "", strings.Join(all, ", "))
-	resp, err := http.PostForm(host+"/"+path, values)
+	return http.PostForm(host+"/"+path, values)
+
+}
+
+// Post - test function to make post and check returned code
+func Post(host, path string, params map[string]string, requiredCode int) {
+	resp, err := PostRequest(host, path, params)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -29,6 +38,7 @@ func Post(host, path string, params map[string]string, requiredCode int) {
 	out(resp, requiredCode)
 }
 
+// Get - test function to make get and check returned code
 func Get(host, path string, requiredCode int, resultCount int) {
 	println("GET", "/"+path)
 	resp, err := http.Get(host + "/" + path)

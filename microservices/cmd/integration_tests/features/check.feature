@@ -1,10 +1,10 @@
 # file: featurer/check.feature
 
-Feature: new event
-    In order to use mycalendar api
-    As an API calendar
-    I need add new event
+Feature: Add new event
+    Using mycalendar api
+    I can add new event
 
 Scenario: Add event
-    When I send "GET" requst to "/users"
+    When I create event at "2020-10-22 18:00:00" with "Maks birthday"
     Then response code should be 200
+
