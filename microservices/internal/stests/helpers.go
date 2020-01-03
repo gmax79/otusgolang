@@ -41,10 +41,19 @@ func Post(host, path string, params map[string]string, requiredCode int) {
 	}
 }
 
-// Get - test function to make get and check returned code
-func Get(host, path string, requiredCode int, resultCount int) {
+// GetRequest - helper to create get request
+func GetRequest(host, path string) (*http.Response, error) {
 	fmt.Println("GET", "/"+path)
 	resp, err := http.Get(host + "/" + path)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// Get - test function to make get and check returned code
+func Get(host, path string, requiredCode int, resultCount int) {
+	resp, err := GetRequest(host, path)
 	if err != nil {
 		fmt.Println(err)
 		return
