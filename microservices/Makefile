@@ -21,9 +21,17 @@ testmq:
 
 tests: testapp testgrpc testmq
 
-rabbitmq: sender scheduler
-
 all: mycalendar tests sender sheduler
+
+run: 
+	cd cmd/mycalendar && ./mycalendar &  \
+	cd cmd/sender && ./sender & \
+	cd cmd/sheduler && ./sheduler &
+
+stop:
+	build/kill.sh sheduler \
+	&& build/kill.sh sender \
+	&& build/kill.sh mycalendar
 
 docker-mycalendar: mycalendar
 	docker build -f build/package/mycalendar.dockerfile -t mycalendar . \
