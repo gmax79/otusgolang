@@ -51,16 +51,25 @@ func GetRequest(host, path string) (*http.Response, error) {
 	return resp, nil
 }
 
-// Get - test function to make get and check returned code
-func Get(host, path string, requiredCode int, resultCount int) {
+// GetContent - test function to make get and return answer content
+func GetContent(host, path string, requiredCode int) ([]byte, error) {
 	resp, err := GetRequest(host, path)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return []byte{}, err
 	}
 	data, err := out(resp, requiredCode)
 	if err != nil {
+		return []byte{}, err
+	}
+	return data, nil
+}
+
+// Get - test function to make get and check returned code and count
+func Get(host, path string, requiredCode int, resultCount int) {
+	data, err := GetContent(host, path, requiredCode)
+	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	s := string(data)
 	s = strings.ReplaceAll(s, "\\", "")
@@ -82,7 +91,11 @@ func out(resp *http.Response, requiredCode int) ([]byte, error) {
 	}
 	fmt.Println("Return Code:", resp.Status)
 	fmt.Println("Content-Length:", resp.ContentLength)
-	if resp.ContentLength > 0 {
+	fmt.Println("Bytes count:", len(data))
+	if resp.ContentLength != int64(len(data)) {
+		return data, fmt.Errorf("Content len not equal readed bytes chunk")
+	}
+	if len(data) > 2 {
 		fmt.Println("Content:", string(data))
 		data = data[1 : len(data)-1]
 	}

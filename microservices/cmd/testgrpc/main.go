@@ -44,6 +44,7 @@ func assertCount(prefix string, count int, err error) {
 
 func main() {
 
+	fmt.Println("Testing calendar grpc interface app")
 	var err error
 	cli, err := grpccon.CreateClient(host)
 	if err != nil {

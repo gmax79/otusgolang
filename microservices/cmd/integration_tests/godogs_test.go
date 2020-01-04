@@ -3,7 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"net/http"
+	"strings"
 
 	"github.com/DATA-DOG/godog"
 	tests "github.com/gmax79/otusgolang/microservices/internal/stests"
@@ -40,18 +41,14 @@ type result struct {
 }
 
 func iGetEventsAt(arg1 string) error {
-	resp, err := tests.GetRequest(host, "events_for_day?day="+arg1)
+	data, err := tests.GetContent(host, "events_for_day?day="+arg1, http.StatusOK)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(data))
+	content := string(data)
+	content = strings.ReplaceAll(content, "\\", "")
 	var r result
-	if err = json.Unmarshal(data, &r); err != nil {
+	if err = json.Unmarshal([]byte(content), &r); err != nil {
 		return err
 	}
 	resultCount = r.Count

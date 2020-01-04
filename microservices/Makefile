@@ -19,19 +19,28 @@ sheduler:
 testmq:
 	cd cmd/testmq && go build -o testmq
 
-tests: testapp testgrpc testmq
+testgodog: 
+	cd cmd/integration_tests && godog -o testgodog
+
+tests: testapp testgrpc testmq testgodog
 
 all: mycalendar tests sender sheduler
 
 run: 
-	cd cmd/mycalendar && ./mycalendar &  \
-	cd cmd/sender && ./sender & \
+	cd cmd/mycalendar && ./mycalendar &
+	cd cmd/sender && ./sender &
 	cd cmd/sheduler && ./sheduler &
 
+run-tests: tests
+	cd cmd/testapp && ./testapp
+	cd cmd/testgrpc && ./testgrpc
+	cd cmd/testmq && ./testmq
+	cd cmd/integration_tests && ./testgodog
+
 stop:
-	build/kill.sh sheduler \
-	&& build/kill.sh sender \
-	&& build/kill.sh mycalendar
+	build/kill.sh sheduler
+	build/kill.sh sender
+	build/kill.sh mycalendar
 
 docker-mycalendar: mycalendar
 	docker build -f build/package/mycalendar.dockerfile -t mycalendar . \
@@ -53,4 +62,4 @@ docker-push:
 	&& docker push gmax079/practice:sender
 
 clean: 
-	-rm cmd/mycalendar/mycalendar cmd/testapp/testapp cmd/testgrpc/testgrpc cmd/testmq/testmq cmd/sender/sender cmd/sheduler/sheduler 2>/dev/null 
+	-rm cmd/mycalendar/mycalendar cmd/testapp/testapp cmd/testgrpc/testgrpc cmd/testmq/testmq cmd/integration_tests/testgodog cmd/sender/sender cmd/sheduler/sheduler 2>/dev/null 
