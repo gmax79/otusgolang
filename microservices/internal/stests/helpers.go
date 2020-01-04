@@ -89,10 +89,9 @@ func out(resp *http.Response, requiredCode int) ([]byte, error) {
 	if err != nil {
 		return data, err
 	}
-	fmt.Println("Return Code:", resp.Status)
-	fmt.Println("Content-Length:", resp.ContentLength)
-	fmt.Println("Bytes count:", len(data))
+	fmt.Println("Return Code:", resp.Status, ", Content-Length:", resp.ContentLength)
 	if resp.ContentLength != int64(len(data)) {
+		fmt.Println("Bytes count:", len(data))
 		return data, fmt.Errorf("Content len not equal readed bytes chunk")
 	}
 	if len(data) > 2 {

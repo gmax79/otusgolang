@@ -1,7 +1,5 @@
-gen:
+mycalendar:
 	cd api/pbcalendar && ./genpb.sh
-
-mycalendar: gen
 	cd cmd/mycalendar && go build -o mycalendar
 
 testapp:
@@ -24,7 +22,7 @@ testgodog:
 
 tests: testapp testgrpc testmq testgodog
 
-all: mycalendar tests sender sheduler
+all: mycalendar sender sheduler tests
 
 run: 
 	cd cmd/mycalendar && ./mycalendar &
@@ -42,24 +40,29 @@ stop:
 	build/kill.sh sender
 	build/kill.sh mycalendar
 
-docker-mycalendar: mycalendar
+docker-mycalendar:
 	docker build -f build/package/mycalendar.dockerfile -t mycalendar . \
 	&& docker tag mycalendar gmax079/practice:mycalendar
 
-docker-sheduler: sheduler
+docker-sheduler:
 	docker build -f build/package/sheduler.dockerfile -t sheduler . \
 	&& docker tag sheduler gmax079/practice:sheduler
 
-docker-sender: sender
+docker-sender:
 	docker build -f build/package/sender.dockerfile -t sender . \
 	&& docker tag sender gmax079/practice:sender
 
-docker-all: docker-mycalendar docker-sheduler docker-sender
+docker-tests:
+	docker build -f build/package/tests.dockerfile -t tests . \
+	&& docker tag tests gmax079/practice:tests
+
+docker-all: docker-mycalendar docker-sheduler docker-sender docker-tests
 
 docker-push:
 	docker push gmax079/practice:mycalendar \
 	&& docker push gmax079/practice:sheduler \
-	&& docker push gmax079/practice:sender
+	&& docker push gmax079/practice:sender \
+	&& docker push gmax079/practice:tests
 
 clean: 
 	-rm cmd/mycalendar/mycalendar cmd/testapp/testapp cmd/testgrpc/testgrpc cmd/testmq/testmq cmd/integration_tests/testgodog cmd/sender/sender cmd/sheduler/sheduler 2>/dev/null 

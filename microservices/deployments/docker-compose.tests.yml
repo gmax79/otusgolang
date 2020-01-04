@@ -1,0 +1,13 @@
+version: "3.7"
+
+mainapp:
+    extends:
+      file: docker-compose.yaml
+      service: mainapp
+  
+services: 
+    tests:
+        image: gmax079/practice:tests
+        container_name: tests
+        environment:
+          WAIT_HOSTS: localhost:8888 # for wait tool
