@@ -58,6 +58,12 @@ docker-tests:
 
 docker-all: docker-mycalendar docker-sheduler docker-sender docker-tests
 
+docker-run:
+	cd deployments && docker-compose up
+
+docker-stop:
+	cd deployments && docker-compose down
+
 docker-push:
 	docker push gmax079/practice:mycalendar \
 	&& docker push gmax079/practice:sheduler \
