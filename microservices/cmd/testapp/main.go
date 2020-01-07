@@ -62,4 +62,6 @@ func main() {
 	tests.Get(host, "events_for_day?day=2020-03-10", http.StatusOK, 1)
 	tests.Get(host, "events_for_week?week=2020-11", http.StatusOK, 2)
 	tests.Get(host, "events_for_month?month=2020-03", http.StatusOK, 3)
+
+	fmt.Println("Tests via http interface OK!")
 }

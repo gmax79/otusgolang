@@ -29,4 +29,5 @@ func main() {
 		"event": "RabbitMQ #2.2",
 	}
 	tests.Post(host, "create_event", r3, http.StatusOK)
+	fmt.Println("Tests for Messages queue are OK!")
 }

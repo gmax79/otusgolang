@@ -1,8 +1,9 @@
 #!/bin/bash
-./wait
+chmod +x wait
+./wait || exit 1
 echo "Starting tests"
-./testapp
-./testgrpc
-./testmq
-echo "Test via godog"
-./testgodog
+./testapp || exit 1
+./testgrpc || exit 1
+./testmq || exit 1
+echo "Tests via godog"
+./testgodog || exit 1

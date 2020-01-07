@@ -20,11 +20,13 @@ testmq:
 testgodog: 
 	cd cmd/integration_tests && godog -o testgodog
 
+app: mycalendar sender sheduler
+
 tests: testapp testgrpc testmq testgodog
 
-all: mycalendar sender sheduler tests
+all: app tests
 
-run: 
+run: app
 	cd cmd/mycalendar && ./mycalendar &
 	cd cmd/sender && ./sender &
 	cd cmd/sheduler && ./sheduler &
@@ -61,8 +63,13 @@ docker-all: docker-mycalendar docker-sheduler docker-sender docker-tests
 docker-run:
 	cd deployments && docker-compose up
 
+docker-run-tests:
+	cd deployments && docker-compose -f docker-compose.yml -f docker-compose.tests.yml up || exit_code=$$? || exit $$exit_code
+
 docker-stop:
-	cd deployments && docker-compose down
+	cd deployments && docker-compose -f docker-compose.yml -f docker-compose.tests.yml down
+
+test: docker-run-tests
 
 docker-push:
 	docker push gmax079/practice:mycalendar \

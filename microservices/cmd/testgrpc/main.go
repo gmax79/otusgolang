@@ -91,5 +91,5 @@ func main() {
 	}
 
 	cli.Close()
-	fmt.Println("Connection at grpc host closed")
+	fmt.Println("Tests via grpc interface OK!")
 }
