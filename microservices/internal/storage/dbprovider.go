@@ -179,16 +179,16 @@ func getWhereParameter(p objects.SearchParameters) string {
 	}
 	if p.Week > 0 {
 		if p.Month == 0 && p.Day == 0 {
-			return fmt.Sprintf("EXTRACT('week' from timer) = %d", p.Week)
+			return fmt.Sprintf("EXTRACT('week' from timer) = %d AND EXTRACT('year' from timer) = %d", p.Week, p.Year)
 		}
 		return ""
 	}
 	if p.Month > 0 {
 		if p.Day == 0 {
-			return fmt.Sprintf("EXTRACT('month' from timer) = %d", p.Month)
+			return fmt.Sprintf("EXTRACT('month' from timer) = %d AND EXTRACT('year' from timer) = %d", p.Month, p.Year)
 		}
 		if p.Day > 0 {
-			return fmt.Sprintf("EXTRACT('month' from timer) = %d AND EXTRACT('day' from timer) = %d", p.Month, p.Day)
+			return fmt.Sprintf("EXTRACT('month' from timer) = %d AND EXTRACT('day' from timer) = %d AND EXTRACT('year' from timer) = %d", p.Month, p.Day, p.Year)
 		}
 	}
 	return ""

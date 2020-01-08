@@ -11,7 +11,7 @@ import (
 const host = "http://localhost:8888"
 
 func main() {
-	fmt.Println("Testing rabbit mq pipeline. Create nearby events")
+	fmt.Println("Testing caledar rabbit mq pipeline. Create nearby events")
 	r1 := map[string]string{
 		"time":  tests.DurationToTimeString(time.Second * 5),
 		"event": "RabbitMQ #1",
@@ -29,4 +29,5 @@ func main() {
 		"event": "RabbitMQ #2.2",
 	}
 	tests.Post(host, "create_event", r3, http.StatusOK)
+	fmt.Println("Tests for Messages queue are OK!")
 }
