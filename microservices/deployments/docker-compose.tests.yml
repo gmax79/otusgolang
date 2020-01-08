@@ -7,9 +7,7 @@ services:
         environment:
           WAIT_HOSTS: localhost:8888 # for wait tool
         volumes:
-          - "/etc/timezone:/etc/timezone:ro"
-          - "/etc/localtime:/etc/localtime:ro"
-        depends_on:
-          - mycalendar
-          - sheduler
+          - "~/etc:/etc/localtime:ro"
+          #- "/etc/timezone:/etc/timezone:ro"
+          #- "/etc/localtime:/etc/localtime:ro"
         network_mode: "host"

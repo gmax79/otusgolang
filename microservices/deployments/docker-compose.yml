@@ -2,7 +2,7 @@ version: "3.7"
 
 services: 
     postgres:
-      image: postgres:12.1-alpine        
+      image: postgres:12.1-alpine
       container_name: postgres
       environment:
         POSTGRES_USER: postgres
@@ -13,7 +13,7 @@ services:
           ipv4_address: 10.0.0.10
           aliases:
             - postgres
-    
+
     rabbitmq:
       image: rabbitmq:3.8.2
       container_name: rabbitmq
@@ -25,7 +25,7 @@ services:
           ipv4_address: 10.0.0.11
           aliases:
             - rabbitmq
-      
+
     mycalendar:
       image: gmax079/practice:mycalendar
       container_name: mycalendar
@@ -38,19 +38,20 @@ services:
         GRPC_PORT: 9090
         WAIT_HOSTS: postgres:5432 # for wait tool
       volumes:
-        - "/etc/timezone:/etc/timezone:ro"
-        - "/etc/localtime:/etc/localtime:ro"
+        - "~/etc:/etc/localtime:ro"
+        #- "/etc/timezone:/etc/timezone:ro"
+        #- "/etc/localtime:/etc/localtime:ro"
       depends_on:
         - postgres
       ports:
         - "8888:8888"
-        - "9090:9090"
+        - "9090:9090"  d
       networks:
         calendar_net:
           ipv4_address: 10.0.0.12
           aliases:
             - mycalendar
-          
+
     sheduler:
       image: gmax079/practice:sheduler
       container_name: sheduler
@@ -61,8 +62,9 @@ services:
         GRPC_HOST: mycalendar:9090
         WAIT_HOSTS: rabbitmq:5672 # for wait tool
       volumes:
-        - "/etc/timezone:/etc/timezone:ro"
-        - "/etc/localtime:/etc/localtime:ro"
+        - "~/etc:/etc/localtime:ro"
+        #- "/etc/timezone:/etc/timezone:ro"
+        #- "/etc/localtime:/etc/localtime:ro"
       depends_on:
         - rabbitmq
       networks:
@@ -101,7 +103,7 @@ services:
           ipv4_address: 10.0.0.14
           aliases:
             - sender
-    
+
 networks:
   calendar_net:
     ipam:

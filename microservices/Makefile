@@ -64,11 +64,20 @@ docker-run:
 	cd deployments && docker-compose up
 
 docker-run-tests:
-	cd deployments && docker-compose -f docker-compose.yml -f docker-compose.tests.yml up || exit_code=$$? || exit $$exit_code
+	set -e; \
+	export COMPOSE_IGNORE_ORPHANS=true; \
+	exit_code=0; \
+	cd deployments; \
+	docker-compose -f docker-compose.yml up -d; \
+	docker-compose -f docker-compose.tests.yml up || exit_code=$$?; \
+	docker-compose -f docker-compose.yml -f docker-compose.tests.yml down; \
+	echo "integration_tests result: $$exit_code"; \
+	exit $$exit_code; \
 
 docker-stop:
 	cd deployments && docker-compose -f docker-compose.yml -f docker-compose.tests.yml down
 
+# requirement command from hometask
 test: docker-run-tests
 
 docker-push:
