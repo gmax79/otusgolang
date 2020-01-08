@@ -45,7 +45,7 @@ services:
         - postgres
       ports:
         - "8888:8888"
-        - "9090:9090"  d
+        - "9090:9090"
       networks:
         calendar_net:
           ipv4_address: 10.0.0.12

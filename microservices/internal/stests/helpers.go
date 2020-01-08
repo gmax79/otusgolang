@@ -29,13 +29,18 @@ func PostRequest(host, path string, params map[string]string) (*http.Response, e
 }
 
 // Post - test function to make post and check returned code
-func Post(host, path string, params map[string]string, requiredCode int) {
+func Post(host, path string, params map[string]string, requiredCode int) error {
 	resp, err := PostRequest(host, path, params)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	_, err = out(resp, requiredCode)
+	return err
+}
+
+// PostWithPrint - test function to make post and check returned code, with printing result
+func PostWithPrint(host, path string, params map[string]string, requiredCode int) {
+	err := Post(host, path, params, requiredCode)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -65,27 +70,41 @@ func GetContent(host, path string, requiredCode int) ([]byte, error) {
 }
 
 // Get - test function to make get and check returned code and count
-func Get(host, path string, requiredCode int, resultCount int) {
+func Get(host, path string, requiredCode int, resultCount int) error {
 	data, err := GetContent(host, path, requiredCode)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	s := string(data)
 	s = strings.ReplaceAll(s, "\\", "")
 	var r result
 	err = json.Unmarshal([]byte(s), &r)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 	if r.Count != resultCount {
-		fmt.Println("ERROR, Count must ", resultCount)
+		return fmt.Errorf("ERROR, Count must %d", resultCount)
+	}
+	return nil
+}
+
+// GetWithPrint - test function to make get and check returned code and count and print result
+func GetWithPrint(host, path string, requiredCode int, resultCount int) {
+	err := Get(host, path, requiredCode, resultCount)
+	if err != nil {
+		fmt.Println(err)
 	}
 }
 
-func out(resp *http.Response, requiredCode int) ([]byte, error) {
+// ReadContentAndCloseBody - helper to read Response body and close it
+func ReadContentAndCloseBody(resp *http.Response) ([]byte, error) {
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
+	return data, err
+}
+
+func out(resp *http.Response, requiredCode int) ([]byte, error) {
+	data, err := ReadContentAndCloseBody(resp)
 	if err != nil {
 		return data, err
 	}
@@ -99,7 +118,7 @@ func out(resp *http.Response, requiredCode int) ([]byte, error) {
 		data = data[1 : len(data)-1]
 	}
 	if requiredCode != resp.StatusCode {
-		return data, fmt.Errorf("ERROR, Code must %d", requiredCode)
+		return data, fmt.Errorf("ERROR, Code must %d, got %d", requiredCode, resp.StatusCode)
 	}
 	return data, nil
 }
