@@ -39,7 +39,6 @@ services:
         WAIT_HOSTS: postgres:5432 # for wait tool
       volumes:
         #- "~/etc:/etc/localtime:ro"
-        - "/etc/timezone:/etc/timezone:ro"
         - "/etc/localtime:/etc/localtime:ro"
       depends_on:
         - postgres
@@ -63,7 +62,6 @@ services:
         WAIT_HOSTS: rabbitmq:5672 # for wait tool
       volumes:
         #- "~/etc:/etc/localtime:ro"
-        - "/etc/timezone:/etc/timezone:ro"
         - "/etc/localtime:/etc/localtime:ro"
       depends_on:
         - rabbitmq
