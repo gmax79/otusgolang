@@ -2,12 +2,13 @@ version: "3.7"
 
 services: 
     postgres:
-      image: postgres:12.1-alpine
+      image: postgres:11.6
       container_name: postgres
       environment:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: Vfnhtirf79
         POSTGRES_DB: calendar
+      command: "postgres -c shared_preload_libraries='pg_stat_statements' -c pg_stat_statements.max=10000 -c pg_stat_statements.track=all"
       networks:
         calendar_net:
           ipv4_address: 10.0.0.10
@@ -38,8 +39,8 @@ services:
         GRPC_PORT: 9999
         WAIT_HOSTS: postgres:5432 # for wait tool
       volumes:
-        #- "~/etc:/etc/localtime:ro"
-        - "/etc/localtime:/etc/localtime:ro"
+        - "~/etc:/etc/localtime:ro"
+        #- "/etc/localtime:/etc/localtime:ro"
       depends_on:
         - postgres
       ports:
@@ -61,8 +62,8 @@ services:
         GRPC_HOST: mycalendar:9999
         WAIT_HOSTS: rabbitmq:5672 # for wait tool
       volumes:
-        #- "~/etc:/etc/localtime:ro"
-        - "/etc/localtime:/etc/localtime:ro"
+        - "~/etc:/etc/localtime:ro"
+        #- "/etc/localtime:/etc/localtime:ro"
       depends_on:
         - rabbitmq
       networks:
@@ -86,21 +87,40 @@ services:
           ipv4_address: 10.0.0.14
           aliases:
             - sender
-    sender:
-      image: gmax079/practice:sender
-      container_name: sender
-      environment:
-        RABBITMQ_HOST: rabbitmq:5672
-        RABBITMQ_USER: calendar
-        RABBITMQ_PASSWORD: Vfnhtirf79
-        WAIT_HOSTS: rabbitmq:5672 # for wait tool
-      depends_on:
-        - rabbitmq
+
+    prometheus:
+      image: prom/prometheus:v2.15.2
+      container_name: prometheus
+      ports:
+        - "9090:9090"
+      volumes:
+        - "./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
       networks:
         calendar_net:
-          ipv4_address: 10.0.0.14
+          ipv4_address: 10.0.0.15
           aliases:
-            - sender
+            - prometheus
+    
+    pgexporter:
+      image: wrouesnel/postgres_exporter:v0.8.0
+      container_name: pgexporter
+      environment:
+        DATA_SOURCE_URI: "postgres:5432/postgres?sslmode=disable"
+        DATA_SOURCE_USER: postgres
+        DATA_SOURCE_PASS: Vfnhtirf79
+      ports:
+          - "9187:9187"
+      volumes:
+          - "./pgexporter:/app"
+      command: "--extend.query-path=/app/queries.yml"
+      depends_on:
+          - postgres
+          - prometheus
+      networks:
+          calendar_net:
+            ipv4_address: 10.0.0.16
+            aliases:
+              - pgexporter
 
 networks:
   calendar_net:
