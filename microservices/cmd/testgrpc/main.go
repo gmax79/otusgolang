@@ -10,7 +10,7 @@ import (
 	tests "github.com/gmax79/otusgolang/microservices/internal/stests"
 )
 
-const host = "localhost:9090"
+const host = "localhost:9999"
 
 func s2date(stime string) simple.Date {
 	layout := "2006-01-02 15:04:05"

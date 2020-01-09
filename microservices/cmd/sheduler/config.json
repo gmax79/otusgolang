@@ -2,5 +2,5 @@
     "rabbitmq_host": "do.cc3.ru:5672",
     "rabbitmq_user": "grader",
     "rabbitmq_password": "Vfnhtirf79",
-    "grpc_host": "localhost:9090"
+    "grpc_host": "localhost:9999"
 }
