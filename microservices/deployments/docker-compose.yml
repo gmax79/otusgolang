@@ -8,7 +8,8 @@ services:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: Vfnhtirf79
         POSTGRES_DB: calendar
-      command: "postgres -c shared_preload_libraries='pg_stat_statements' -c pg_stat_statements.max=10000 -c pg_stat_statements.track=all"
+      volumes:
+        - ./postgres/pg_stat_statements.sh:/docker-entrypoint-initdb.d/pg_stat_statements.sh
       networks:
         calendar_net:
           ipv4_address: 10.0.0.10
