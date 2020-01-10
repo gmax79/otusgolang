@@ -55,6 +55,12 @@ func main() {
 	if errmetric != nil {
 		fmt.Println("Can't register sender_messages_total_sent metric", errmetric)
 	}
+	rpsfunc, errmetric := a.RegisterGaugeMetric("sender_messages_rps", "RPS of messages sent by sender service")
+	if errmetric != nil {
+		fmt.Println("Can't register sender_messages_rps metric", errmetric)
+	}
+
+	rpsadapter := pmetrics.CreateRPSCounter(rpsfunc)
 
 	rmqHost := config.RabbitMQAddr()
 	var rabbitConn *api.RmqConnection
@@ -88,6 +94,7 @@ loop:
 				break loop
 			}
 			counterfunc()
+			rpsadapter(1)
 			if len(msg) == 0 {
 				fmt.Println("empty body from rmq ???")
 				continue
