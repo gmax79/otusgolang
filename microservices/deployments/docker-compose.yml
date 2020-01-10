@@ -109,6 +109,7 @@ services:
         DATA_SOURCE_URI: "postgres:5432/postgres?sslmode=disable"
         DATA_SOURCE_USER: postgres
         DATA_SOURCE_PASS: Vfnhtirf79
+        PG_EXPORTER_AUTO_DISCOVER_DATABASES: "true"
       ports:
           - "9187:9187"
       volumes:
