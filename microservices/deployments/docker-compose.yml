@@ -80,6 +80,7 @@ services:
         RABBITMQ_HOST: rabbitmq:5672
         RABBITMQ_USER: calendar
         RABBITMQ_PASSWORD: Vfnhtirf79
+        PROMETHEUS_SENDER_HOST: 0.0.0.0:9102
         WAIT_HOSTS: rabbitmq:5672 # for wait tool
       depends_on:
         - rabbitmq
@@ -117,7 +118,6 @@ services:
       command: "--extend.query-path=/app/queries.yml"
       depends_on:
           - postgres
-          - prometheus
       networks:
           calendar_net:
             ipv4_address: 10.0.0.16

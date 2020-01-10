@@ -42,6 +42,12 @@ stop:
 	build/kill.sh sender
 	build/kill.sh mycalendar
 
+devenv-run:
+	cd deployments && docker-compose -f docker-compose.dev.yml up
+
+devenv-stop:
+	cd deployments && docker-compose -f docker-compose.dev.yml down
+
 docker-mycalendar:
 	docker build -f build/package/mycalendar.dockerfile -t mycalendar . \
 	&& docker tag mycalendar gmax079/practice:mycalendar

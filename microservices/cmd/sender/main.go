@@ -11,6 +11,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gmax79/otusgolang/microservices/internal/pmetrics"
+
 	"github.com/gmax79/otusgolang/microservices/api"
 )
 
@@ -19,6 +21,7 @@ type senderConfig struct {
 	RmqlHost    string `json:"rabbitmq_host"`
 	RmqlUser    string `json:"rabbitmq_user"`
 	RmqPassword string `json:"rabbitmq_password"`
+	Prometheus  string `json:"prometheus_exporter"`
 }
 
 func (s *senderConfig) RabbitMQAddr() string {
@@ -42,8 +45,18 @@ func main() {
 	if err = json.Unmarshal(configJSON, &config); err != nil {
 		return
 	}
-	rmqHost := config.RabbitMQAddr()
 
+	a, errmetric := pmetrics.CreateMetricsAgent(config.Prometheus)
+	if errmetric != nil {
+		fmt.Println(errmetric)
+	}
+	defer a.Shutdown()
+	counterfunc, errmetric := a.RegisterCounterMetric("sender_messages_total_sent", "Count messages sent by sender sevice")
+	if errmetric != nil {
+		fmt.Println("Can't register sender_messages_total_sent metric", errmetric)
+	}
+
+	rmqHost := config.RabbitMQAddr()
 	var rabbitConn *api.RmqConnection
 	var datachan <-chan []byte
 	for {
@@ -74,6 +87,7 @@ loop:
 			if !ok {
 				break loop
 			}
+			counterfunc()
 			if len(msg) == 0 {
 				fmt.Println("empty body from rmq ???")
 				continue

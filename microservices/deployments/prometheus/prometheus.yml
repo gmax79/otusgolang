@@ -3,3 +3,8 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
     - targets: ['pgexporter:9187']
+
+  - job_name: 'sender'
+    scrape_interval: 5s
+    static_configs:
+    - targets: ['sender:9102']

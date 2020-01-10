@@ -1,0 +1,47 @@
+version: "3.7"
+
+services: 
+    postgres:
+      image: postgres:11.6
+      container_name: postgres
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: Vfnhtirf79
+        POSTGRES_DB: calendar
+      ports:
+        - "5432:5432"
+      volumes:
+        - ./postgres/pg_stat_statements.sh:/docker-entrypoint-initdb.d/pg_stat_statements.sh
+
+    rabbitmq:
+      image: rabbitmq:3.8.2
+      container_name: rabbitmq
+      environment:
+        RABBITMQ_DEFAULT_USER: calendar
+        RABBITMQ_DEFAULT_PASS: Vfnhtirf79
+      ports:
+        - "5672:5672"
+
+    pgexporter:
+      image: wrouesnel/postgres_exporter:v0.8.0
+      container_name: pgexporter
+      environment:
+        DATA_SOURCE_URI: "postgres:5432/postgres?sslmode=disable"
+        DATA_SOURCE_USER: postgres
+        DATA_SOURCE_PASS: Vfnhtirf79
+        PG_EXPORTER_AUTO_DISCOVER_DATABASES: "true"
+      ports:
+          - "9187:9187"
+      volumes:
+          - "./pgexporter:/app"
+      command: "--extend.query-path=/app/queries.yml"
+      depends_on:
+          - postgres
+
+    prometheus:
+      image: prom/prometheus:v2.15.2
+      container_name: prometheus
+      ports:
+        - "9090:9090"
+      volumes:
+        - "./prometheus/prometheus.dev.yml:/etc/prometheus/prometheus.yml"
