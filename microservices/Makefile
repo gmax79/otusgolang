@@ -1,12 +1,6 @@
 mycalendar:
-	cd api/pbcalendar && ./genpb.sh
+	cd scripts && ./genpb.sh
 	cd cmd/mycalendar && go build -o mycalendar
-
-testapp:
-	cd cmd/testapp && go build -o testapp
-
-testgrpc:
-	cd cmd/testgrpc && go build -o testgrpc
 
 sender:
 	cd cmd/sender &&  go build -o sender
@@ -14,11 +8,17 @@ sender:
 sheduler:
 	cd cmd/sheduler &&  go build -o sheduler
 
+testapp:
+	cd cmd/tests/testapp && go build -o testapp
+
+testgrpc:
+	cd cmd/tests/testgrpc && go build -o testgrpc
+
 testmq:
-	cd cmd/testmq && go build -o testmq
+	cd cmd/tests/testmq && go build -o testmq
 
 testgodog: 
-	cd cmd/integration_tests && godog -o testgodog
+	cd cmd/tests/integration_tests && godog -o testgodog
 
 app: mycalendar sender sheduler
 
@@ -71,6 +71,7 @@ docker-run-tests:
 	docker-compose -f docker-compose.yml up -d; \
 	docker-compose -f docker-compose.tests.yml up || exit_code=$$?; \
 	docker-compose -f docker-compose.yml -f docker-compose.tests.yml down; \
+	docker rmi gmax079/practice:mycalendar gmax079/practice:sheduler gmax079/practice:sender gmax079/practice:tests
 	echo "integration_tests result: $$exit_code"; \
 	exit $$exit_code; \
 
@@ -87,4 +88,6 @@ docker-push:
 	&& docker push gmax079/practice:tests
 
 clean: 
-	-rm cmd/mycalendar/mycalendar cmd/testapp/testapp cmd/testgrpc/testgrpc cmd/testmq/testmq cmd/integration_tests/testgodog cmd/sender/sender cmd/sheduler/sheduler 2>/dev/null 
+	rm -f cmd/mycalendar/mycalendar cmd/sender/sender cmd/sheduler/sheduler
+	rm -f cmd/tests/testapp/testapp cmd/tests/testgrpc/testgrpc cmd/tests/testmq/testmq cmd/tests/integration_tests/testgodog
+

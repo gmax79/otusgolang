@@ -18,7 +18,7 @@ import (
 // CalendarServiceConfig - base parameters
 type CalendarServiceConfig struct {
 	ListenHTTP   string `json:"host"`
-	GrpcHost     string `json:"grpc"`
+	GRPCHost     string `json:"grpc"`
 	PsqlHost     string `json:"postgres_host"`
 	PsqlUser     string `json:"postgres_user"`
 	PsqlPassword string `json:"postgres_password"`
@@ -30,8 +30,8 @@ func (cc *CalendarServiceConfig) Check() error {
 	if cc.ListenHTTP == "" {
 		return fmt.Errorf("Host address not declared")
 	}
-	if cc.GrpcHost == "" {
-		return fmt.Errorf("Grpc host address not declared")
+	if cc.GRPCHost == "" {
+		return fmt.Errorf("GRPC host address not declared")
 	}
 	if cc.PsqlHost == "" || cc.PsqlUser == "" || cc.PsqlPassword == "" || cc.PsqlDatabase == "" {
 		return fmt.Errorf("Postgres not fully configurated")
@@ -65,7 +65,7 @@ func main() {
 	}
 	logger.Info("Calendar service started")
 	logger.Info("Caledar api ", zap.String("host", config.ListenHTTP))
-	logger.Info("Calendar grpc api ", zap.String("host", config.GrpcHost))
+	logger.Info("Calendar grpc api ", zap.String("host", config.GRPCHost))
 	logger.Info("Calendar db ", zap.String("host", config.PsqlHost), zap.String("database", config.PsqlDatabase))
 
 	connection := fmt.Sprintf("postgresql://%s:%s@%s/%s", config.PsqlUser, config.PsqlPassword, config.PsqlHost, config.PsqlDatabase)
@@ -76,9 +76,9 @@ func main() {
 	}
 	server := createServer(calen, config.ListenHTTP, logger)
 
-	grpc, err := createGrpc(calen, config.GrpcHost, logger)
+	grpc, err := createGRPC(calen, config.GRPCHost, logger)
 	if err != nil {
-		logger.Error("Grpc", zap.String("error", err.Error()))
+		logger.Error("GRPC", zap.String("error", err.Error()))
 		return
 	}
 

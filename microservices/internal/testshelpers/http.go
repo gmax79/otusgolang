@@ -1,4 +1,4 @@
-package stests
+package testshelpers
 
 import (
 	"encoding/json"

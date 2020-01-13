@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/DATA-DOG/godog"
-	tests "github.com/gmax79/otusgolang/microservices/internal/stests"
+	tests "github.com/gmax79/otusgolang/microservices/internal/testshelpers"
 )
 
 const host = "http://localhost:8888"

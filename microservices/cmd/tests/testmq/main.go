@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	tests "github.com/gmax79/otusgolang/microservices/internal/stests"
+	tests "github.com/gmax79/otusgolang/microservices/internal/testshelpers"
 )
 
 const host = "http://localhost:8888"
@@ -29,5 +29,5 @@ func main() {
 		"event": "RabbitMQ #2.2",
 	}
 	tests.Post(host, "create_event", r3, http.StatusOK)
-	fmt.Println("Tests for Messages queue are OK!")
+	fmt.Println("Tests for Messages queue are finished")
 }

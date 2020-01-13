@@ -10,3 +10,4 @@ services:
           #- "~/etc:/etc/localtime:ro"
           - "/etc/localtime:/etc/localtime:ro"
         network_mode: "host"
+

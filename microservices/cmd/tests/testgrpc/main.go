@@ -7,7 +7,7 @@ import (
 
 	"github.com/gmax79/otusgolang/microservices/internal/grpccon"
 	"github.com/gmax79/otusgolang/microservices/internal/simple"
-	tests "github.com/gmax79/otusgolang/microservices/internal/stests"
+	tests "github.com/gmax79/otusgolang/microservices/internal/testshelpers"
 )
 
 const host = "localhost:9090"
@@ -91,5 +91,5 @@ func main() {
 	}
 
 	cli.Close()
-	fmt.Println("Tests via grpc interface OK!")
+	fmt.Println("Tests via grpc interface finished")
 }

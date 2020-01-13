@@ -21,8 +21,8 @@ type grpcCalendarAPI struct {
 	calen     calendar.Calendar
 }
 
-// createGrpc - service grpc interface
-func createGrpc(calen calendar.Calendar, host string, zaplog *zap.Logger) (*grpcCalendarAPI, error) {
+// createGRPC - service grpc interface
+func createGRPC(calen calendar.Calendar, host string, zaplog *zap.Logger) (*grpcCalendarAPI, error) {
 	listen, err := net.Listen("tcp", host)
 	if err != nil {
 		return nil, err

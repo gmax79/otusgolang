@@ -21,7 +21,7 @@ type shedulerConfig struct {
 	RmqlHost    string `json:"rabbitmq_host"`
 	RmqlUser    string `json:"rabbitmq_user"`
 	RmqPassword string `json:"rabbitmq_password"`
-	GrpcHost    string `json:"grpc_host"`
+	GRPCHost    string `json:"grpc_host"`
 }
 
 func (s *shedulerConfig) RabbitMQAddr() string {
@@ -29,7 +29,7 @@ func (s *shedulerConfig) RabbitMQAddr() string {
 }
 
 func (s *shedulerConfig) ApplicationAddr() string {
-	return s.GrpcHost
+	return s.GRPCHost
 }
 
 func main() {
