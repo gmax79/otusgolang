@@ -71,7 +71,8 @@ docker-tests:
 docker-all: docker-mycalendar docker-sheduler docker-sender docker-tests
 
 docker-run:
-	cd deployments && docker-compose up
+	cp /etc/localtime /tmp/localtime
+	cd deployments && docker-compose -f docker-compose.yml up
 
 docker-stop:
 	cd deployments && docker-compose -f docker-compose.yml -f docker-compose.tests.yml down
@@ -79,12 +80,13 @@ docker-stop:
 docker-run-tests:
 	set -e; \
 	export COMPOSE_IGNORE_ORPHANS=true; \
+	cp /etc/localtime /tmp/localtime; \
 	exit_code=0; \
 	cd deployments; \
 	docker-compose -f docker-compose.yml up -d; \
 	docker-compose -f docker-compose.tests.yml up || exit_code=$$?; \
 	docker-compose -f docker-compose.yml -f docker-compose.tests.yml down; \
-	docker rmi gmax079/practice:mycalendar gmax079/practice:sheduler gmax079/practice:sender gmax079/practice:tests
+	docker rmi gmax079/practice:mycalendar gmax079/practice:sheduler gmax079/practice:sender gmax079/practice:tests; \
 	echo "integration_tests result: $$exit_code"; \
 	exit $$exit_code; \
 

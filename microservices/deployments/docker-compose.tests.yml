@@ -7,7 +7,5 @@ services:
         environment:
           WAIT_HOSTS: localhost:8888 # for wait tool
         volumes:
-          #- "~/etc:/etc/localtime:ro"
-          - "/etc/localtime:/etc/localtime:ro"
+          - "/tmp/localtime:/etc/localtime:ro"
         network_mode: "host"
-
