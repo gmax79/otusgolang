@@ -46,7 +46,10 @@ func (s *httpCalendarAPI) logRequest(r *http.Request) {
 func (s *httpCalendarAPI) Shutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	s.server.Shutdown(ctx)
+	err := s.server.Shutdown(ctx)
+	if err != nil {
+		s.logger.Error("shutdown", zap.String("error", err.Error()))
+	}
 }
 
 func (s *httpCalendarAPI) ListenAndServe() {

@@ -32,7 +32,9 @@ func assert(result string, err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(result)
+	if result != "" {
+		fmt.Println(result)
+	}
 }
 
 func assertCount(prefix string, awaitcount, count int, err error) {
@@ -48,12 +50,12 @@ func assertCount(prefix string, awaitcount, count int, err error) {
 func main() {
 
 	fmt.Println("Testing calendar grpc interface app")
+	defer fmt.Println("Tests via grpc interface finished")
 	var err error
 	cli, err := grpccon.CreateClient(host)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Connnected at grpc host:", host)
+	assert("", err)
+
+	fmt.Println("Connnecting at grpc host:", host)
 
 	assert(cli.CreateEvent(s2date("2020-04-07 12:00:00"), "Exam in school"))
 	assert(cli.DeleteEvent(s2date("2020-04-07 12:00:00"), "Exam in school"))
@@ -91,5 +93,4 @@ func main() {
 	}
 
 	cli.Close()
-	fmt.Println("Tests via grpc interface finished")
 }

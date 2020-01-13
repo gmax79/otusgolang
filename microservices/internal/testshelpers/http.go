@@ -17,11 +17,9 @@ type result struct {
 func PostRequest(host, path string, params map[string]string) (*http.Response, error) {
 	all := []string{}
 	values := url.Values{}
-	if params != nil {
-		for k, v := range params {
-			all = append(all, k+"='"+v+"'")
-			values[k] = []string{v}
-		}
+	for k, v := range params {
+		all = append(all, k+"='"+v+"'")
+		values[k] = []string{v}
 	}
 	fmt.Println("POST", "/"+path, "", strings.Join(all, ", "))
 	return http.PostForm(host+"/"+path, values)

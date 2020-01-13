@@ -26,21 +26,31 @@ tests: testapp testgrpc testmq testgodog
 
 all: app tests
 
-run: app
+devenv-up:
+	docker-compose -f deployments/docker-compose.dev.yml up -d
+
+devenv-down:
+	docker-compose -f deployments/docker-compose.dev.yml down
+
+run: app devenv-up
+	sleep 10 #wait rabbitmq and postgres
 	cd cmd/mycalendar && ./mycalendar &
 	cd cmd/sender && ./sender &
 	cd cmd/sheduler && ./sheduler &
 
-run-tests: tests
-	cd cmd/testapp && ./testapp
-	cd cmd/testgrpc && ./testgrpc
-	cd cmd/testmq && ./testmq
-	cd cmd/integration_tests && ./testgodog
+run-tests: tests # required make run before
+	-cd cmd/tests/testapp && ./testapp
+	-cd cmd/tests/testgrpc && ./testgrpc
+	-cd cmd/tests/testmq && ./testmq
+	-cd cmd/tests/integration_tests && ./testgodog
+	make clean-tests
 
 stop:
-	build/kill.sh sheduler
-	build/kill.sh sender
-	build/kill.sh mycalendar
+	-pkill -f sheduler
+	-pkill -f sender
+	-pkill -f mycalendar
+	make devenv-down
+	make clean-app
 
 docker-mycalendar:
 	docker build -f build/package/mycalendar.dockerfile -t mycalendar . \
@@ -63,6 +73,9 @@ docker-all: docker-mycalendar docker-sheduler docker-sender docker-tests
 docker-run:
 	cd deployments && docker-compose up
 
+docker-stop:
+	cd deployments && docker-compose -f docker-compose.yml -f docker-compose.tests.yml down
+
 docker-run-tests:
 	set -e; \
 	export COMPOSE_IGNORE_ORPHANS=true; \
@@ -75,9 +88,6 @@ docker-run-tests:
 	echo "integration_tests result: $$exit_code"; \
 	exit $$exit_code; \
 
-docker-stop:
-	cd deployments && docker-compose -f docker-compose.yml -f docker-compose.tests.yml down
-
 # requirement command from hometask
 test: docker-run-tests
 
@@ -87,7 +97,10 @@ docker-push:
 	&& docker push gmax079/practice:sender \
 	&& docker push gmax079/practice:tests
 
-clean: 
+clean-app:
 	rm -f cmd/mycalendar/mycalendar cmd/sender/sender cmd/sheduler/sheduler
+
+clean-tests:
 	rm -f cmd/tests/testapp/testapp cmd/tests/testgrpc/testgrpc cmd/tests/testmq/testmq cmd/tests/integration_tests/testgodog
 
+clean: clean-app clean-tests

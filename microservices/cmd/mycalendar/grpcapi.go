@@ -62,7 +62,11 @@ func (g *grpcCalendarAPI) CreateEvent(ctx context.Context, req *pbcalendar.Creat
 	var newevent objects.Event
 	newevent.Alerttime = trigger
 	newevent.Information = req.Information
-	events.AddEvent(newevent)
+	err = events.AddEvent(newevent)
+	if err != nil {
+		g.logger.Error("grpc CreateEvent", zap.String("error", err.Error()))
+		return nil, err
+	}
 
 	var result pbcalendar.CreateEventResponse
 	result.Status = fmt.Sprintf("Event at %s added", trigger.String())

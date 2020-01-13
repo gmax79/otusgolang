@@ -29,7 +29,7 @@ func main() {
 	var err error
 	defer func() {
 		if err != nil {
-			log.Fatalf("Error: %v\n", err)
+			log.Fatalf("sender: %v\n", err)
 		}
 	}()
 	configFile := flag.String("config", "config.json", "path to config file")
@@ -66,7 +66,7 @@ func main() {
 	defer rabbitConn.Close()
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
-	fmt.Println("Sender started")
+	log.Println("Sender started")
 loop:
 	for {
 		select {
@@ -75,18 +75,18 @@ loop:
 				break loop
 			}
 			if len(msg) == 0 {
-				fmt.Println("empty body from rmq ???")
+				log.Println("sender:", "empty body from rabbit mq ???")
 				continue
 			}
 			mq := &api.RmqMessage{}
 			if err := json.Unmarshal(msg, mq); err != nil {
-				fmt.Printf("Got invalid blob: %v\n", err)
+				log.Printf("sender: Got invalid blob: %v\n", err)
 			} else {
-				fmt.Println("Event from calendar:", mq.Event)
+				log.Println("sender:", "Event from calendar:", mq.Event)
 			}
 		case <-stop:
 			break loop
 		}
 	}
-	fmt.Println("Sender stopped")
+	log.Println("Sender stopped")
 }

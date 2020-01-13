@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/streadway/amqp"
@@ -94,7 +95,9 @@ func (c *RmqConnection) Subscribe(name string) (<-chan []byte, error) {
 				return
 			case msg := <-rmqchan:
 				datach <- msg.Body
-				msg.Ack(false)
+				if err := msg.Ack(false); err != nil {
+					fmt.Println(err)
+				}
 			}
 		}
 	}()
