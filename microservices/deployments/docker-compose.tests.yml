@@ -6,6 +6,7 @@ services:
         container_name: tests
         environment:
           WAIT_HOSTS: localhost:8888 # for wait tool
+          WAIT_HOSTS_TIMEOUT: 10
         volumes:
           - "/tmp/localtime:/etc/localtime:ro"
         network_mode: "host"
