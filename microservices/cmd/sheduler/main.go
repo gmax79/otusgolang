@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -51,7 +52,9 @@ func main() {
 	}
 
 	var con *grpccon.Client
-	con, err = grpccon.CreateClient(config.ApplicationAddr())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	con, err = grpccon.CreateClient(ctx, config.ApplicationAddr())
+	cancel()
 	if err != nil {
 		return
 	}
@@ -77,7 +80,9 @@ loop:
 	for {
 		select {
 		case <-ticker.C:
-			events, err := con.SinceEvents(from)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			events, err := con.SinceEvents(ctx, from)
+			cancel()
 			if err != nil {
 				log.Println("sheduler:", err)
 				continue

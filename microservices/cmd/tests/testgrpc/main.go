@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -51,40 +52,70 @@ func main() {
 
 	fmt.Println("Testing calendar grpc interface app")
 	defer fmt.Println("Tests via grpc interface finished")
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
 	var err error
-	cli, err := grpccon.CreateClient(host)
+	cli, err := grpccon.CreateClient(ctx, host)
 	assert("", err)
+
+	createEvent := func(date, info string) (string, error) {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		return cli.CreateEvent(ctx, s2date(date), info)
+	}
+
+	deleteEvent := func(date, info string) (string, error) {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		return cli.DeleteEvent(ctx, s2date(date), info)
+	}
+
+	moveEvent := func(date, info, nextdate string) (string, error) {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		return cli.MoveEvent(ctx, s2date(date), info, s2date(nextdate))
+	}
 
 	fmt.Println("Connnecting at grpc host:", host)
 
-	assert(cli.CreateEvent(s2date("2020-04-07 12:00:00"), "Exam in school"))
-	assert(cli.DeleteEvent(s2date("2020-04-07 12:00:00"), "Exam in school"))
-	assert(cli.CreateEvent(s2date("2020-04-09 13:00:00"), "Call Willy"))
-	assert(cli.DeleteEvent(s2date("2020-04-09 15:00:00"), "Exam in school"))
-	assert(cli.MoveEvent(s2date("2020-04-09 13:00:00"), "Exam in school", s2date("2020-04-09 15:00:00")))
+	assert(createEvent("2020-04-07 12:00:00", "Exam in school"))
+	assert(deleteEvent("2020-04-07 12:00:00", "Exam in school"))
+	assert(createEvent("2020-04-09 13:00:00", "Call Willy"))
+	assert(deleteEvent("2020-04-09 15:00:00", "Exam in school"))
+	assert(moveEvent("2020-04-09 13:00:00", "Exam in school", "2020-04-09 15:00:00"))
 
-	assert(cli.CreateEvent(s2date("2020-04-12 8:00:00"), "Pay credit"))
-	assert(cli.CreateEvent(s2date("2020-04-14 10:00:00"), "Send pacel to Jack"))
+	assert(createEvent("2020-04-12 8:00:00", "Pay credit"))
+	assert(createEvent("2020-04-14 10:00:00", "Send pacel to Jack"))
 
 	var count int
-	count, err = cli.GetEventsForDay(9, 4, 2020)
+	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	count, err = cli.GetEventsForDay(ctx, 9, 4, 2020)
 	assertCount("At 2020-4-9", 1, count, err)
-	count, err = cli.GetEventsForWeek(16, 2020)
+	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	count, err = cli.GetEventsForWeek(ctx, 16, 2020)
 	assertCount("At week 2020-16", 1, count, err)
-	count, err = cli.GetEventsForMonth(4, 2020)
+	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	count, err = cli.GetEventsForMonth(ctx, 4, 2020)
 	assertCount("At month 2020-4", 3, count, err)
 
 	var now simple.Date
 	now.SetNow()
 
 	d1 := tests.DurationToSimpleDate(time.Second * 3)
-	assert(cli.CreateEvent(d1, "Test since method #1"))
+	assert(createEvent(d1.String(), "Test since method #1"))
 	d2 := tests.DurationToSimpleDate(time.Second * 6)
-	assert(cli.CreateEvent(d2, "Test since method #2"))
+	assert(createEvent(d2.String(), "Test since method #2"))
 
 	time.Sleep(time.Second * 7)
 
-	events, err := cli.SinceEvents(now)
+	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	events, err := cli.SinceEvents(ctx, now)
 	if err != nil {
 		log.Fatal(err)
 	}
