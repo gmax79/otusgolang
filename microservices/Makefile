@@ -81,23 +81,31 @@ docker-run-tests:
 	set -e; \
 	export COMPOSE_IGNORE_ORPHANS=true; \
 	cp /etc/localtime /tmp/localtime; \
+	cd deployments && docker-compose -f docker-compose.tests.yml up
+
+docker-cicd-tests:
+	set -e; \
+	export COMPOSE_IGNORE_ORPHANS=true; \
+	cp /etc/localtime /tmp/localtime; \
 	exit_code=0; \
-	cd deployments; \
-	docker-compose -f docker-compose.yml up -d; \
-	docker-compose -f docker-compose.tests.yml up || exit_code=$$?; \
-	docker-compose -f docker-compose.yml -f docker-compose.tests.yml down; \
-	docker rmi gmax079/practice:mycalendar gmax079/practice:sheduler gmax079/practice:sender gmax079/practice:tests; \
+	docker-compose -f deployments/docker-compose.yml up -d; \
+	docker-compose -f deployments/docker-compose.tests.yml up || exit_code=$$?; \
+	docker-compose -f deployments/docker-compose.yml -f deployments/docker-compose.tests.yml down; \
+	make docker-clean; \
 	echo "integration_tests result: $$exit_code"; \
-	exit $$exit_code; \
+	exit $$exit_code;
 
 # requirement command from hometask
-test: docker-run-tests
+test: docker-cicd-tests
 
 docker-push:
 	docker push gmax079/practice:mycalendar \
 	&& docker push gmax079/practice:sheduler \
 	&& docker push gmax079/practice:sender \
 	&& docker push gmax079/practice:tests
+
+docker-clean:
+	docker rmi gmax079/practice:mycalendar gmax079/practice:sheduler gmax079/practice:sender gmax079/practice:tests
 
 clean-app:
 	rm -f cmd/mycalendar/mycalendar cmd/sender/sender cmd/sheduler/sheduler
