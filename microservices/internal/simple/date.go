@@ -12,8 +12,8 @@ var parseDate *regexp.Regexp
 var days = [12]int{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 
 func init() {
-	parseTime = regexp.MustCompile("(?:^|\\s)([0-9]{1,2})(:[0-9]{2})?(:[0-9]{2})?(?:$|\\s)")
-	parseDate = regexp.MustCompile("(?:^|\\s)([0-9]{4})(-[0-9]{2})?(-[0-9]{2})?(?:$|\\s)")
+	parseTime = regexp.MustCompile(`(?:^|\s)([0-9]{1,2})(:[0-9]{2})?(:[0-9]{2})?(?:$|\s)`)
+	parseDate = regexp.MustCompile(`(?:^|\s)([0-9]{4})(-[0-9]{2})?(-[0-9]{2})?(?:$|\s)`)
 }
 
 // Date -  date with time without timezone

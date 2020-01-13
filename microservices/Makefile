@@ -1,12 +1,6 @@
 mycalendar:
-	cd api/pbcalendar && ./genpb.sh
+	cd scripts && ./genpb.sh
 	cd cmd/mycalendar && go build -o mycalendar
-
-testapp:
-	cd cmd/testapp && go build -o testapp
-
-testgrpc:
-	cd cmd/testgrpc && go build -o testgrpc
 
 sender:
 	cd cmd/sender &&  go build -o sender
@@ -14,11 +8,17 @@ sender:
 sheduler:
 	cd cmd/sheduler &&  go build -o sheduler
 
+testapp:
+	cd cmd/tests/testapp && go build -o testapp
+
+testgrpc:
+	cd cmd/tests/testgrpc && go build -o testgrpc
+
 testmq:
-	cd cmd/testmq && go build -o testmq
+	cd cmd/tests/testmq && go build -o testmq
 
 testgodog: 
-	cd cmd/integration_tests && godog -o testgodog
+	cd cmd/tests/integration_tests && godog -o testgodog
 
 app: mycalendar sender sheduler
 
@@ -26,21 +26,31 @@ tests: testapp testgrpc testmq testgodog
 
 all: app tests
 
-run: app
+devenv-up:
+	docker-compose -f deployments/docker-compose.dev.yml up -d
+
+devenv-down:
+	docker-compose -f deployments/docker-compose.dev.yml down
+
+run: app devenv-up
+	sleep 10 #wait rabbitmq and postgres
 	cd cmd/mycalendar && ./mycalendar &
 	cd cmd/sender && ./sender &
 	cd cmd/sheduler && ./sheduler &
 
-run-tests: tests
-	cd cmd/testapp && ./testapp
-	cd cmd/testgrpc && ./testgrpc
-	cd cmd/testmq && ./testmq
-	cd cmd/integration_tests && ./testgodog
+run-tests: tests # required make run before
+	-cd cmd/tests/testapp && ./testapp
+	-cd cmd/tests/testgrpc && ./testgrpc
+	-cd cmd/tests/testmq && ./testmq
+	-cd cmd/tests/integration_tests && ./testgodog
+	make clean-tests
 
 stop:
-	build/kill.sh sheduler
-	build/kill.sh sender
-	build/kill.sh mycalendar
+	-pkill -f sheduler
+	-pkill -f sender
+	-pkill -f mycalendar
+	make devenv-down
+	make clean-app
 
 devenv-run:
 	cd deployments && docker-compose -f docker-compose.dev.yml up
@@ -67,24 +77,32 @@ docker-tests:
 docker-all: docker-mycalendar docker-sheduler docker-sender docker-tests
 
 docker-run:
-	cd deployments && docker-compose up
-
-docker-run-tests:
-	set -e; \
-	export COMPOSE_IGNORE_ORPHANS=true; \
-	exit_code=0; \
-	cd deployments; \
-	docker-compose -f docker-compose.yml up -d; \
-	docker-compose -f docker-compose.tests.yml up || exit_code=$$?; \
-	docker-compose -f docker-compose.yml -f docker-compose.tests.yml down; \
-	echo "integration_tests result: $$exit_code"; \
-	exit $$exit_code; \
+	cp /etc/localtime /tmp/localtime
+	cd deployments && docker-compose -f docker-compose.yml up
 
 docker-stop:
 	cd deployments && docker-compose -f docker-compose.yml -f docker-compose.tests.yml down
 
+docker-run-tests:
+	set -e; \
+	export COMPOSE_IGNORE_ORPHANS=true; \
+	cp /etc/localtime /tmp/localtime; \
+	cd deployments && docker-compose -f docker-compose.tests.yml up
+
+docker-cicd-tests:
+	set -e; \
+	export COMPOSE_IGNORE_ORPHANS=true; \
+	cp /etc/localtime /tmp/localtime; \
+	exit_code=0; \
+	docker-compose -f deployments/docker-compose.yml up -d; \
+	docker-compose -f deployments/docker-compose.tests.yml up || exit_code=$$?; \
+	docker-compose -f deployments/docker-compose.yml -f deployments/docker-compose.tests.yml down; \
+	make docker-clean; \
+	echo "integration_tests result: $$exit_code"; \
+	exit $$exit_code;
+
 # requirement command from hometask
-test: docker-run-tests
+test: docker-cicd-tests
 
 docker-push:
 	docker push gmax079/practice:mycalendar \
@@ -92,5 +110,13 @@ docker-push:
 	&& docker push gmax079/practice:sender \
 	&& docker push gmax079/practice:tests
 
-clean: 
-	-rm cmd/mycalendar/mycalendar cmd/testapp/testapp cmd/testgrpc/testgrpc cmd/testmq/testmq cmd/integration_tests/testgodog cmd/sender/sender cmd/sheduler/sheduler 2>/dev/null 
+docker-clean:
+	docker rmi gmax079/practice:mycalendar gmax079/practice:sheduler gmax079/practice:sender gmax079/practice:tests
+
+clean-app:
+	rm -f cmd/mycalendar/mycalendar cmd/sender/sender cmd/sheduler/sheduler
+
+clean-tests:
+	rm -f cmd/tests/testapp/testapp cmd/tests/testgrpc/testgrpc cmd/tests/testmq/testmq cmd/tests/integration_tests/testgodog
+
+clean: clean-app clean-tests

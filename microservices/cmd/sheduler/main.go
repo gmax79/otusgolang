@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -21,7 +22,7 @@ type shedulerConfig struct {
 	RmqlHost    string `json:"rabbitmq_host"`
 	RmqlUser    string `json:"rabbitmq_user"`
 	RmqPassword string `json:"rabbitmq_password"`
-	GrpcHost    string `json:"grpc_host"`
+	GRPCHost    string `json:"grpc_host"`
 }
 
 func (s *shedulerConfig) RabbitMQAddr() string {
@@ -29,14 +30,14 @@ func (s *shedulerConfig) RabbitMQAddr() string {
 }
 
 func (s *shedulerConfig) ApplicationAddr() string {
-	return s.GrpcHost
+	return s.GRPCHost
 }
 
 func main() {
 	var err error
 	defer func() {
 		if err != nil {
-			log.Fatalf("Error: %v\nUse --help option to read usage information", err)
+			log.Fatalf("sheduler: %v\n", err)
 		}
 	}()
 	configFile := flag.String("config", "config.json", "path to config file")
@@ -51,7 +52,9 @@ func main() {
 	}
 
 	var con *grpccon.Client
-	con, err = grpccon.CreateClient(config.ApplicationAddr())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	con, err = grpccon.CreateClient(ctx, config.ApplicationAddr())
+	cancel()
 	if err != nil {
 		return
 	}
@@ -69,7 +72,7 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 	ticker := time.NewTicker(time.Second * 3)
-	fmt.Println("Sheduler started")
+	log.Println("Sheduler started")
 
 	var from simple.Date
 	from.SetNow()
@@ -77,14 +80,19 @@ loop:
 	for {
 		select {
 		case <-ticker.C:
-			events, err := con.SinceEvents(from)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			events, err := con.SinceEvents(ctx, from)
+			cancel()
 			if err != nil {
-				fmt.Println(err)
+				log.Println("sheduler:", err)
 				continue
 			}
 			for _, e := range events {
 				text := fmt.Sprint("Event at ", e.Alerttime.String(), "! ", e.Information)
-				pusblishEventToRabbit(rabbitConn, text)
+				err := pusblishEventToRabbit(rabbitConn, text)
+				if err != nil {
+					log.Println("sheduler:", err)
+				}
 			}
 			from.SetNowPlus(time.Second)
 		case <-stop:
@@ -92,11 +100,11 @@ loop:
 		}
 	}
 	ticker.Stop()
-	fmt.Println("Sheduler stopped")
+	log.Println("Sheduler stopped")
 }
 
 func pusblishEventToRabbit(conn *api.RmqConnection, event string) error {
-	fmt.Println("Send to RabbitMQ:", event)
+	log.Println("Send to RabbitMQ:", event)
 	var m api.RmqMessage
 	m.Event = event
 	data, err := json.Marshal(m)

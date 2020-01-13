@@ -12,7 +12,6 @@ import (
 // Client - main object for grpc client for calendar service
 type Client struct {
 	cancel func()
-	ctx    context.Context
 	client pbcalendar.MyCalendarClient
 }
 
@@ -41,7 +40,7 @@ func ProtoToDate(p *pbcalendar.Date) simple.Date {
 }
 
 // CreateClient - create instance of connection to service
-func CreateClient(host string) (*Client, error) {
+func CreateClient(ctx context.Context, host string) (*Client, error) {
 
 	clientCon, err := grpc.Dial(host, grpc.WithInsecure())
 	if err != nil {
@@ -49,7 +48,7 @@ func CreateClient(host string) (*Client, error) {
 	}
 	c := &Client{}
 	var cancelfunc func()
-	c.ctx, cancelfunc = context.WithCancel(context.Background())
+	_, cancelfunc = context.WithCancel(ctx)
 	c.cancel = func() {
 		cancelfunc()
 		clientCon.Close()
@@ -64,11 +63,11 @@ func (c *Client) Close() {
 }
 
 // CreateEvent - call grpc to create event
-func (c *Client) CreateEvent(date simple.Date, info string) (string, error) {
+func (c *Client) CreateEvent(ctx context.Context, date simple.Date, info string) (string, error) {
 	var e pbcalendar.CreateEventRequest
 	e.Alerttime = DateToProto(date)
 	e.Information = info
-	result, err := c.client.CreateEvent(c.ctx, &e)
+	result, err := c.client.CreateEvent(ctx, &e)
 	if err != nil {
 		return "", err
 	}
@@ -76,11 +75,11 @@ func (c *Client) CreateEvent(date simple.Date, info string) (string, error) {
 }
 
 // DeleteEvent - call grpc to delete event
-func (c *Client) DeleteEvent(date simple.Date, info string) (string, error) {
+func (c *Client) DeleteEvent(ctx context.Context, date simple.Date, info string) (string, error) {
 	var e pbcalendar.DeleteEventRequest
 	e.Alerttime = DateToProto(date)
 	e.Information = info
-	result, err := c.client.DeleteEvent(c.ctx, &e)
+	result, err := c.client.DeleteEvent(ctx, &e)
 	if err != nil {
 		return "", err
 	}
@@ -88,12 +87,12 @@ func (c *Client) DeleteEvent(date simple.Date, info string) (string, error) {
 }
 
 // MoveEvent - call grpc to move event
-func (c *Client) MoveEvent(date simple.Date, info string, newdate simple.Date) (string, error) {
+func (c *Client) MoveEvent(ctx context.Context, date simple.Date, info string, newdate simple.Date) (string, error) {
 	var e pbcalendar.MoveEventRequest
 	e.Alerttime = DateToProto(date)
 	e.Information = info
 	e.Newdate = DateToProto(newdate)
-	result, err := c.client.MoveEvent(c.ctx, &e)
+	result, err := c.client.MoveEvent(ctx, &e)
 	if err != nil {
 		return "", err
 	}
@@ -101,12 +100,12 @@ func (c *Client) MoveEvent(date simple.Date, info string, newdate simple.Date) (
 }
 
 // GetEventsForDay - grpc, calculate events for day
-func (c *Client) GetEventsForDay(day, month, year int) (int, error) {
+func (c *Client) GetEventsForDay(ctx context.Context, day, month, year int) (int, error) {
 	var e pbcalendar.EventsForDayRequest
 	e.Day = int32(day)
 	e.Month = int32(month)
 	e.Year = int32(year)
-	result, err := c.client.EventsForDay(c.ctx, &e)
+	result, err := c.client.EventsForDay(ctx, &e)
 	if err != nil {
 		return 0, err
 	}
@@ -114,11 +113,11 @@ func (c *Client) GetEventsForDay(day, month, year int) (int, error) {
 }
 
 // GetEventsForWeek - grpc, calculate events for week
-func (c *Client) GetEventsForWeek(week, year int) (int, error) {
+func (c *Client) GetEventsForWeek(ctx context.Context, week, year int) (int, error) {
 	var e pbcalendar.EventsForWeekRequest
 	e.Week = int32(week)
 	e.Year = int32(year)
-	result, err := c.client.EventsForWeek(c.ctx, &e)
+	result, err := c.client.EventsForWeek(ctx, &e)
 	if err != nil {
 		return 0, err
 	}
@@ -126,11 +125,11 @@ func (c *Client) GetEventsForWeek(week, year int) (int, error) {
 }
 
 // GetEventsForMonth - grpc, calculate events for month
-func (c *Client) GetEventsForMonth(month, year int) (int, error) {
+func (c *Client) GetEventsForMonth(ctx context.Context, month, year int) (int, error) {
 	var e pbcalendar.EventsForMonthRequest
 	e.Month = int32(month)
 	e.Year = int32(year)
-	result, err := c.client.EventsForMonth(c.ctx, &e)
+	result, err := c.client.EventsForMonth(ctx, &e)
 	if err != nil {
 		return 0, err
 	}
@@ -138,10 +137,10 @@ func (c *Client) GetEventsForMonth(month, year int) (int, error) {
 }
 
 // SinceEvents - return events in next interval in seconds
-func (c *Client) SinceEvents(from simple.Date) ([]objects.Event, error) {
+func (c *Client) SinceEvents(ctx context.Context, from simple.Date) ([]objects.Event, error) {
 	var r pbcalendar.SinceEventsRequest
 	r.From = DateToProto(from)
-	resp, err := c.client.SinceEvents(c.ctx, &r)
+	resp, err := c.client.SinceEvents(ctx, &r)
 	if err != nil {
 		return nil, err
 	}

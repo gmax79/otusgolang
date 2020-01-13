@@ -1,4 +1,4 @@
-package stests // support for tests
+package testshelpers // support for tests
 
 import (
 	"log"

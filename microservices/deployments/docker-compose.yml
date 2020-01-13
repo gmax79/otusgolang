@@ -40,8 +40,7 @@ services:
         GRPC_PORT: 9999
         WAIT_HOSTS: postgres:5432 # for wait tool
       volumes:
-        - "~/etc:/etc/localtime:ro"
-        #- "/etc/localtime:/etc/localtime:ro"
+        - "/tmp/localtime:/etc/localtime:ro"
       depends_on:
         - postgres
       ports:
@@ -63,8 +62,7 @@ services:
         GRPC_HOST: mycalendar:9999
         WAIT_HOSTS: rabbitmq:5672 # for wait tool
       volumes:
-        - "~/etc:/etc/localtime:ro"
-        #- "/etc/localtime:/etc/localtime:ro"
+        - "/tmp/localtime:/etc/localtime:ro"
       depends_on:
         - rabbitmq
       networks:

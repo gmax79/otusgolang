@@ -3,13 +3,13 @@ syntax = "proto3";
 package pbcalendar;
 
 service MyCalendar {
-    rpc createEvent (CreateEventRequest) returns (CreateEventResponse);
-    rpc deleteEvent (DeleteEventRequest) returns (DeleteEventResponse);
-    rpc moveEvent (MoveEventRequest) returns (MoveEventResponse);
-    rpc eventsForDay(EventsForDayRequest) returns (Count);
-    rpc eventsForMonth(EventsForMonthRequest) returns (Count);
-    rpc eventsForWeek(EventsForWeekRequest) returns (Count);
-    rpc sinceEvents(SinceEventsRequest) returns (SinceEventsResponse);
+    rpc CreateEvent (CreateEventRequest) returns (CreateEventResponse);
+    rpc DeleteEvent (DeleteEventRequest) returns (DeleteEventResponse);
+    rpc MoveEvent (MoveEventRequest) returns (MoveEventResponse);
+    rpc EventsForDay(EventsForDayRequest) returns (Count);
+    rpc EventsForMonth(EventsForMonthRequest) returns (Count);
+    rpc EventsForWeek(EventsForWeekRequest) returns (Count);
+    rpc SinceEvents(SinceEventsRequest) returns (SinceEventsResponse);
 }
 
 message CreateEventRequest {

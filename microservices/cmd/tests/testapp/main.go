@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"net/http"
 
-	tests "github.com/gmax79/otusgolang/microservices/internal/stests"
+	tests "github.com/gmax79/otusgolang/microservices/internal/testshelpers"
 )
 
 const host = "http://localhost:8888"
 
 func main() {
-	fmt.Println("Testing calendar app")
+	fmt.Println("Testing calendar app via http interface")
+	defer fmt.Println("Tests via http interface finished")
+
 	tests.PostWithPrint(host, "", map[string]string{}, http.StatusNotFound)
 	tests.PostWithPrint(host, "a", map[string]string{}, http.StatusNotFound)
 	tests.PostWithPrint(host, "b", map[string]string{}, http.StatusNotFound)
@@ -62,6 +64,4 @@ func main() {
 	tests.GetWithPrint(host, "events_for_day?day=2020-03-10", http.StatusOK, 1)
 	tests.GetWithPrint(host, "events_for_week?week=2020-11", http.StatusOK, 2)
 	tests.GetWithPrint(host, "events_for_month?month=2020-03", http.StatusOK, 3)
-
-	fmt.Println("Tests via http interface OK!")
 }

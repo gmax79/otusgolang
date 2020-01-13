@@ -2,30 +2,35 @@ package support
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
 // HTTPResponse - send http answer to client
 func HTTPResponse(w http.ResponseWriter, v interface{}) {
+	var err error
 	switch v.(type) {
 	case nil:
 		w.WriteHeader(http.StatusNotFound)
 	case int:
 		w.WriteHeader(v.(int))
 	case error:
-		err := v.(error)
-		text := "{ \"error\" : \"" + err.Error() + "\"  }\n"
+		verr := v.(error)
+		text := "{ \"error\" : \"" + verr.Error() + "\"  }\n"
 		w.WriteHeader(http.StatusBadRequest)
 		w.Header().Add("Content-Type", "application/json")
-		w.Write([]byte(text))
+		_, err = w.Write([]byte(text))
 	default:
-		answer, err := json.Marshal(v)
+		var answer []byte
+		answer, err = json.Marshal(v)
 		if err != nil {
 			HTTPResponse(w, err)
-		} else {
-			w.WriteHeader(http.StatusOK)
-			w.Write(answer)
 		}
+		w.WriteHeader(http.StatusOK)
+		_, err = w.Write(answer)
+	}
+	if err != nil {
+		fmt.Println(err)
 	}
 }
 

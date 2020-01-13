@@ -44,7 +44,10 @@ func (p *DbProvider) GetTriggers() ([]simple.Date, error) {
 			return []simple.Date{}, err
 		}
 		var d simple.Date
-		d.ParseDate(timer)
+		err = d.ParseDate(timer)
+		if err != nil {
+			return []simple.Date{}, err
+		}
 		ids = append(ids, d)
 	}
 	if err = rows.Err(); err != nil {
