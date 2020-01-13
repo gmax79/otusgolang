@@ -1,19 +1,24 @@
 package pmetrics
 
-import "time"
-
-// RPScounter - counts rps from incremental information
-type RPScounter struct {
-	last time.Time
-}
+import (
+	"time"
+)
 
 // CreateRPSCounter - create adapter, which working with time. Returns incremental function to calc result value
 func CreateRPSCounter(setter func(float64)) func(int) {
-	var c RPScounter
-	c.last = time.Now()
-
+	var count float64
+	var seconds float64
+	before := time.Now()
 	return func(add int) {
-		var rps float64
-		setter(rps)
+		now := time.Now()
+		delta := now.Sub(before).Seconds()
+		before = now
+		seconds = seconds + delta
+		count = count + float64(add)
+		if seconds > 0 {
+			setter(count / seconds)
+			return
+		}
+		setter(0)
 	}
 }

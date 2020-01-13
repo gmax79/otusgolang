@@ -59,7 +59,6 @@ func main() {
 	if errmetric != nil {
 		fmt.Println("Can't register sender_messages_rps metric", errmetric)
 	}
-
 	rpsadapter := pmetrics.CreateRPSCounter(rpsfunc)
 
 	rmqHost := config.RabbitMQAddr()
