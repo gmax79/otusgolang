@@ -8,5 +8,6 @@
     "postgres_host": "localhost:5432",
     "postgres_user": "postgres",
     "postgres_password": "Vfnhtirf79",
-    "postgres_database": "calendar"
+    "postgres_database": "calendar",
+    "prometheus_exporter": "localhost:9188"
 }

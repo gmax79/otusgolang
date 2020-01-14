@@ -2,5 +2,5 @@
     "rabbitmq_host": "localhost:5672",
     "rabbitmq_user": "calendar",
     "rabbitmq_password": "Vfnhtirf79",
-    "prometheus_exporter": "localhost:9102"
+    "prometheus_exporter": "localhost:9189"
 }

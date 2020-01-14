@@ -7,4 +7,11 @@ scrape_configs:
     - job_name: 'sender'
       scrape_interval: 5s
       static_configs:
-      - targets: ['host.docker.internal:9102']
+      - targets: ['host.docker.internal:9189']
+
+    - job_name: 'httpapi'
+      scrape_interval: 5s
+      static_configs:
+        - targets: ['host.docker.internal:9188']
+
+  

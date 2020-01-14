@@ -1,23 +1,25 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/gmax79/otusgolang/microservices/internal/gracefully"
+	"github.com/gmax79/otusgolang/microservices/internal/pmetrics"
 
 	"github.com/gmax79/otusgolang/microservices/internal/calendar"
 	"github.com/gmax79/otusgolang/microservices/internal/objects"
 	"github.com/gmax79/otusgolang/microservices/internal/simple"
 	"github.com/gmax79/otusgolang/microservices/internal/support"
+
 	"go.uber.org/zap"
 )
 
 type httpCalendarAPI struct {
-	server    *http.Server
-	logger    *zap.Logger
-	lastError error
-	calen     calendar.Calendar
+	server *gracefully.HTTPServer
+	logger *zap.Logger
+	calen  calendar.Calendar
 }
 
 func createServer(calen calendar.Calendar, host string, zaplog *zap.Logger) *httpCalendarAPI {
@@ -30,7 +32,8 @@ func createServer(calen calendar.Calendar, host string, zaplog *zap.Logger) *htt
 	mux.HandleFunc("/events_for_day", s.httpEventsForDay)
 	mux.HandleFunc("/events_for_week", s.httpEventsForWeek)
 	mux.HandleFunc("/events_for_month", s.httpEventsForMonth)
-	s.server = &http.Server{Addr: host, Handler: mux}
+	metricsHandler := pmetrics.AttachPrometheusToHandler(mux)
+	s.server = gracefully.CreateHTTPServer(host, metricsHandler)
 	s.calen = calen
 	return s
 }
@@ -44,22 +47,19 @@ func (s *httpCalendarAPI) logRequest(r *http.Request) {
 }
 
 func (s *httpCalendarAPI) Shutdown() {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-	err := s.server.Shutdown(ctx)
+	err := s.server.Shutdown(3 * time.Second)
 	if err != nil {
 		s.logger.Error("shutdown", zap.String("error", err.Error()))
 	}
 }
 
-func (s *httpCalendarAPI) ListenAndServe() {
-	go func() {
-		s.lastError = s.server.ListenAndServe()
-	}()
+func (s *httpCalendarAPI) ListenAndServe() error {
+	timetostart := time.Millisecond * 200
+	return s.server.ListenAndServe(timetostart)
 }
 
 func (s *httpCalendarAPI) GetLastError() error {
-	return s.lastError
+	return s.server.GetLastError()
 }
 
 func (s *httpCalendarAPI) httpRoot(w http.ResponseWriter, r *http.Request) {
