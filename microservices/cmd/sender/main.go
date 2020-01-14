@@ -35,6 +35,9 @@ func main() {
 			log.Fatalf("sender: %v\n", err)
 		}
 	}()
+
+	log.Println("Sender init")
+
 	configFile := flag.String("config", "config.json", "path to config file")
 	flag.Parse()
 	var configJSON []byte
@@ -46,16 +49,17 @@ func main() {
 		return
 	}
 
-	a, errmetric := pmetrics.CreateMetricsAgent(config.Prometheus)
+	exporter, errmetric := pmetrics.StartPrometheusExporter(config.Prometheus)
 	if errmetric != nil {
 		fmt.Println(errmetric)
 	}
-	defer a.Shutdown()
-	counterfunc, errmetric := a.RegisterCounterMetric("sender_messages_total_sent", "Count messages sent by sender sevice")
+
+	agent := pmetrics.CreateMetricsAgent()
+	counterfunc, errmetric := agent.RegisterCounterMetric("sender_messages_count", "Count messages sent by sender sevice")
 	if errmetric != nil {
-		fmt.Println("Can't register sender_messages_total_sent metric", errmetric)
+		fmt.Println("Can't register sender_messages_count metric", errmetric)
 	}
-	rpsfunc, errmetric := a.RegisterGaugeMetric("sender_messages_rps", "RPS of messages sent by sender service")
+	rpsfunc, errmetric := agent.RegisterGaugeMetric("sender_messages_rps", "RPS of messages sent by sender service")
 	if errmetric != nil {
 		fmt.Println("Can't register sender_messages_rps metric", errmetric)
 	}
@@ -107,6 +111,10 @@ loop:
 		case <-stop:
 			break loop
 		}
+	}
+	agent.Shutdown()
+	if err = exporter.Shutdown(); err != nil {
+		log.Println(err)
 	}
 	log.Println("Sender stopped")
 }
