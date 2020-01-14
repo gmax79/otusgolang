@@ -1,61 +1,35 @@
 package pmetrics
 
 import (
-	"context"
 	"errors"
-	"net/http"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // Agent - main object to send statistic to prometheus
 type Agent struct {
-	lastError error
-	client    *http.Server
-	finished  bool
+	finished bool
 }
 
 // CreateMetricsAgent - create prometheus client
-func CreateMetricsAgent(listen string) (*Agent, error) {
+func CreateMetricsAgent() *Agent {
 	var a Agent
-	if listen == "" {
-		a.finished = true
-		return &a, errors.New("Metrics will not collected, listen host for exporter not declared")
-	}
-	a.client = &http.Server{Addr: listen, Handler: promhttp.Handler()}
-	wait := make(chan struct{})
-	go func() {
-		close(wait)
-		a.lastError = a.client.ListenAndServe()
-		a.finished = true
-	}()
-	<-wait
-	time.Sleep(time.Millisecond * 100)
-	if a.lastError != nil {
-		var dummy Agent
-		dummy.finished = true
-		return &dummy, errors.New("Metrics will not collected. " + a.lastError.Error())
-	}
-	return &a, nil
+	return &a
 }
 
-// Shutdown - stopping prometheus client
+func cantCreateError(metric string) error {
+	return errors.New("Can't create metric '" + metric + "', prometheus exporter closed")
+}
+
+// Shutdown - stop collect data
 func (a *Agent) Shutdown() {
 	a.finished = true
-	if a.client == nil {
-		return
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-	a.client.Shutdown(ctx)
 }
 
-// RegisterCounterMetric -
+// RegisterCounterMetric - create standard counter metric
 func (a *Agent) RegisterCounterMetric(name, descr string) (func(), error) {
 	if a.finished {
-		return func() {}, nil // return dummy function (not collecting)
+		return func() {}, cantCreateError(name)
 	}
 	var opt prometheus.CounterOpts
 	opt.Help = descr
@@ -66,14 +40,17 @@ func (a *Agent) RegisterCounterMetric(name, descr string) (func(), error) {
 		return nil, err
 	}
 	return func() {
+		if a.finished {
+			return
+		}
 		c.Inc()
 	}, nil
 }
 
-// RegisterGaugeMetric -
+// RegisterGaugeMetric - create standard gauge matric
 func (a *Agent) RegisterGaugeMetric(name, descr string) (func(float64), error) {
 	if a.finished {
-		return func(float64) {}, nil
+		return func(float64) {}, cantCreateError(name)
 	}
 	var opt prometheus.GaugeOpts
 	opt.Help = descr
@@ -84,6 +61,9 @@ func (a *Agent) RegisterGaugeMetric(name, descr string) (func(float64), error) {
 		return nil, err
 	}
 	return func(v float64) {
+		if a.finished {
+			return
+		}
 		c.Set(v)
 	}, nil
 }
