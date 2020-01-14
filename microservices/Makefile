@@ -111,7 +111,7 @@ docker-push:
 	&& docker push gmax079/practice:tests
 
 docker-clean:
-	docker rmi gmax079/practice:mycalendar gmax079/practice:sheduler gmax079/practice:sender gmax079/practice:tests
+	docker rmi -f gmax079/practice:mycalendar gmax079/practice:sheduler gmax079/practice:sender gmax079/practice:tests
 
 clean-app:
 	rm -f cmd/mycalendar/mycalendar cmd/sender/sender cmd/sheduler/sheduler
