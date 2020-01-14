@@ -2,6 +2,7 @@ package pmetrics
 
 import (
 	"errors"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -9,11 +10,13 @@ import (
 // Agent - main object to send statistic to prometheus
 type Agent struct {
 	finished bool
+	stop     chan struct{}
 }
 
 // CreateMetricsAgent - create prometheus client
 func CreateMetricsAgent() *Agent {
 	var a Agent
+	a.stop = make(chan struct{})
 	return &a
 }
 
@@ -24,6 +27,7 @@ func cantCreateError(metric string) error {
 // Shutdown - stop collect data
 func (a *Agent) Shutdown() {
 	a.finished = true
+	close(a.stop)
 }
 
 // RegisterCounterMetric - create standard counter metric
@@ -65,5 +69,48 @@ func (a *Agent) RegisterGaugeMetric(name, descr string) (func(float64), error) {
 			return
 		}
 		c.Set(v)
+	}, nil
+}
+
+// RegisterRPSMetric - create metric to calculate RPS
+func (a *Agent) RegisterRPSMetric(name, descr string) (func(float64), error) {
+	if a.finished {
+		return func(float64) {}, cantCreateError(name)
+	}
+	var opt prometheus.GaugeOpts
+	opt.Help = descr
+	opt.Name = name
+	c := prometheus.NewGauge(opt)
+	err := prometheus.Register(c)
+	if err != nil {
+		return nil, err
+	}
+
+	valchan := make(chan float64, 1)
+	var valacc float64
+	go func() {
+		ticker := time.NewTicker(time.Second)
+		before := time.Now()
+		for {
+			select {
+			case <-a.stop:
+				return
+			case <-ticker.C:
+				now := time.Now()
+				delta := now.Sub(before).Seconds()
+				before = now
+				c.Set(valacc / delta)
+				valacc = 0
+			case v := <-valchan:
+				valacc += v
+			}
+		}
+	}()
+
+	return func(v float64) {
+		if a.finished {
+			return
+		}
+		valchan <- v
 	}, nil
 }
