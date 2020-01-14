@@ -110,9 +110,9 @@ func main() {
 	server.Shutdown()
 	if exporter != nil {
 		exporter.Shutdown()
-	}
-	if experr := exporter.GetLastError(); experr != nil {
-		logger.Error("error", zap.Error(experr))
+		if experr := exporter.GetLastError(); experr != nil {
+			logger.Error("error", zap.Error(experr))
+		}
 	}
 	if httperr := server.GetLastError(); httperr != nil {
 		logger.Error("error", zap.Error(httperr))
