@@ -2,10 +2,11 @@ package calendar
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/gmax79/otusgolang/microservices/internal/objects"
 	"github.com/gmax79/otusgolang/microservices/internal/simple"
 	"github.com/gmax79/otusgolang/microservices/internal/storage"
-	"sync"
 )
 
 // Calendar implementaion

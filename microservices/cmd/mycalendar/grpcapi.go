@@ -81,6 +81,7 @@ func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, req *pbcalendar.Delet
 	trigger := grpccon.ProtoToDate(t)
 	events, err := g.calen.GetEvents(trigger)
 	if err != nil {
+		g.logger.Error("grpc", zap.Error(err))
 		return nil, err
 	}
 
@@ -89,6 +90,7 @@ func (g *grpcCalendarAPI) DeleteEvent(ctx context.Context, req *pbcalendar.Delet
 	delevent.Information = req.Information
 	err = events.DeleteEvent(delevent)
 	if err != nil {
+		g.logger.Error("grpc", zap.Error(err))
 		return nil, err
 	}
 	result.Status = fmt.Sprintf("Event %s at %s deleted", req.Information, trigger.String())
@@ -102,6 +104,7 @@ func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, req *pbcalendar.MoveEve
 	newtime := grpccon.ProtoToDate(req.Newdate)
 	events, err := g.calen.GetEvents(trigger)
 	if err != nil {
+		g.logger.Error("grpc", zap.Error(err))
 		return nil, err
 	}
 
@@ -110,6 +113,7 @@ func (g *grpcCalendarAPI) MoveEvent(ctx context.Context, req *pbcalendar.MoveEve
 	moveevent.Information = req.Information
 	err = events.MoveEvent(moveevent, newtime)
 	if err != nil {
+		g.logger.Error("grpc", zap.Error(err))
 		return nil, err
 	}
 
@@ -128,6 +132,7 @@ func (g *grpcCalendarAPI) EventsForDay(ctx context.Context, req *pbcalendar.Even
 
 	events, err := g.calen.FindEvents(sp)
 	if err != nil {
+		g.logger.Error("grpc", zap.Error(err))
 		return nil, err
 	}
 
@@ -146,6 +151,7 @@ func (g *grpcCalendarAPI) EventsForMonth(ctx context.Context, req *pbcalendar.Ev
 
 	events, err := g.calen.FindEvents(sp)
 	if err != nil {
+		g.logger.Error("grpc", zap.Error(err))
 		return nil, err
 	}
 
@@ -164,6 +170,7 @@ func (g *grpcCalendarAPI) EventsForWeek(ctx context.Context, req *pbcalendar.Eve
 
 	events, err := g.calen.FindEvents(sp)
 	if err != nil {
+		g.logger.Error("grpc", zap.Error(err))
 		return nil, err
 	}
 
@@ -178,6 +185,7 @@ func (g *grpcCalendarAPI) SinceEvents(ctx context.Context, req *pbcalendar.Since
 
 	events, err := g.calen.SinceEvents(grpccon.ProtoToDate(req.From))
 	if err != nil {
+		g.logger.Error("sql", zap.Error(err))
 		return nil, err
 	}
 	pbevents := make([]*pbcalendar.SinceEvent, len(events))
