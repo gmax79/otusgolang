@@ -1,0 +1,5 @@
+groups:
+- name: calendar
+  rules:
+  - record: dbrecords
+    expr: pg_stat_user_tables_n_tup_ins{datname="calendar",groups="calendar",job="postgres",relname="events",schemaname="public"}

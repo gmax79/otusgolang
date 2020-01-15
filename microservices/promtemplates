@@ -1,0 +1,11 @@
+histogram_quantile(0.9, sum(http_request_duration_seconds_bucket{StatudCode="200",handler="/create_event"}[5m])  by (handler, le) )
+
+
+sum(rate(http_request_duration_seconds_count[30s])) by (handler)
+
+histogram_quantile(0.9, sum(http_request_duration_seconds_bucket{StatudCode="200",handler="/create_event"}[5m])  by (handler, le) )
+
+sum( http_request_duration_seconds_count) by (handler)
+
+
+avg(http_request_duration_seconds_sum) by (handler)

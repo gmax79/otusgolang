@@ -32,7 +32,7 @@ func createServer(calen calendar.Calendar, host string, zaplog *zap.Logger) *htt
 	mux.HandleFunc("/events_for_day", s.httpEventsForDay)
 	mux.HandleFunc("/events_for_week", s.httpEventsForWeek)
 	mux.HandleFunc("/events_for_month", s.httpEventsForMonth)
-	metricsHandler := pmetrics.AttachPrometheusToHandler(mux)
+	metricsHandler := pmetrics.AttachPrometheusToHandler("mycalender", mux)
 	s.server = gracefully.CreateHTTPServer(host, metricsHandler)
 	s.calen = calen
 	return s
@@ -78,11 +78,13 @@ func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request
 		}
 		t, err := simple.ParseValidDate(time)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
 		events, err := s.calen.AddTrigger(t)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
@@ -93,6 +95,7 @@ func (s *httpCalendarAPI) httpCreateEvent(w http.ResponseWriter, r *http.Request
 
 		err = events.AddEvent(newevent)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
@@ -114,11 +117,13 @@ func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request
 		}
 		t, err := simple.ParseValidDate(time)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
 		events, err := s.calen.GetEvents(t)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
@@ -128,6 +133,7 @@ func (s *httpCalendarAPI) httpDeleteEvent(w http.ResponseWriter, r *http.Request
 		delevent.Information = event
 		err = events.DeleteEvent(delevent)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
@@ -150,16 +156,19 @@ func (s *httpCalendarAPI) httpMoveEvent(w http.ResponseWriter, r *http.Request) 
 		}
 		t, err := simple.ParseValidDate(time)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
 		newt, err := simple.ParseValidDate(newtime)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
 		events, err := s.calen.GetEvents(t)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
@@ -169,6 +178,7 @@ func (s *httpCalendarAPI) httpMoveEvent(w http.ResponseWriter, r *http.Request) 
 		moveevent.Information = event
 		err = events.MoveEvent(moveevent, newt)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
@@ -188,6 +198,7 @@ func (s *httpCalendarAPI) httpEventsForDay(w http.ResponseWriter, r *http.Reques
 		}
 		d, err := simple.ParseValidDate(time)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
@@ -198,6 +209,7 @@ func (s *httpCalendarAPI) httpEventsForDay(w http.ResponseWriter, r *http.Reques
 
 		count, err := s.calen.FindEvents(sp)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
@@ -218,6 +230,7 @@ func (s *httpCalendarAPI) httpEventsForWeek(w http.ResponseWriter, r *http.Reque
 		}
 		d, err := simple.ParseDate(time)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
@@ -227,6 +240,7 @@ func (s *httpCalendarAPI) httpEventsForWeek(w http.ResponseWriter, r *http.Reque
 
 		count, err := s.calen.FindEvents(sp)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
@@ -247,6 +261,7 @@ func (s *httpCalendarAPI) httpEventsForMonth(w http.ResponseWriter, r *http.Requ
 		}
 		d, err := simple.ParseDate(time)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}
@@ -256,6 +271,7 @@ func (s *httpCalendarAPI) httpEventsForMonth(w http.ResponseWriter, r *http.Requ
 
 		count, err := s.calen.FindEvents(sp)
 		if err != nil {
+			s.logger.Error("api", zap.Error(err))
 			support.HTTPResponse(w, err)
 			return
 		}

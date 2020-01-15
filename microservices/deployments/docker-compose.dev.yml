@@ -45,3 +45,6 @@ services:
         - "9090:9090"
       volumes:
         - "./prometheus/prometheus.dev.yml:/etc/prometheus/prometheus.yml"
+        #- "./prometheus/prometheus.rules.yml:/etc/prometheus/prometheus.rules.yml"
+        - "./prometheus/calendar.html:/usr/share/prometheus/consoles/calendar.html"
+

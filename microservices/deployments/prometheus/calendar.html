@@ -1,0 +1,51 @@
+{{ template "head" . }}
+
+
+{{ template "prom_content_head" . }}
+<br>
+<h2>Calendar service</h2>
+
+<div id="queryGraph"></div>
+<script>
+new PromConsole.Graph({
+  node: document.querySelector("#queryGraph"),
+  expr: 'pg_stat_user_tables_n_tup_ins{datname="calendar",groups="calendar",job="postgres",relname="events",schemaname="public"}',
+  name: "Rows in events table",
+  yTitle: "Rows"
+})
+</script>
+
+<div id="queryGraph"></div>
+<script>
+new PromConsole.Graph({
+  node: document.querySelector("#queryGraph"),
+  expr: 'sender_messages_count',
+  name: "Messages sent by sender",
+  yTitle: "Count"
+})
+</script>
+
+<div id="queryGraph"></div>
+<script>
+new PromConsole.Graph({
+  node: document.querySelector("#queryGraph"),
+  expr: 'sender_messages_rps',
+  name: "Messages rps by sender",
+  yTitle: "RPS"
+
+})
+</script>
+
+<div id="queryGraph"></div>
+<script>
+new PromConsole.Graph({
+  node: document.querySelector("#queryGraph"),
+  expr: 'avg(http_request_duration_seconds_bucket{StatudCode="200", handler="/create_event"})',
+  name: "Average duration of create_event",
+  yUnits: "s",
+  yTitle: "Seconds"
+})
+</script>
+
+{{ template "prom_content_tail" . }}
+{{ template "tail" }}
