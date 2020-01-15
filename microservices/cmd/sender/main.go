@@ -64,43 +64,52 @@ func main() {
 		fmt.Println("Can't register sender_messages_rps metric", errmetric)
 	}
 
-	rmqHost := config.RabbitMQAddr()
 	var rabbitConn *api.RmqConnection
 	var datachan <-chan []byte
-	for {
-		rabbitConn, err = api.RabbitMQConnect(rmqHost)
-		if err != nil {
-			return
+	connect := func() error {
+		if rabbitConn != nil {
+			rabbitConn.Close()
 		}
-		if datachan, err = rabbitConn.Subscribe("calendar"); err == nil {
+		var connerr error
+		for {
+			rabbitConn, connerr = api.RabbitMQConnect(config.RabbitMQAddr())
+			if connerr != nil {
+				return connerr
+			}
+			if datachan, connerr = rabbitConn.Subscribe("calendar"); connerr == nil {
+				break
+			}
+			rabbitConn.Close()
+			if api.IsNoQueueError(connerr) {
+				log.Println("Wait rabbitmq queue")
+				time.Sleep(time.Second * 3)
+				continue
+			}
 			break
 		}
-		if api.IsNoQueueError(err) {
-			rabbitConn.Close()
-			log.Println("Wait rabbitmq queue")
-			time.Sleep(time.Second * 3)
-			continue
-		}
+		return connerr
+	}
+	if err = connect(); err != nil {
 		return
 	}
 
-	defer rabbitConn.Close()
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 	log.Println("Sender started")
+
 loop:
 	for {
 		select {
 		case msg, ok := <-datachan:
-			if !ok {
-				break loop
+			if !ok || len(msg) == 0 {
+				log.Println("sender:", "connection to rabbit mq lost, reconnecting")
+				if err := connect(); err != nil {
+					log.Println(err)
+					break loop
+				}
 			}
 			counterfunc()
 			rpsfunc(1)
-			if len(msg) == 0 {
-				log.Println("sender:", "empty body from rabbit mq ???")
-				continue
-			}
 			mq := &api.RmqMessage{}
 			if err := json.Unmarshal(msg, mq); err != nil {
 				log.Printf("sender: Got invalid blob: %v\n", err)
@@ -110,6 +119,9 @@ loop:
 		case <-stop:
 			break loop
 		}
+	}
+	if rabbitConn != nil {
+		rabbitConn.Close()
 	}
 	agent.Shutdown()
 	if err = exporter.Shutdown(); err != nil {

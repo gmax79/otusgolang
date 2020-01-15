@@ -13,10 +13,11 @@ type RmqMessage struct {
 
 // RmqConnection - main object with connection data
 type RmqConnection struct {
-	conn *amqp.Connection
-	ch   *amqp.Channel
-	stop chan struct{}
-	wg   *sync.WaitGroup
+	conn   *amqp.Connection
+	ch     *amqp.Channel
+	stop   chan struct{}
+	wg     *sync.WaitGroup
+	datach chan []byte
 }
 
 // Close connection to rabbit
@@ -35,8 +36,8 @@ func RabbitMQConnect(addr string) (*RmqConnection, error) {
 		return nil, err
 	}
 	if c.ch, err = c.conn.Channel(); err != nil {
+		c.conn.Close()
 		return nil, err
-
 	}
 	c.stop = make(chan struct{})
 	c.wg = &sync.WaitGroup{}
@@ -85,23 +86,27 @@ func (c *RmqConnection) Subscribe(name string) (<-chan []byte, error) {
 		return nil, err
 	}
 	c.wg.Add(1)
-	datach := make(chan []byte, 1)
+	c.datach = make(chan []byte, 1)
 	go func() {
-		defer c.wg.Done()
+	loop:
 		for {
 			select {
 			case <-c.stop:
-				close(datach)
-				return
-			case msg := <-rmqchan:
-				datach <- msg.Body
+				break loop
+			case msg, ok := <-rmqchan:
+				if !ok {
+					break loop
+				}
+				c.datach <- msg.Body
 				if err := msg.Ack(false); err != nil {
 					fmt.Println(err)
 				}
 			}
 		}
+		close(c.datach)
+		c.wg.Done()
 	}()
-	return datach, nil
+	return c.datach, nil
 }
 
 // IsNoQueueError - check error for queue is not declared in rabbitmq
