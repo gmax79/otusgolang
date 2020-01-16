@@ -1,59 +1,90 @@
 {{ template "head" . }}
-
-
 {{ template "prom_content_head" . }}
 <br>
 <h2>Calendar service</h2>
 
+<h3>Rows in tables</h3>
 <div id="queryGraph"></div>
 <script>
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),
   expr: 'pg_stat_user_tables_n_tup_ins{datname="calendar",groups="calendar",job="postgres",relname="events",schemaname="public"}',
-  name: "Rows in events table",
+  name: "events",
   yTitle: "Rows"
 })
+</script>
+
+<h3>Rate for fetching rows from databases</h3>
+<div id="rowsfetched"></div>
+<script>
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),
   expr: 'rate(pg_stat_database_tup_fetched{datname="calendar"}[1m])',
-  name: "Rate for fetching rows from calendar database",
+  name: "calendar",
   yUnits: "[1m]"
 })
+</script>
+
+<h3>Rate for inserting rows into databases</h3>
+<div id="rowsinserted"></div>
+<script>
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),
   expr: 'rate(pg_stat_database_tup_inserted{datname="calendar"}[1m])',
-  name: "Rate for inserting rows into calendar database",
+  name: "calendar",
   yUnits: "[1m]"
 })
+</script>
+
+<h3>Rate for deleting rows into databases</h3>
+<div id="rowsdeleted"></div>
+<script>
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),
   expr: 'rate(pg_stat_database_tup_deleted{datname="calendar"}[1m])',
-  name: "Rate for deleting rows from calendar database",
+  name: "calendar",
   yUnits: "[1m]"
 })
+</script>
+
+<h3>Total count of results with code 404</h3>
+<div id="count404"></div>
+<script>
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),
   expr: 'sum(http_return_codes_count{code="404"})',
-  name: "Count of requests with 404",
+  name: "404"
 })
+</script>
+
+<h3>Average latency of api requests</h3>
+<div id="avglatency"></div>
+<script>
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),
   expr: 'avg(http_request_duration_seconds_bucket{code="200"}) by (handler)',
   yUnits: "ms",
   yTitle: "Milliseconds"
 })
+</script>
+
+<h3>Messages sent by sender</h3>
+<div id="sentsender"></div>
+<script>
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),
   expr: 'sender_messages_count',
-  name: "Messages sent by sender",
   yTitle: "Count"
 })
+</script>
+
+<h3>Messages rps by sender</h3>
+<div id="rpssender"></div>
+<script>
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),
   expr: 'sender_messages_rps',
-  name: "Messages rps by sender",
   yTitle: "RPS"
-
 })
 </script>
 
