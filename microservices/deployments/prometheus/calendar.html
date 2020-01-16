@@ -33,6 +33,11 @@ new PromConsole.Graph({
 })
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),
+  expr: 'sum(http_return_codes_count{code="404"})',
+  name: "Count of requests with 404",
+})
+new PromConsole.Graph({
+  node: document.querySelector("#queryGraph"),
   expr: 'avg(http_request_duration_seconds_bucket{code="200", handler="/create_event"})',
   name: "Average duration of create_event request",
   yUnits: "ms",

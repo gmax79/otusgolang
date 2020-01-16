@@ -36,7 +36,7 @@ func createServer(calen calendar.Calendar, host string, zaplog *zap.Logger) *htt
 	mdlwareMetricsHandler := pmetrics.AttachMiddlewareHandler("mycalender", mux)
 	codesMetric := agent.CreateReturnCodesMetricsHandler()
 	labels := map[string]string{
-		"service": "calendar",
+		"service": "mycalendar",
 	}
 	handler := codesMetric.Attach(labels, mdlwareMetricsHandler)
 	s.server = gracefully.CreateHTTPServer(host, handler)
