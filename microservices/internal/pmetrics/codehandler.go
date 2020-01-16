@@ -1,7 +1,6 @@
 package pmetrics
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -37,8 +36,6 @@ func (mh *returnCodesMetricsHandler) Attach(labels map[string]string, h http.Han
 			v.count = v.count + 1
 			mh.values[k] = v
 			v.setter(float64(v.count))
-
-			fmt.Println(v)
 		} else {
 			labels["handler"] = k.url
 			labels["code"] = strconv.Itoa(k.code)
@@ -49,12 +46,9 @@ func (mh *returnCodesMetricsHandler) Attach(labels map[string]string, h http.Han
 			var v urlcodevalue
 			v.count = 1
 			v.setter = f
-			v.setter(float64(v.count))
 			mh.values[k] = v
-
-			fmt.Println(v)
+			v.setter(float64(v.count))
 		}
-
 	})
 }
 
