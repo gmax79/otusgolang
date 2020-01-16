@@ -33,10 +33,10 @@ new PromConsole.Graph({
 })
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),
-  expr: 'avg(http_request_duration_seconds_bucket{StatudCode="200", handler="/create_event"})',
-  name: "Average duration of create_event",
-  yUnits: "s",
-  yTitle: "Seconds"
+  expr: 'avg(http_request_duration_seconds_bucket{code="200", handler="/create_event"})',
+  name: "Average duration of create_event request",
+  yUnits: "ms",
+  yTitle: "Milliseconds"
 })
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),

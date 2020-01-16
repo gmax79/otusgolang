@@ -13,13 +13,10 @@ import (
 
 // AttachPrometheusToHandler - wrapping handler by promethues
 func AttachPrometheusToHandler(service string, handler http.Handler) http.Handler {
-
-	metricsConfig := metrics.Config{
-		StatusCodeLabel: "StatudCode",
-	}
+	metricsConfig := metrics.Config{}
 	mdlw := middleware.New(middleware.Config{
-		Service:  service,
-		Recorder: metrics.NewRecorder(metricsConfig),
+		Service:                service,
+		Recorder:               metrics.NewRecorder(metricsConfig),
 	})
 
 	return mdlw.Handler("", handler)
