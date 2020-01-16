@@ -13,6 +13,12 @@ type Agent struct {
 	stop     chan struct{}
 }
 
+// CounterFunc - function to increment counter prometheus metric
+type CounterFunc func()
+
+// GaugeFunc - function to set value of gauge prometheus metric
+type GaugeFunc func(float64)
+
 // CreateMetricsAgent - create prometheus client
 func CreateMetricsAgent() *Agent {
 	var a Agent
@@ -31,7 +37,7 @@ func (a *Agent) Shutdown() {
 }
 
 // RegisterCounterMetric - create standard counter metric
-func (a *Agent) RegisterCounterMetric(name, descr string) (func(), error) {
+func (a *Agent) RegisterCounterMetric(name, descr string) (CounterFunc, error) {
 	if a.finished {
 		return func() {}, cantCreateError(name)
 	}
@@ -52,13 +58,15 @@ func (a *Agent) RegisterCounterMetric(name, descr string) (func(), error) {
 }
 
 // RegisterGaugeMetric - create standard gauge matric
-func (a *Agent) RegisterGaugeMetric(name, descr string) (func(float64), error) {
+func (a *Agent) RegisterGaugeMetric(name, descr string, labels map[string]string) (GaugeFunc, error) {
 	if a.finished {
 		return func(float64) {}, cantCreateError(name)
 	}
 	var opt prometheus.GaugeOpts
+
 	opt.Help = descr
 	opt.Name = name
+	opt.ConstLabels = labels
 	c := prometheus.NewGauge(opt)
 	err := prometheus.Register(c)
 	if err != nil {
@@ -72,8 +80,8 @@ func (a *Agent) RegisterGaugeMetric(name, descr string) (func(float64), error) {
 	}, nil
 }
 
-// RegisterRPSMetric - create metric to calculate RPS
-func (a *Agent) RegisterRPSMetric(name, descr string) (func(float64), error) {
+// RegisterRPSMetric - create metric to autocalculate value per second from simple set value
+func (a *Agent) RegisterRPSMetric(name, descr string) (GaugeFunc, error) {
 	if a.finished {
 		return func(float64) {}, cantCreateError(name)
 	}
@@ -113,4 +121,9 @@ func (a *Agent) RegisterRPSMetric(name, descr string) (func(float64), error) {
 		}
 		valchan <- v
 	}, nil
+}
+
+// CreateReturnCodesMetricsHandler - create handler to calculate return codes from http request
+func (a *Agent) CreateReturnCodesMetricsHandler() MetricsHandler {
+	return createReturnCodesMetricsHandler(a)
 }

@@ -32,8 +32,14 @@ func createServer(calen calendar.Calendar, host string, zaplog *zap.Logger) *htt
 	mux.HandleFunc("/events_for_day", s.httpEventsForDay)
 	mux.HandleFunc("/events_for_week", s.httpEventsForWeek)
 	mux.HandleFunc("/events_for_month", s.httpEventsForMonth)
-	metricsHandler := pmetrics.AttachPrometheusToHandler("mycalender", mux)
-	s.server = gracefully.CreateHTTPServer(host, metricsHandler)
+	agent := pmetrics.CreateMetricsAgent()
+	mdlwareMetricsHandler := pmetrics.AttachMiddlewareHandler("mycalender", mux)
+	codesMetric := agent.CreateReturnCodesMetricsHandler()
+	labels := map[string]string{
+		"service": "calendar",
+	}
+	handler := codesMetric.Attach(labels, mdlwareMetricsHandler)
+	s.server = gracefully.CreateHTTPServer(host, handler)
 	s.calen = calen
 	return s
 }
