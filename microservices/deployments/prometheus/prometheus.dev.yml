@@ -3,18 +3,13 @@ scrape_configs:
       scrape_interval: 5s
       static_configs:
       - targets: ['pgexporter:9187']
-        labels: 
-          groups: 'calendar'
 
     - job_name: 'sender'
       scrape_interval: 5s
       static_configs:
-      - targets: ['host.docker.internal:9189']
+      - targets: ['docker-host:9189']
 
     - job_name: 'mycalendar http api'
       scrape_interval: 5s
       static_configs:
-        - targets: ['host.docker.internal:9188']
-
-rule_files:
-  - 'prometheus.rules.yml'
+        - targets: ['docker-host:9188']

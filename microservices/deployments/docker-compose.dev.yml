@@ -46,3 +46,9 @@ services:
       volumes:
         - "./prometheus/prometheus.dev.yml:/etc/prometheus/prometheus.yml"
         - "./prometheus/calendar.html:/usr/share/prometheus/consoles/calendar.html"
+
+    docker-host:
+      image: qoomon/docker-host
+      container_name: docker-host
+      cap_add: [ 'NET_ADMIN', 'NET_RAW' ]
+      restart: on-failure

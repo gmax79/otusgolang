@@ -9,5 +9,5 @@
     "postgres_user": "postgres",
     "postgres_password": "Vfnhtirf79",
     "postgres_database": "calendar",
-    "prometheus_exporter": "localhost:9188"
+    "prometheus_exporter": ":9188"
 }
