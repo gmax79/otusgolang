@@ -13,37 +13,43 @@ new PromConsole.Graph({
   name: "Rows in events table",
   yTitle: "Rows"
 })
-</script>
-
-<div id="queryGraph"></div>
-<script>
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),
-  expr: 'sender_messages_count',
-  name: "Messages sent by sender",
-  yTitle: "Count"
+  expr: 'rate(pg_stat_database_tup_fetched{datname="calendar"}[1m])',
+  name: "Rate for fetching rows from calendar database",
+  yUnits: "[1m]"
 })
-</script>
-
-<div id="queryGraph"></div>
-<script>
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),
-  expr: 'sender_messages_rps',
-  name: "Messages rps by sender",
-  yTitle: "RPS"
-
+  expr: 'rate(pg_stat_database_tup_inserted{datname="calendar"}[1m])',
+  name: "Rate for inserting rows into calendar database",
+  yUnits: "[1m]"
 })
-</script>
-
-<div id="queryGraph"></div>
-<script>
+new PromConsole.Graph({
+  node: document.querySelector("#queryGraph"),
+  expr: 'rate(pg_stat_database_tup_deleted{datname="calendar"}[1m])',
+  name: "Rate for deleting rows from calendar database",
+  yUnits: "[1m]"
+})
 new PromConsole.Graph({
   node: document.querySelector("#queryGraph"),
   expr: 'avg(http_request_duration_seconds_bucket{StatudCode="200", handler="/create_event"})',
   name: "Average duration of create_event",
   yUnits: "s",
   yTitle: "Seconds"
+})
+new PromConsole.Graph({
+  node: document.querySelector("#queryGraph"),
+  expr: 'sender_messages_count',
+  name: "Messages sent by sender",
+  yTitle: "Count"
+})
+new PromConsole.Graph({
+  node: document.querySelector("#queryGraph"),
+  expr: 'sender_messages_rps',
+  name: "Messages rps by sender",
+  yTitle: "RPS"
+
 })
 </script>
 
