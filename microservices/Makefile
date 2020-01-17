@@ -101,6 +101,11 @@ docker-cicd-tests:
 	echo "integration_tests result: $$exit_code"; \
 	exit $$exit_code;
 
+docker-prom-tests:
+	make docker-run-tests
+	make docker-run-tests
+	make docker-run-tests
+
 # requirement command from hometask
 test: docker-cicd-tests
 
