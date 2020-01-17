@@ -9,5 +9,5 @@
     "postgres_user": "$POSTGRES_USER",
     "postgres_password": "$POSTGRES_PASSWORD",
     "postgres_database": "$POSTGRES_DB",
-    "prometheus_exporter": ""
+    "prometheus_exporter": "$PROMETHEUS_EXPORTER"
 }

@@ -38,6 +38,7 @@ services:
         POSTGRES_DB: calendar
         HTTP_PORT: 8888
         GRPC_PORT: 9999
+        PROMETHEUS_EXPORTER: 0.0.0.0:9188
         WAIT_HOSTS: postgres:5432 # for wait tool
       volumes:
         - "/tmp/localtime:/etc/localtime:ro"
@@ -78,7 +79,7 @@ services:
         RABBITMQ_HOST: rabbitmq:5672
         RABBITMQ_USER: calendar
         RABBITMQ_PASSWORD: Vfnhtirf79
-        PROMETHEUS_SENDER_HOST: 0.0.0.0:9102
+        PROMETHEUS_EXPORTER: 0.0.0.0:9189
         WAIT_HOSTS: rabbitmq:5672 # for wait tool
       depends_on:
         - rabbitmq
@@ -95,6 +96,7 @@ services:
         - "9090:9090"
       volumes:
         - "./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+        - "./prometheus/calendar.html:/usr/share/prometheus/consoles/calendar.html"
       networks:
         calendar_net:
           ipv4_address: 10.0.0.15

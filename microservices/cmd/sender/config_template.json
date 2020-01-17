@@ -2,5 +2,5 @@
     "rabbitmq_host": "$RABBITMQ_HOST",
     "rabbitmq_user": "$RABBITMQ_USER",
     "rabbitmq_password": "$RABBITMQ_PASSWORD",
-    "prometheus_exporter": "$PROMETHEUS_SENDER_HOST"
+    "prometheus_exporter": "$PROMETHEUS_EXPORTER"
 }
