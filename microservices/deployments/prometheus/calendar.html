@@ -68,6 +68,16 @@ new PromConsole.Graph({
 })
 </script>
 
+<h4>RPS requests</h4>
+<div id="rpsrequests"></div>
+<script>
+new PromConsole.Graph({
+  node: document.querySelector("#rpsrequests"),
+  expr: 'avg(http_requests_rps) by (handler)',
+  yTitle: "RPS"
+})
+</script>
+
 <h4>Messages sent by sender</h4>
 <div id="sentsender"></div>
 <script>

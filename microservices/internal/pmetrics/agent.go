@@ -127,3 +127,8 @@ func (a *Agent) RegisterRPSMetric(name, descr string) (GaugeFunc, error) {
 func (a *Agent) CreateReturnCodesMetricsHandler() MetricsHandler {
 	return createReturnCodesMetricsHandler(a)
 }
+
+// CreateRpsMetricsHandler - create handler to calculate rps of http requests
+func (a *Agent) CreateRpsMetricsHandler() MetricsHandler {
+	return createRpsMetricsHandler(a)
+}

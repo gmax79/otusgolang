@@ -34,11 +34,18 @@ func createServer(calen calendar.Calendar, host string, zaplog *zap.Logger) *htt
 	mux.HandleFunc("/events_for_month", s.httpEventsForMonth)
 	agent := pmetrics.CreateMetricsAgent()
 	mdlwareMetricsHandler := pmetrics.AttachMiddlewareHandler("mycalender", mux)
+
 	codesMetric := agent.CreateReturnCodesMetricsHandler()
 	labels := map[string]string{
 		"service": "mycalendar",
 	}
 	handler := codesMetric.Attach(labels, mdlwareMetricsHandler)
+
+	rpsMetric := agent.CreateRpsMetricsHandler()
+	labels2 := map[string]string{
+		"service": "mycalendar",
+	}
+	handler = rpsMetric.Attach(labels2, handler)
 	s.server = gracefully.CreateHTTPServer(host, handler)
 	s.calen = calen
 	return s
