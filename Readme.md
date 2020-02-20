@@ -1,1 +1,1 @@
-golang cources in otus
+golang homeworks in otus
